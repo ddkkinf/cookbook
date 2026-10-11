@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Modern Cookbook</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #E63946;
+            --primary-dark: #C1121F;
+            --bg: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-main: #1D3557;
+            --text-muted: #457B9D;
+            --accent: #A8DADC;
+            --border-radius: 16px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--text-main), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Search Bar */
+        .search-container {
+            position: sticky;
+            top: 1rem;
+            z-index: 100;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-wrapper {
+            position: relative;
+            box-shadow: var(--shadow);
+            border-radius: 50px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .search-wrapper:focus-within {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 1.2rem 1.5rem 1.2rem 3.5rem;
+            border: none;
+            outline: none;
+            font-size: 1.1rem;
+            font-family: inherit;
+        }
+
+        /* Recipe Grid */
+        #recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .recipe-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-image {
+            height: 200px;
+            background: linear-gradient(135deg, var(--accent), var(--text-muted));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 4rem;
+            position: relative;
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card-content h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .card-info {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .card-info i {
+            margin-right: 0.3rem;
+            color: var(--primary);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(29, 53, 87, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--bg);
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            margin: auto;
+            border-radius: 24px;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .close-btn {
+            position: sticky;
+            top: 1.5rem;
+            right: 1.5rem;
+            float: right;
+            background: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            z-index: 10;
+            border: none;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 3rem 2rem;
+        }
+
+        .recipe-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .recipe-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .recipe-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Ingredients & Steps */
+        .recipe-section {
+            margin-bottom: 3rem;
+        }
+
+        .recipe-section h4 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--primary);
+        }
+
+        .ingredients-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            list-style: none;
+        }
+
+        .ingredients-list li {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .ingredients-list li span:last-child {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .steps-list {
+            list-style: none;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .step-item:hover {
+            background: #FFF5F5;
+        }
+
+        .step-checkbox {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: var(--transition);
+            color: transparent;
+        }
+
+        .step-item.completed .step-checkbox {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .step-item.completed .step-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        .step-text {
+            font-size: 1.1rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            header h1 { font-size: 2.2rem; }
+            .modal-content { height: 100vh; border-radius: 0; }
+            .recipe-meta { flex-direction: column; gap: 0.5rem; align-items: center; }
+            .recipe-header h2 { font-size: 1.8rem; }
+        }
+
+        /* Print Styles */
+        @media print {
+            .search-container, .close-btn, .step-checkbox { display: none !important; }
+            .modal { position: relative; display: block; opacity: 1; }
+            .modal-content { height: auto; box-shadow: none; transform: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>DDKKIN’s Cookbook</h1>
+        <p>맛있는 일상의 기록, 나만의 비밀 레시피 북</p>
+    </header>
+
+    <div class="search-container">
+        <div class="search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="search-input" placeholder="레시피 이름이나 재료를 검색해보세요...">
+        </div>
+    </div>
+
+    <div id="recipe-grid">
+        <!-- Recipe Cards will be injected here -->
+    </div>
+</div>
+
+<!-- Recipe Detail Modal -->
+<div id="recipe-modal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-body" id="modal-body">
+            <!-- Details will be injected here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Recipe Data
+    const recipes = [
+        {
+            id: 1,
+            title: "분식집 스타일 떡볶이",
+            description: "특유의 감칠맛과 쫀득하고 걸쭉한 국물 농도가 일품인 황금 레시피",
+            time: "20분",
+            difficulty: "쉬움",
+            category: "한식",
+            ingredients: [
+                { name: "떡볶이떡", amount: "300g" },
+                { name: "사각어묵", amount: "2장" },
+                { name: "양배추", amount: "2장" },
+                { name: "대파", amount: "1대" },
+                { name: "물(육수)", amount: "400ml" },
+                { name: "고추장", amount: "2큰술" },
+                { name: "고춧가루", amount: "1.5큰술" },
+                { name: "설탕", amount: "2큰술" },
+                { name: "물엿", amount: "1큰술" },
+                { name: "진간장", amount: "1큰술" },
+                { name: "소고기 다시다", amount: "0.5큰술" }
+            ],
+            steps: [
+                "냉동 떡인 경우 찬물에 10분 정도 담가 말랑하게 불려줍니다.",
+                "어묵은 한 입 크기로, 양배추와 대파는 큼직하게 썰어둡니다.",
+                "팬에 물 400ml와 모든 양념 재료를 넣고 센 불로 끓입니다.",
+                "국물이 끓어오르면 떡과 양배추를 넣고 중불에서 3~4분간 끓입니다.",
+                "떡이 말랑해지면 어묵과 대파를 넣고 약중불에서 걸쭉해질 때까지 3~4분 더 졸여냅니다."
+            ],
+            icon: "🥘"
+        }
+        // More recipes can be added here
+    ];
+
+    const grid = document.getElementById('recipe-grid');
+    const searchInput = document.getElementById('search-input');
+    const modal = document.getElementById('recipe-modal');
+    const modalBody = document.getElementById('modal-body');
+
+    // Initial Render
+    renderRecipes(recipes);
+
+    // Search Logic
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = recipes.filter(r => 
+            r.title.toLowerCase().includes(term) || 
+            r.ingredients.some(i => i.name.toLowerCase().includes(term))
+        );
+        renderRecipes(filtered);
+    });
+
+    function renderRecipes(items) {
+        grid.innerHTML = items.map(recipe => `
+            <div class="recipe-card" onclick="openRecipe(${recipe.id})">
+                <div class="card-image">
+                    ${recipe.icon}
+                    <span class="card-badge">${recipe.category}</span>
+                </div>
+                <div class="card-content">
+                    <h3>${recipe.title}</h3>
+                    <div class="card-info">
+                        <span><i class="fa-regular fa-clock"></i> ${recipe.time}</span>
+                        <span><i class="fa-solid fa-gauge-high"></i> ${recipe.difficulty}</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function openRecipe(id) {
+        const recipe = recipes.find(r => r.id === id);
+        if (!recipe) return;
+
+        modalBody.innerHTML = `
+            <div class="recipe-header">
+                <h2>${recipe.title}</h2>
+                <p>${recipe.description}</p>
+            </div>
+            <div class="recipe-meta">
+                <span><i class="fa-regular fa-clock"></i> <strong>소요시간:</strong> ${recipe.time}</span>
+                <span><i class="fa-solid fa-gauge-high"></i> <strong>난이도:</strong> ${recipe.difficulty}</span>
+                <span><i class="fa-solid fa-utensils"></i> <strong>분류:</strong> ${recipe.category}</span>
+            </div>
+            
+            <div class="recipe-section">
+                <h4><i class="fa-solid fa-basket-shopping"></i> 재료 (Ingredients)</h4>
+                <ul class="ingredients-list">
+                    ${recipe.ingredients.map(ing => `
+                        <li><span>${ing.name}</span> <span>${ing.amount}</span></li>
+                    `).join('')}
+                </ul>
+            </div>
+
+            <div class="recipe-section">
+                <h4><i class="fa-solid fa-fire-burner"></i> 조리 순서 (Instructions)</h4>
+                <div class="steps-list">
+                    ${recipe.steps.map((step, index) => `
+                        <div class="step-item" onclick="toggleStep(this)">
+                            <div class="step-checkbox"><i class="fa-solid fa-check"></i></div>
+                            <div class="step-text"><strong>Step ${index + 1}.</strong> ${step}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-top: 2rem;">
+                <p>💡 Tip: 소고기 다시다 대신 치킨스톡이나 굴소스를 사용해도 좋습니다.</p>
+            </div>
+        `;
+
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    function toggleStep(element) {
+        element.classList.toggle('completed');
+    }
+
+    // Close modal on outside click
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>
+
+</body>
+</html>
