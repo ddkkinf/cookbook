@@ -634,15 +634,15 @@
         }
 
         // Metadata extraction (servings, time, difficulty, category)
-        const servingsMatch = mdContent.match(/조리\s*분량|분량[^\n:]*:\s*([^\n*]+)/);
-        const timeMatch = mdContent.match(/조리\s*시간|소요\s*시간[^\n:]*:\s*([^\n*]+)/);
-        const diffMatch = mdContent.match(/난이도[^\n:]*:\s*([^\n*]+)/);
-        const catMatch = mdContent.match(/분류|카테고리[^\n:]*:\s*([^\n*]+)/);
+        function extractMeta(regex, defaultValue) {
+            const m = mdContent.match(regex);
+            return (m && m[1]) ? m[1].replace(/\*\*/g, '').trim() : defaultValue;
+        }
 
-        const servings = servingsMatch ? servingsMatch[1].trim().replace(/\*\*/g, '') : '2인분';
-        const time = timeMatch ? timeMatch[1].trim().replace(/\*\*/g, '') : '20분';
-        const difficulty = diffMatch ? diffMatch[1].trim().replace(/\*\*/g, '') : '보통';
-        const category = catMatch ? catMatch[1].trim().replace(/\*\*/g, '') : folderCategory;
+        const servings = extractMeta(/(?:조리\s*분량|분량)[^\n:]*:\s*([^\n*]+)/i, '2인분');
+        const time = extractMeta(/(?:조리\s*시간|소요\s*시간)[^\n:]*:\s*([^\n*]+)/i, '20분');
+        const difficulty = extractMeta(/난이도[^\n:]*:\s*([^\n*]+)/i, '보통');
+        const category = extractMeta(/(?:분류|카테고리)[^\n:]*:\s*([^\n*]+)/i, folderCategory);
 
         // Parse ingredients from markdown tables or list
         const ingredients = [];
