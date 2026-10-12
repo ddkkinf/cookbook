@@ -197,6 +197,143 @@
             border-left: 3px solid #E9C46A;
         }
 
+        /* Interactive Status Editor in Modal */
+        .interactive-status-panel {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.4rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            border: 1px solid #ECEEF0;
+        }
+
+        .interactive-status-panel h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .interactive-status-panel h4 span {
+            font-size: 0.8rem;
+            font-weight: normal;
+            color: var(--text-muted);
+        }
+
+        .status-button-group {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+        }
+
+        .status-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
+            border: 2px solid #E5E7EB;
+            background: #F9FAFB;
+            color: #4B5563;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            transition: var(--transition);
+        }
+
+        .status-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+        }
+
+        .status-btn.selected-verified {
+            border-color: #2A9D8F;
+            background: #E8F6F4;
+            color: #2A9D8F;
+        }
+
+        .status-btn.selected-needs_fix {
+            border-color: #E76F51;
+            background: #FDF1EE;
+            color: #E76F51;
+        }
+
+        .status-btn.selected-unverified {
+            border-color: #6C757D;
+            background: #F1F3F5;
+            color: #495057;
+        }
+
+        .comment-editor-wrapper {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .comment-input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .comment-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+        }
+
+        .save-comment-btn {
+            padding: 0.8rem 1.4rem;
+            background: var(--text-main);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .save-comment-btn:hover {
+            background: var(--primary);
+        }
+
+        /* Toast notification */
+        .toast-notify {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1D3557;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toast-notify.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
         /* Search Bar */
         .search-container {
             position: sticky;
@@ -648,6 +785,12 @@
     </div>
 </div>
 
+<!-- Toast notification popup -->
+<div id="toast-notify" class="toast-notify">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toast-text">저장되었습니다!</span>
+</div>
+
 <script>
     // GitHub Repository Configuration
     const GITHUB_REPO = 'ddkkinf/cookbook';
@@ -858,6 +1001,20 @@
             const results = await Promise.all(fetchPromises);
             allRecipes = results.filter(r => r !== null);
 
+            // Synchronize with local storage overrides (web-based status & comments)
+            allRecipes.forEach(recipe => {
+                const localData = getLocalRecipeState(recipe.id);
+                if (localData) {
+                    if (localData.status) {
+                        recipe.status = localData.status;
+                        recipe.statusText = localData.status === 'verified' ? '검증 완료' : (localData.status === 'needs_fix' ? '수정 필요' : '미검증');
+                    }
+                    if (typeof localData.comment === 'string') {
+                        recipe.comment = localData.comment;
+                    }
+                }
+            });
+
             // Setup category & status filter tabs
             setupFilterTabs();
 
@@ -981,19 +1138,53 @@
             <div class="recipe-header">
                 <h2>${recipe.icon} ${recipe.title}</h2>
                 <p>${recipe.description}</p>
-                <div style="margin-top: 0.8rem;">
-                    ${recipe.status === 'verified' ? '<span class="card-status-badge status-verified" style="position:static;"><i class="fa-solid fa-circle-check"></i> 검증 완료</span>' : (recipe.status === 'needs_fix' ? '<span class="card-status-badge status-needs_fix" style="position:static;"><i class="fa-solid fa-triangle-exclamation"></i> 수정 필요</span>' : '<span class="card-status-badge status-unverified" style="position:static;">미검증</span>')}
+                <div id="modal-status-badge-container" style="margin-top: 0.8rem;">
+                    ${renderStatusBadgeHtml(recipe.status)}
                 </div>
             </div>
 
-            ${recipe.comment ? `
-            <div class="recipe-comment-box">
-                <i class="fa-solid fa-note-sticky"></i>
-                <div>
-                    <strong>테스터/작성자 코멘트:</strong><br>
-                    ${recipe.comment}
+            <!-- Interactive Web Status & Comment Panel -->
+            <div class="interactive-status-panel">
+                <h4>
+                    <span><i class="fa-solid fa-sliders"></i> 내 검증 상태 & 코멘트</span>
+                    <span style="display:flex; align-items:center; gap:0.5rem;">
+                        <span id="sync-mode-label">${getGitHubToken() ? '🟢 GitHub 원본 + 브라우저 저장' : '💾 브라우저 자동 저장'}</span>
+                        <button onclick="configureGitHubToken('${recipe.id.replace(/'/g, "\\'")}')" style="background:none; border:1px solid #D1D5DB; border-radius:6px; padding:0.2rem 0.5rem; font-size:0.75rem; cursor:pointer; color:#4B5563;" title="GitHub 토큰을 등록하면 웹에서 변경 시 마크다운 파일도 자동 수정됩니다">
+                            <i class="fa-brands fa-github"></i> ${getGitHubToken() ? '연동됨' : 'GitHub 연동'}
+                        </button>
+                    </span>
+                </h4>
+                
+                <div class="status-button-group" id="modal-status-btn-group">
+                    <button class="status-btn ${recipe.status === 'unverified' ? 'selected-unverified' : ''}" onclick="updateRecipeStatus('${recipe.id.replace(/'/g, "\\'")}', 'unverified')">
+                        ⚪ 미검증
+                    </button>
+                    <button class="status-btn ${recipe.status === 'verified' ? 'selected-verified' : ''}" onclick="updateRecipeStatus('${recipe.id.replace(/'/g, "\\'")}', 'verified')">
+                        <i class="fa-solid fa-circle-check"></i> 검증 완료
+                    </button>
+                    <button class="status-btn ${recipe.status === 'needs_fix' ? 'selected-needs_fix' : ''}" onclick="updateRecipeStatus('${recipe.id.replace(/'/g, "\\'")}', 'needs_fix')">
+                        <i class="fa-solid fa-triangle-exclamation"></i> 수정 필요
+                    </button>
                 </div>
-            </div>` : ''}
+
+                <div class="comment-editor-wrapper">
+                    <input type="text" id="recipe-comment-input" class="comment-input" placeholder="나만의 조리 팁이나 수정 메모를 남겨보세요..." value="${recipe.comment ? recipe.comment.replace(/"/g, '&quot;') : ''}" onkeydown="if(event.key==='Enter') saveRecipeComment('${recipe.id.replace(/'/g, "\\'")}')">
+                    <button class="save-comment-btn" onclick="saveRecipeComment('${recipe.id.replace(/'/g, "\\'")}')">
+                        <i class="fa-solid fa-floppy-disk"></i> 저장
+                    </button>
+                </div>
+            </div>
+
+            <div id="modal-comment-box-container">
+                ${recipe.comment ? `
+                <div class="recipe-comment-box">
+                    <i class="fa-solid fa-note-sticky"></i>
+                    <div>
+                        <strong>테스터/작성자 코멘트:</strong><br>
+                        ${recipe.comment}
+                    </div>
+                </div>` : ''}
+            </div>
 
             <div class="recipe-meta">
                 <span><i class="fa-solid fa-user-group"></i> <strong>분량:</strong> ${recipe.servings}</span>
@@ -1041,6 +1232,223 @@
 
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
+    }
+
+    // --- LocalStorage & GitHub Direct Sync Helpers ---
+    const LOCAL_STORAGE_KEY = 'cookbook_recipe_states_v1';
+    const GITHUB_TOKEN_KEY = 'cookbook_github_pat';
+
+    function getLocalRecipeState(recipeId) {
+        try {
+            const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (!raw) return null;
+            const map = JSON.parse(raw);
+            return map[recipeId] || null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function saveLocalRecipeState(recipeId, status, comment) {
+        try {
+            const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+            const map = raw ? JSON.parse(raw) : {};
+            map[recipeId] = {
+                status: status,
+                comment: comment,
+                updatedAt: new Date().toISOString()
+            };
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(map));
+        } catch (e) {
+            console.error('Failed to save to localStorage:', e);
+        }
+    }
+
+    function getGitHubToken() {
+        return localStorage.getItem(GITHUB_TOKEN_KEY) || '';
+    }
+
+    function configureGitHubToken(currentRecipeId) {
+        const current = getGitHubToken();
+        const input = prompt(
+            'GitHub Personal Access Token을 입력하면 웹에서 상태/코멘트 변경 시 GitHub의 마크다운(.md) 원본 파일도 자동으로 수정·커밋됩니다.\n(비워두고 확인을 누르면 연동이 해제되며 브라우저 자동 저장만 사용합니다.)',
+            current
+        );
+        if (input === null) return;
+        const trimmed = input.trim();
+        if (trimmed) {
+            localStorage.setItem(GITHUB_TOKEN_KEY, trimmed);
+            showToast('GitHub 연동이 설정되었습니다! 이제 마크다운 원본도 함께 업데이트됩니다.');
+        } else {
+            localStorage.removeItem(GITHUB_TOKEN_KEY);
+            showToast('GitHub 연동이 해제되었습니다. (브라우저 자동 저장 모드)');
+        }
+        if (currentRecipeId) openRecipe(currentRecipeId);
+    }
+
+    function renderStatusBadgeHtml(status) {
+        if (status === 'verified') {
+            return '<span class="card-status-badge status-verified" style="position:static;"><i class="fa-solid fa-circle-check"></i> 검증 완료</span>';
+        } else if (status === 'needs_fix') {
+            return '<span class="card-status-badge status-needs_fix" style="position:static;"><i class="fa-solid fa-triangle-exclamation"></i> 수정 필요</span>';
+        }
+        return '<span class="card-status-badge status-unverified" style="position:static;">⚪ 미검증</span>';
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+        const toast = document.getElementById('toast-notify');
+        const text = document.getElementById('toast-text');
+        if (!toast || !text) return;
+        text.textContent = message;
+        toast.classList.add('show');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2600);
+    }
+
+    function updateMarkdownStatusAndComment(mdContent, statusText, comment) {
+        let updated = mdContent;
+        // Update or insert 검증 상태
+        if (/^[*-]?\s*\*\*?(?:검증\s*상태|검증|상태|status)[^*:\n]*[:*]+\s*([^\n\r]*)/im.test(updated)) {
+            updated = updated.replace(
+                /^([*-]?\s*\*\*?(?:검증\s*상태|검증|상태|status)[^*:\n]*[:*]+)[ \t]*([^\n\r]*)/im,
+                `$1 ${statusText}`
+            );
+        }
+        // Update or insert 코멘트
+        if (/^[*-]?\s*\*\*?(?:코멘트|메모|피드백|노트|comment)[^*:\n\r]*[:*]+[ \t]*([^\r\n]*)/im.test(updated)) {
+            updated = updated.replace(
+                /^([*-]?\s*\*\*?(?:코멘트|메모|피드백|노트|comment)[^*:\n\r]*[:*]+)[ \t]*([^\r\n]*)/im,
+                 comment ? `$1 ${comment}` : `$1 `
+            );
+        }
+        return updated;
+    }
+
+    async function syncRecipeToGitHub(recipe) {
+        const token = getGitHubToken();
+        if (!token) return false;
+
+        try {
+            const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${recipe.path}?ref=${GITHUB_BRANCH}`;
+            const getRes = await fetch(apiUrl, {
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            if (!getRes.ok) throw new Error(`GitHub 조회 실패 (${getRes.status})`);
+            const fileData = await getRes.json();
+
+            const updatedMd = updateMarkdownStatusAndComment(recipe.rawMarkdown, recipe.statusText, recipe.comment);
+            recipe.rawMarkdown = updatedMd;
+
+            // Encode UTF-8 string to base64
+            const base64Content = btoa(unescape(encodeURIComponent(updatedMd)));
+
+            const putRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${recipe.path}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: `docs(${recipe.title}): 웹에서 상태(${recipe.statusText}) 및 코멘트 업데이트`,
+                    content: base64Content,
+                    sha: fileData.sha,
+                    branch: GITHUB_BRANCH
+                })
+            });
+
+            if (!putRes.ok) throw new Error(`GitHub 저장 실패 (${putRes.status})`);
+            return true;
+        } catch (e) {
+            console.error('GitHub sync error:', e);
+            showToast(`⚠️ 브라우저엔 저장되었으나 GitHub 반영 실패: ${e.message}`);
+            return false;
+        }
+    }
+
+    async function updateRecipeStatus(id, newStatus) {
+        const recipe = allRecipes.find(r => r.id === id);
+        if (!recipe) return;
+
+        recipe.status = newStatus;
+        recipe.statusText = newStatus === 'verified' ? '검증 완료' : (newStatus === 'needs_fix' ? '수정 필요' : '미검증');
+
+        const commentInput = document.getElementById('recipe-comment-input');
+        if (commentInput) {
+            recipe.comment = commentInput.value.trim();
+        }
+
+        saveLocalRecipeState(recipe.id, recipe.status, recipe.comment);
+
+        // Update Modal UI immediately
+        const badgeContainer = document.getElementById('modal-status-badge-container');
+        if (badgeContainer) badgeContainer.innerHTML = renderStatusBadgeHtml(recipe.status);
+
+        const btnGroup = document.getElementById('modal-status-btn-group');
+        if (btnGroup) {
+            const escapedId = recipe.id.replace(/'/g, "\\'");
+            btnGroup.innerHTML = `
+                <button class="status-btn ${recipe.status === 'unverified' ? 'selected-unverified' : ''}" onclick="updateRecipeStatus('${escapedId}', 'unverified')">
+                    ⚪ 미검증
+                </button>
+                <button class="status-btn ${recipe.status === 'verified' ? 'selected-verified' : ''}" onclick="updateRecipeStatus('${escapedId}', 'verified')">
+                    <i class="fa-solid fa-circle-check"></i> 검증 완료
+                </button>
+                <button class="status-btn ${recipe.status === 'needs_fix' ? 'selected-needs_fix' : ''}" onclick="updateRecipeStatus('${escapedId}', 'needs_fix')">
+                    <i class="fa-solid fa-triangle-exclamation"></i> 수정 필요
+                </button>
+            `;
+        }
+
+        setupFilterTabs();
+        applyFilter();
+
+        if (getGitHubToken()) {
+            showToast(`'${recipe.statusText}' 상태 저장 및 GitHub 마크다운 반영 중...`);
+            const ok = await syncRecipeToGitHub(recipe);
+            if (ok) showToast(`✅ '${recipe.statusText}' 상태가 GitHub 마크다운까지 완벽 반영되었습니다!`);
+        } else {
+            showToast(`상태가 '${recipe.statusText}'(으)로 변경되었습니다!`);
+        }
+    }
+
+    async function saveRecipeComment(id) {
+        const recipe = allRecipes.find(r => r.id === id);
+        if (!recipe) return;
+
+        const commentInput = document.getElementById('recipe-comment-input');
+        const newComment = commentInput ? commentInput.value.trim() : '';
+        recipe.comment = newComment;
+
+        saveLocalRecipeState(recipe.id, recipe.status, recipe.comment);
+
+        const commentBoxContainer = document.getElementById('modal-comment-box-container');
+        if (commentBoxContainer) {
+            commentBoxContainer.innerHTML = recipe.comment ? `
+                <div class="recipe-comment-box">
+                    <i class="fa-solid fa-note-sticky"></i>
+                    <div>
+                        <strong>테스터/작성자 코멘트:</strong><br>
+                        ${recipe.comment}
+                    </div>
+                </div>` : '';
+        }
+
+        applyFilter();
+
+        if (getGitHubToken()) {
+            showToast('코멘트 저장 및 GitHub 마크다운 반영 중...');
+            const ok = await syncRecipeToGitHub(recipe);
+            if (ok) showToast('✅ 코멘트가 GitHub 마크다운까지 완벽 저장되었습니다!');
+        } else {
+            showToast(recipe.comment ? '코멘트가 저장되었습니다!' : '코멘트가 삭제되었습니다.');
+        }
     }
 
     function closeModal() {
