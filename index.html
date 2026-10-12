@@ -422,12 +422,13 @@
             title: "분식집 스타일 떡볶이",
             description: "특유의 감칠맛과 쫀득하고 걸쭉한 국물 농도가 일품인 황금 레시피",
             time: "20분",
+            servings: "2인분",
             difficulty: "쉬움",
             category: "한식",
             ingredients: [
                 { name: "떡볶이떡", amount: "300g" },
                 { name: "사각어묵", amount: "2장" },
-                { name: "양배추", amount: "2장" },
+                { name: "양파", amount: "1/2개" },
                 { name: "대파", amount: "1대" },
                 { name: "물(육수)", amount: "400ml" },
                 { name: "고추장", amount: "2큰술" },
@@ -439,9 +440,9 @@
             ],
             steps: [
                 "냉동 떡인 경우 찬물에 10분 정도 담가 말랑하게 불려줍니다.",
-                "어묵은 한 입 크기로, 양배추와 대파는 큼직하게 썰어둡니다.",
+                "어묵은 한 입 크기로 썰고, 양파는 도톰하게 채 썰고 대파는 큼직하게 썰어둡니다.",
                 "팬에 물 400ml와 모든 양념 재료를 넣고 센 불로 끓입니다.",
-                "국물이 끓어오르면 떡과 양배추를 넣고 중불에서 3~4분간 끓입니다.",
+                "국물이 끓어오르면 불린 떡과 채 썬 양파를 넣고 중불에서 3~4분간 끓입니다.",
                 "떡이 말랑해지면 어묵과 대파를 넣고 약중불에서 걸쭉해질 때까지 3~4분 더 졸여냅니다."
             ],
             icon: "🥘"
@@ -477,6 +478,7 @@
                 <div class="card-content">
                     <h3>${recipe.title}</h3>
                     <div class="card-info">
+                        <span><i class="fa-solid fa-user-group"></i> ${recipe.servings}</span>
                         <span><i class="fa-regular fa-clock"></i> ${recipe.time}</span>
                         <span><i class="fa-solid fa-gauge-high"></i> ${recipe.difficulty}</span>
                     </div>
@@ -495,6 +497,7 @@
                 <p>${recipe.description}</p>
             </div>
             <div class="recipe-meta">
+                <span><i class="fa-solid fa-user-group"></i> <strong>분량:</strong> ${recipe.servings}</span>
                 <span><i class="fa-regular fa-clock"></i> <strong>소요시간:</strong> ${recipe.time}</span>
                 <span><i class="fa-solid fa-gauge-high"></i> <strong>난이도:</strong> ${recipe.difficulty}</span>
                 <span><i class="fa-solid fa-utensils"></i> <strong>분류:</strong> ${recipe.category}</span>
@@ -522,7 +525,7 @@
             </div>
 
             <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-top: 2rem;">
-                <p>💡 Tip: 소고기 다시다 대신 치킨스톡이나 굴소스를 사용해도 좋습니다.</p>
+                <p>💡 Tip: 양파가 익으면서 나오는 달큰한 감칠맛이 국물에 깊이를 더해줍니다. 취향에 따라 소고기 다시다 대신 치킨스톡이나 굴소스를 넣으셔도 좋습니다.</p>
             </div>
         `;
 
