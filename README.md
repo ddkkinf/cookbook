@@ -9,8 +9,7 @@ GitHub Markdown 기반의 스마트 쿡북입니다.
 
 ```text
 cookbook/
-├── index.html                  # GitHub Pages 진입점 (html/index.html로 리다이렉트)
-├── html/
+├── docs/                       # GitHub Pages 배포 디렉토리
 │   └── index.html              # 레시피 웹 뷰어 (GitHub Tree API 기반 실시간 연동)
 └── recipe/                     # 레시피 마크다운 모음
     ├── korean/                 # 한식 카테고리
@@ -26,7 +25,7 @@ cookbook/
 ## 📝 새 레시피 추가 방법
 
 `recipe/<카테고리명>/` 폴더 아래에 새 `.md` 파일을 만들기만 하면 됩니다!  
-코드(`index.html`)를 직접 건드릴 필요가 전혀 없습니다.
+코드(`docs/index.html`)를 직접 건드릴 필요가 전혀 없습니다.
 
 ### 지원 카테고리 폴더명 예시
 - `korean`: 한식
