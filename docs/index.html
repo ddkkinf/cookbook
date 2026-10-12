@@ -758,7 +758,9 @@
             statusText = '수정 필요';
         }
 
-        const comment = extractMeta(/(?:코멘트|메모|피드백|노트|comment)[^*:\n]*[:*]+\s*([^\n*]+)/i, '');
+        const commentMatch = mdContent.match(/^[*-]?\s*\*\*?(?:코멘트|메모|피드백|노트|comment)[^*:\n\r]*[:*]+[ \t]*([^\r\n]+)/im);
+        let comment = (commentMatch && commentMatch[1]) ? commentMatch[1].replace(/\*\*/g, '').trim() : '';
+        if (comment === '---' || comment === '-') comment = '';
 
         // Parse ingredients from markdown tables or list
         const ingredients = [];
@@ -886,8 +888,10 @@
         // Status tabs count
         const verifiedCount = allRecipes.filter(r => r.status === 'verified').length;
         const needsFixCount = allRecipes.filter(r => r.status === 'needs_fix').length;
+        const unverifiedCount = allRecipes.filter(r => r.status === 'unverified').length;
         statusTabsContainer.innerHTML = `
             <button class="status-tab ${currentStatus === 'all' ? 'active' : ''}" data-status="all" onclick="filterByStatus('all')">전체 상태 (${allRecipes.length})</button>
+            <button class="status-tab ${currentStatus === 'unverified' ? 'active' : ''}" data-status="unverified" onclick="filterByStatus('unverified')">⚪ 미검증 (${unverifiedCount})</button>
             <button class="status-tab ${currentStatus === 'verified' ? 'active' : ''}" data-status="verified" onclick="filterByStatus('verified')">✅ 검증 완료 (${verifiedCount})</button>
             <button class="status-tab ${currentStatus === 'needs_fix' ? 'active' : ''}" data-status="needs_fix" onclick="filterByStatus('needs_fix')">⚠️ 수정 필요 (${needsFixCount})</button>
         `;
