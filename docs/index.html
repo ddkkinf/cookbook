@@ -909,9 +909,9 @@
         const ingredients = [];
         const tableRows = mdContent.matchAll(/\|\s*\*\*?([^*|]+)\*\*?\s*\|\s*([^|]+)\s*\|/g);
         for (const match of tableRows) {
-            const name = match[1].trim();
-            const amount = match[2].trim();
-            if (name && name !== '재료' && !name.includes('---')) {
+            const name = match[1].replace(/\*\*/g, '').trim();
+            const amount = match[2].replace(/\*\*/g, '').trim();
+            if (name && !/^(?:재료|양념\s*재료)$/.test(name) && !name.includes('---')) {
                 ingredients.push({ name, amount });
             }
         }
@@ -922,22 +922,36 @@
             }
         }
 
-        // Parse step instructions
+        // Helper to convert inline markdown bold/italic/code for step cards
+        function formatInlineMd(text) {
+            return text
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>');
+        }
+
+        // Parse step instructions with clean line breaks
         const steps = [];
-        const stepBlocks = mdContent.matchAll(/###\s*Step\s*\d+[^.\n]*\.?\s*([^\n]+)([\s\S]*?)(?=###\s*Step|\n##|$)/gi);
+        const stepBlocks = mdContent.matchAll(/###\s*Step\s*\d+[^.\n]*\.?\s*([^\n]+)([\s\S]*?)(?=###\s*Step|\n---|(?:\n##\s)|$)/gi);
         for (const block of stepBlocks) {
-            const stepTitle = block[1].trim();
-            const stepBody = block[2].trim()
+            const stepTitle = formatInlineMd(block[1].trim());
+            const stepLines = block[2].trim()
                 .split('\n')
-                .map(l => l.replace(/^\d+\.\s*/, '').trim())
-                .filter(l => l && !l.startsWith('*') && !l.startsWith('-'))
-                .join(' ');
-            steps.push(stepBody ? `${stepTitle}: ${stepBody}` : stepTitle);
+                .map(l => l.trim())
+                .filter(l => l && !l.startsWith('>'))
+                .map(l => {
+                    if (/^[*-]\s+/.test(l)) {
+                        return '&nbsp;&nbsp;• ' + formatInlineMd(l.replace(/^[*-]\s+/, ''));
+                    }
+                    return formatInlineMd(l);
+                });
+            const stepBody = stepLines.join('<br>');
+            steps.push(stepBody ? `<strong>${stepTitle}</strong><br>${stepBody}` : `<strong>${stepTitle}</strong>`);
         }
         if (steps.length === 0) {
             const numSteps = mdContent.matchAll(/^\d+\.\s+([^\n]+)/gm);
             for (const match of numSteps) {
-                steps.push(match[1].trim());
+                steps.push(formatInlineMd(match[1].trim()));
             }
         }
 
@@ -1132,7 +1146,12 @@
         const recipe = allRecipes.find(r => r.id === id);
         if (!recipe) return;
 
-        const renderedMarkdown = typeof marked !== 'undefined' ? marked.parse(recipe.rawMarkdown) : '';
+        const cleanedMd = recipe.rawMarkdown
+            .replace(/^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*$/gm, (_, type) => {
+                const labelMap = { NOTE: '📌 참고', TIP: '💡 팁', IMPORTANT: '⭐ 핵심 체크', WARNING: '⚠️ 주의', CAUTION: '🚨 주의' };
+                return `> **${labelMap[type] || type}**`;
+            });
+        const renderedMarkdown = typeof marked !== 'undefined' ? marked.parse(cleanedMd, { breaks: true }) : '';
 
         modalBody.innerHTML = `
             <div class="recipe-header">
