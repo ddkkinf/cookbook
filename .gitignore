@@ -1,0 +1,14 @@
+node_modules/
+.DS_Store
+*.log
+
+# Android build outputs (keep android/ project source tracked for CI APK builds)
+android/.gradle/
+android/build/
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
+android/local.properties
+*.apk
+*.aab
+*.keystore
+*.jks

@@ -2,16 +2,19 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#E63946">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>김용훈의 레시피</title>
-    <!-- Fonts -->
+    <!-- Fonts (online progressive enhancement, graceful system fallback offline) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Marked.js (Markdown parser) -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Offline-bundled Marked.js & Bundled Recipes -->
+    <script src="./vendor/marked.min.js"></script>
+    <script src="./bundled-recipes.js"></script>
     <style>
         :root {
             --primary: #E63946;
@@ -21,43 +24,50 @@
             --text-main: #1D3557;
             --text-muted: #457B9D;
             --accent: #A8DADC;
+            --teal: #2A9D8F;
+            --amber: #E76F51;
             --border-radius: 16px;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            font-family: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
             line-height: 1.6;
             overflow-x: hidden;
+            padding-top: var(--safe-top);
+            padding-bottom: calc(5rem + var(--safe-bottom));
         }
 
         /* Layout */
         .container {
             max-width: 1000px;
             margin: 0 auto;
-            padding: 2rem 1.5rem;
+            padding: 2rem 1.25rem;
         }
 
         /* Header */
         header {
             text-align: center;
-            margin-bottom: 2.5rem;
-            animation: fadeInDown 0.8s ease-out;
+            margin-bottom: 1.8rem;
+            animation: fadeInDown 0.6s ease-out;
         }
 
         header h1 {
-            font-size: 3rem;
+            font-size: 2.7rem;
             font-weight: 800;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             letter-spacing: -1px;
             background: linear-gradient(135deg, var(--text-main), var(--primary));
             -webkit-background-clip: text;
@@ -66,42 +76,79 @@
 
         header p {
             color: var(--text-muted);
-            font-size: 1.1rem;
+            font-size: 1.02rem;
+        }
+
+        .header-bar-actions {
+            margin-top: 0.9rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .apk-download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.5rem 1.1rem;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #1D3557, #2A9D8F);
+            color: white;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(42, 157, 143, 0.25);
+            transition: var(--transition);
+        }
+
+        .apk-download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(42, 157, 143, 0.35);
+        }
+
+        .sync-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.4rem 0.85rem;
+            border-radius: 50px;
+            background: white;
+            border: 1px solid #E5E7EB;
+            color: #4B5563;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
         }
 
         /* Category & Status Filter Tabs */
         .filter-controls {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.8rem;
             align-items: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.6rem;
         }
 
         .category-tabs, .status-tabs {
             display: flex;
             justify-content: center;
-            gap: 0.6rem;
+            gap: 0.5rem;
             flex-wrap: wrap;
         }
 
         .category-tab, .status-tab {
-            padding: 0.5rem 1.2rem;
+            padding: 0.48rem 1.05rem;
             border-radius: 50px;
             background: white;
             color: var(--text-main);
-            font-size: 0.92rem;
+            font-size: 0.88rem;
             font-weight: 600;
             border: 1px solid rgba(0,0,0,0.06);
             cursor: pointer;
             box-shadow: 0 2px 6px rgba(0,0,0,0.04);
             transition: var(--transition);
-        }
-
-        .category-tab:hover, .status-tab:hover {
-            transform: translateY(-2px);
-            border-color: var(--primary);
-            color: var(--primary);
         }
 
         .category-tab.active {
@@ -115,78 +162,57 @@
             background: var(--text-main);
             color: white;
             border-color: var(--text-main);
-            box-shadow: 0 4px 12px rgba(29, 53, 87, 0.3);
         }
 
         .status-tab.active[data-status="verified"] {
-            background: #2A9D8F;
-            border-color: #2A9D8F;
-            box-shadow: 0 4px 12px rgba(42, 157, 143, 0.3);
+            background: var(--teal);
+            border-color: var(--teal);
         }
 
         .status-tab.active[data-status="needs_fix"] {
-            background: #E76F51;
-            border-color: #E76F51;
-            box-shadow: 0 4px 12px rgba(231, 111, 81, 0.3);
+            background: var(--amber);
+            border-color: var(--amber);
         }
 
         /* Status Badges on Cards */
         .card-status-badge {
             position: absolute;
-            top: 1rem;
-            left: 1rem;
-            padding: 0.3rem 0.75rem;
+            top: 0.9rem;
+            left: 0.9rem;
+            padding: 0.28rem 0.7rem;
             border-radius: 50px;
             font-size: 0.75rem;
             font-weight: 700;
             display: inline-flex;
             align-items: center;
-            gap: 0.35rem;
+            gap: 0.3rem;
             box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-            backdrop-filter: blur(4px);
         }
 
-        .status-verified {
-            background: rgba(42, 157, 143, 0.95);
-            color: white;
-        }
-
-        .status-needs_fix {
-            background: rgba(231, 111, 81, 0.95);
-            color: white;
-        }
-
-        .status-unverified {
-            background: rgba(108, 117, 125, 0.85);
-            color: white;
-        }
+        .status-verified { background: rgba(42, 157, 143, 0.95); color: white; }
+        .status-needs_fix { background: rgba(231, 111, 81, 0.95); color: white; }
+        .status-unverified { background: rgba(108, 117, 125, 0.85); color: white; }
 
         /* Recipe Comment Note */
         .recipe-comment-box {
             background: #FFF8E7;
             border-left: 4px solid #E9C46A;
-            padding: 1.1rem 1.3rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
+            padding: 1rem 1.2rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
             color: #7A5800;
-            font-size: 0.98rem;
-            line-height: 1.6;
+            font-size: 0.94rem;
+            line-height: 1.55;
             display: flex;
             align-items: flex-start;
-            gap: 0.8rem;
-        }
-
-        .recipe-comment-box i {
-            font-size: 1.2rem;
-            color: #E76F51;
-            margin-top: 0.2rem;
+            gap: 0.7rem;
         }
 
         .card-comment-snippet {
             font-size: 0.82rem;
             color: #7A5800;
             background: #FFF9E6;
-            padding: 0.4rem 0.7rem;
+            padding: 0.38rem 0.65rem;
             border-radius: 6px;
             margin-top: 0.5rem;
             margin-bottom: 0.5rem;
@@ -197,149 +223,12 @@
             border-left: 3px solid #E9C46A;
         }
 
-        /* Interactive Status Editor in Modal */
-        .interactive-status-panel {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 1.4rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-            border: 1px solid #ECEEF0;
-        }
-
-        .interactive-status-panel h4 {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .interactive-status-panel h4 span {
-            font-size: 0.8rem;
-            font-weight: normal;
-            color: var(--text-muted);
-        }
-
-        .status-button-group {
-            display: flex;
-            gap: 0.6rem;
-            flex-wrap: wrap;
-            margin-bottom: 1.2rem;
-        }
-
-        .status-btn {
-            flex: 1;
-            min-width: 120px;
-            padding: 0.7rem 1rem;
-            border-radius: 12px;
-            border: 2px solid #E5E7EB;
-            background: #F9FAFB;
-            color: #4B5563;
-            font-size: 0.92rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            transition: var(--transition);
-        }
-
-        .status-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.06);
-        }
-
-        .status-btn.selected-verified {
-            border-color: #2A9D8F;
-            background: #E8F6F4;
-            color: #2A9D8F;
-        }
-
-        .status-btn.selected-needs_fix {
-            border-color: #E76F51;
-            background: #FDF1EE;
-            color: #E76F51;
-        }
-
-        .status-btn.selected-unverified {
-            border-color: #6C757D;
-            background: #F1F3F5;
-            color: #495057;
-        }
-
-        .comment-editor-wrapper {
-            display: flex;
-            gap: 0.6rem;
-        }
-
-        .comment-input {
-            flex: 1;
-            padding: 0.8rem 1rem;
-            border: 1px solid #D1D5DB;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            font-family: inherit;
-            outline: none;
-            transition: var(--transition);
-        }
-
-        .comment-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
-        }
-
-        .save-comment-btn {
-            padding: 0.8rem 1.4rem;
-            background: var(--text-main);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.92rem;
-            cursor: pointer;
-            transition: var(--transition);
-            white-space: nowrap;
-        }
-
-        .save-comment-btn:hover {
-            background: var(--primary);
-        }
-
-        /* Toast notification */
-        .toast-notify {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: #1D3557;
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 50px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-            z-index: 2000;
-            opacity: 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .toast-notify.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
         /* Search Bar */
         .search-container {
             position: sticky;
-            top: 1rem;
-            z-index: 100;
-            margin-bottom: 2.5rem;
+            top: calc(0.6rem + var(--safe-top));
+            z-index: 90;
+            margin-bottom: 2rem;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
@@ -350,54 +239,36 @@
             box-shadow: var(--shadow);
             border-radius: 50px;
             overflow: hidden;
-            transition: var(--transition);
             background: white;
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
-        .search-wrapper:focus-within {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
-        }
-
-        .search-wrapper i {
+        .search-icon {
             position: absolute;
-            left: 1.5rem;
+            left: 1.25rem;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
-            font-size: 1.2rem;
+            font-size: 1.05rem;
+            pointer-events: none;
         }
 
         #search-input {
             width: 100%;
-            padding: 1.2rem 1.5rem 1.2rem 3.5rem;
+            padding: 1rem 1.3rem 1rem 3.1rem;
             border: none;
             outline: none;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-family: inherit;
-        }
-
-        /* Loading / Empty State */
-        .status-message {
-            text-align: center;
-            padding: 4rem 1rem;
-            color: var(--text-muted);
-            font-size: 1.2rem;
-        }
-
-        .status-message i {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            display: block;
-            color: var(--primary);
+            background: transparent;
         }
 
         /* Recipe Grid */
         #recipe-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-            animation: fadeIn 1s ease-in;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 1.5rem;
+            animation: fadeIn 0.5s ease-in;
         }
 
         .recipe-card {
@@ -413,36 +284,40 @@
         }
 
         .recipe-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 18px 25px -5px rgba(0, 0, 0, 0.14);
+        }
+
+        .recipe-card:active {
+            transform: scale(0.985);
         }
 
         .card-image {
-            height: 180px;
+            height: 155px;
             background: linear-gradient(135deg, var(--accent), var(--text-muted));
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 4rem;
+            font-size: 3.6rem;
             position: relative;
         }
 
         .card-badge {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
+            top: 0.9rem;
+            right: 0.9rem;
             background: rgba(255, 255, 255, 0.95);
-            padding: 0.3rem 0.8rem;
+            padding: 0.25rem 0.75rem;
             border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            font-size: 0.78rem;
+            font-weight: 700;
             color: var(--primary);
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         .card-content {
-            padding: 1.5rem;
+            padding: 1.35rem;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
@@ -450,15 +325,15 @@
         }
 
         .card-content h3 {
-            font-size: 1.35rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+            margin-bottom: 0.45rem;
             color: var(--text-main);
         }
 
         .card-content p {
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             color: #6c757d;
-            margin-bottom: 1rem;
+            margin-bottom: 0.9rem;
             line-height: 1.5;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -468,31 +343,24 @@
 
         .card-info {
             display: flex;
-            gap: 1rem;
-            font-size: 0.88rem;
+            gap: 0.85rem;
+            flex-wrap: wrap;
+            font-size: 0.84rem;
             color: var(--text-muted);
             border-top: 1px solid #f0f0f0;
-            padding-top: 0.8rem;
-        }
-
-        .card-info i {
-            margin-right: 0.3rem;
-            color: var(--primary);
+            padding-top: 0.75rem;
         }
 
         /* Modal */
         .modal {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(29, 53, 87, 0.6);
-            backdrop-filter: blur(8px);
+            inset: 0;
+            background: rgba(29, 53, 87, 0.62);
+            backdrop-filter: blur(6px);
             z-index: 1000;
             display: none;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.25s ease;
         }
 
         .modal.active {
@@ -503,137 +371,383 @@
         .modal-content {
             background: var(--bg);
             width: 100%;
-            max-width: 820px;
-            height: 90vh;
+            max-width: 840px;
+            height: 92vh;
             margin: auto;
             border-radius: 24px;
             overflow-y: auto;
             position: relative;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.28);
+            padding-bottom: calc(5rem + var(--safe-bottom));
         }
 
-        .modal.active .modal-content {
-            transform: translateY(0);
+        .modal-sticky-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: calc(0.8rem + var(--safe-top)) 1.2rem 0.8rem;
+            background: rgba(248, 249, 250, 0.92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .wakelock-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.42rem 0.85rem;
+            border-radius: 50px;
+            border: 1px solid #D1D5DB;
+            background: white;
+            color: #4B5563;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .wakelock-btn.active {
+            background: #FEF3C7;
+            border-color: #F59E0B;
+            color: #B45309;
         }
 
         .close-btn {
-            position: sticky;
-            top: 1.5rem;
-            right: 1.5rem;
-            float: right;
             background: white;
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: var(--shadow);
-            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
             border: none;
-            font-size: 1.2rem;
+            font-size: 1.15rem;
+            color: var(--text-main);
             transition: var(--transition);
         }
 
         .close-btn:hover {
             background: var(--primary);
             color: white;
-            transform: rotate(90deg);
         }
 
         .modal-body {
-            padding: 3rem 2.2rem;
+            padding: 1.4rem 1.8rem 2.5rem;
         }
 
         .recipe-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .recipe-header h2 {
-            font-size: 2.3rem;
-            margin-bottom: 0.8rem;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
         }
 
         .recipe-meta {
             display: flex;
             justify-content: center;
-            gap: 1.5rem;
+            gap: 1.1rem;
             flex-wrap: wrap;
-            margin-bottom: 2rem;
-            padding: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 0.9rem 1rem;
             background: white;
             border-radius: var(--border-radius);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            font-size: 0.92rem;
         }
 
-        /* Ingredients & Steps */
+        /* ==========================================
+           SMART SERVING & PORTION CALCULATOR PANEL
+           ========================================== */
+        .serving-calculator-card {
+            background: linear-gradient(135deg, #FFFFFF 0%, #FFF5F5 100%);
+            border: 2px solid #FECACA;
+            border-radius: var(--border-radius);
+            padding: 1.25rem 1.4rem;
+            margin-bottom: 1.8rem;
+            box-shadow: 0 4px 14px rgba(230, 57, 70, 0.08);
+        }
+
+        .serving-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.9rem;
+        }
+
+        .serving-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .serving-title-group h4 {
+            font-size: 1.08rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            margin: 0;
+        }
+
+        .serving-base-hint {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .serving-stepper {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            background: white;
+            padding: 0.35rem 0.55rem;
+            border-radius: 50px;
+            border: 1.5px solid #FCA5A5;
+            box-shadow: 0 2px 6px rgba(230, 57, 70, 0.1);
+        }
+
+        .stepper-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-size: 1.15rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .stepper-btn:active {
+            transform: scale(0.9);
+        }
+
+        .stepper-btn:disabled {
+            background: #E5E7EB;
+            color: #9CA3AF;
+            cursor: not-allowed;
+        }
+
+        .serving-input {
+            width: 54px;
+            text-align: center;
+            border: none;
+            outline: none;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            font-family: inherit;
+            background: transparent;
+        }
+
+        .serving-unit-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-main);
+            padding-right: 0.35rem;
+        }
+
+        .serving-presets-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            margin-top: 0.95rem;
+            padding-top: 0.85rem;
+            border-top: 1px dashed #FECACA;
+        }
+
+        .preset-chips {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .preset-chip {
+            padding: 0.32rem 0.75rem;
+            border-radius: 50px;
+            border: 1px solid #E5E7EB;
+            background: white;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #4B5563;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .preset-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .smart-scale-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.83rem;
+            font-weight: 700;
+            color: #1D3557;
+            cursor: pointer;
+            user-select: none;
+            background: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            border: 1px solid #CBD5E1;
+        }
+
+        .smart-scale-toggle input {
+            accent-color: var(--teal);
+            width: 16px;
+            height: 16px;
+        }
+
+        .smart-scale-banner {
+            margin-top: 0.75rem;
+            background: #ECFEFF;
+            border: 1px solid #A5F3FC;
+            color: #0E7490;
+            padding: 0.6rem 0.9rem;
+            border-radius: 10px;
+            font-size: 0.83rem;
+            line-height: 1.45;
+            display: none;
+        }
+
+        .smart-scale-banner.visible {
+            display: block;
+        }
+
+        /* Ingredients Grid */
         .recipe-section {
-            margin-bottom: 2.5rem;
+            margin-bottom: 2.2rem;
+        }
+
+        .recipe-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-bottom: 1rem;
         }
 
         .recipe-section h4 {
-            font-size: 1.4rem;
-            margin-bottom: 1.2rem;
+            font-size: 1.3rem;
             display: flex;
             align-items: center;
-            gap: 0.8rem;
+            gap: 0.6rem;
             color: var(--primary);
+            margin: 0;
         }
 
         .ingredients-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 0.8rem;
+            grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
+            gap: 0.7rem;
             list-style: none;
         }
 
         .ingredients-list li {
             background: white;
-            padding: 0.9rem 1.1rem;
+            padding: 0.85rem 1rem;
             border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.28rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            border: 1px solid #F1F5F9;
+            transition: var(--transition);
+        }
+
+        .ingredients-list li.scaled-highlight {
+            border-color: #BAE6FD;
+            background: #F8FDFF;
+        }
+
+        .ing-row-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.6rem;
+        }
+
+        .ing-name {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .ing-amount {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.95rem;
+            text-align: right;
+        }
+
+        .ing-meta-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            gap: 0.4rem;
+            font-size: 0.76rem;
+            color: #64748B;
         }
 
-        .ingredients-list li span:last-child {
-            font-weight: 600;
-            color: var(--text-muted);
+        .smart-adj-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: #E0F2FE;
+            color: #0369A1;
+            padding: 0.12rem 0.5rem;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 700;
         }
 
+        /* Steps & Inline Timer Pills */
         .steps-list {
             list-style: none;
         }
 
         .step-item {
             display: flex;
-            gap: 1.2rem;
-            margin-bottom: 1.2rem;
-            padding: 1.3rem;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1.15rem 1.2rem;
             background: white;
             border-radius: var(--border-radius);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
             transition: var(--transition);
             cursor: pointer;
-        }
-
-        .step-item:hover {
-            background: #FFF5F5;
+            border: 1px solid #F1F5F9;
         }
 
         .step-checkbox {
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             border: 2px solid var(--accent);
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            margin-top: 0.15rem;
             transition: var(--transition);
             color: transparent;
         }
@@ -647,96 +761,384 @@
         .step-item.completed .step-text {
             text-decoration: line-through;
             color: var(--text-muted);
-            opacity: 0.7;
+            opacity: 0.65;
+        }
+
+        .step-content-col {
+            flex: 1;
+            min-width: 0;
         }
 
         .step-text {
-            font-size: 1.05rem;
-            line-height: 1.6;
+            font-size: 1rem;
+            line-height: 1.65;
+        }
+
+        .step-timers-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            margin-top: 0.75rem;
+        }
+
+        .step-timer-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.38rem;
+            padding: 0.42rem 0.85rem;
+            border-radius: 50px;
+            border: 1.5px solid #FCA5A5;
+            background: #FFF5F5;
+            color: var(--primary-dark);
+            font-size: 0.83rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .step-timer-pill:hover, .step-timer-pill:active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .custom-timer-trigger {
+            padding: 0.38rem 0.8rem;
+            border-radius: 50px;
+            border: 1px solid #CBD5E1;
+            background: white;
+            color: var(--text-main);
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        /* ==========================================
+           FLOATING MULTI-TIMER DOCK
+           ========================================== */
+        .floating-timer-dock {
+            position: fixed;
+            bottom: calc(0.85rem + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 1.5rem);
+            max-width: 560px;
+            z-index: 1500;
+            display: none;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+
+        .floating-timer-dock.active {
+            display: flex;
+        }
+
+        .timer-card {
+            background: #1D3557;
+            color: white;
+            border-radius: 16px;
+            padding: 0.85rem 1.05rem;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.32);
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            border: 1px solid rgba(255,255,255,0.12);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-card.finished {
+            background: linear-gradient(135deg, #C1121F, #E63946);
+            animation: timerPulse 0.9s infinite alternate;
+        }
+
+        @keyframes timerPulse {
+            from { transform: scale(1); box-shadow: 0 10px 25px rgba(230, 57, 70, 0.5); }
+            to { transform: scale(1.018); box-shadow: 0 14px 34px rgba(230, 57, 70, 0.85); }
+        }
+
+        .timer-card-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.65rem;
+        }
+
+        .timer-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .timer-label {
+            font-size: 0.8rem;
+            color: #A8DADC;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .timer-card.finished .timer-label {
+            color: #FFE5E5;
+            font-weight: 700;
+        }
+
+        .timer-digits {
+            font-size: 1.65rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.5px;
+            line-height: 1.15;
+        }
+
+        .timer-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            flex-wrap: wrap;
+        }
+
+        .t-btn {
+            border: none;
+            border-radius: 9px;
+            padding: 0.45rem 0.68rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.16);
+            color: white;
+            transition: var(--transition);
+        }
+
+        .t-btn:active {
+            transform: scale(0.92);
+        }
+
+        .t-btn.primary {
+            background: #2A9D8F;
+        }
+
+        .t-btn.stop-alarm {
+            background: white;
+            color: #C1121F;
+            padding: 0.5rem 0.9rem;
+            font-weight: 800;
+        }
+
+        .timer-progress-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.16);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .timer-progress-bar {
+            height: 100%;
+            background: #A8DADC;
+            transition: width 0.25s linear;
+        }
+
+        /* Interactive Status Editor in Modal */
+        .interactive-status-panel {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.25rem;
+            margin-bottom: 1.6rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border: 1px solid #ECEEF0;
+        }
+
+        .interactive-status-panel h4 {
+            font-size: 1rem;
+            margin-bottom: 0.85rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .status-button-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.9rem;
+        }
+
+        .status-btn {
+            flex: 1;
+            min-width: 95px;
+            padding: 0.6rem 0.75rem;
+            border-radius: 11px;
+            border: 2px solid #E5E7EB;
+            background: #F9FAFB;
+            color: #4B5563;
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            transition: var(--transition);
+        }
+
+        .status-btn.selected-verified { border-color: var(--teal); background: #E8F6F4; color: var(--teal); }
+        .status-btn.selected-needs_fix { border-color: var(--amber); background: #FDF1EE; color: var(--amber); }
+        .status-btn.selected-unverified { border-color: #6C757D; background: #F1F3F5; color: #495057; }
+
+        .comment-editor-wrapper {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .comment-input {
+            flex: 1;
+            padding: 0.72rem 0.9rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 10px;
+            font-size: 0.92rem;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .save-comment-btn {
+            padding: 0.72rem 1.15rem;
+            background: var(--text-main);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* Raw Markdown Collapsible */
+        details.raw-md-details {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1rem 1.3rem;
+            border: 1px solid #ECEEF0;
+        }
+
+        details.raw-md-details summary {
+            font-weight: 700;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 1.02rem;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .recipe-rendered-body {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            margin-top: 1.5rem;
+            padding-top: 1.1rem;
+            margin-top: 0.9rem;
+            border-top: 1px solid #F1F5F9;
             line-height: 1.7;
+            font-size: 0.95rem;
+            overflow-x: auto;
         }
 
-        .recipe-rendered-body h1,
-        .recipe-rendered-body h2,
-        .recipe-rendered-body h3 {
-            margin-top: 1.5rem;
-            margin-bottom: 0.8rem;
+        .recipe-rendered-body h1, .recipe-rendered-body h2, .recipe-rendered-body h3 {
+            margin-top: 1.3rem;
+            margin-bottom: 0.6rem;
             color: var(--text-main);
         }
 
         .recipe-rendered-body table {
             width: 100%;
             border-collapse: collapse;
-            margin: 1rem 0;
+            margin: 0.8rem 0;
+            font-size: 0.88rem;
         }
 
-        .recipe-rendered-body th,
-        .recipe-rendered-body td {
+        .recipe-rendered-body th, .recipe-rendered-body td {
             border: 1px solid #e9ecef;
-            padding: 0.6rem 1rem;
+            padding: 0.5rem 0.75rem;
             text-align: left;
         }
 
-        .recipe-rendered-body th {
-            background-color: #f8f9fa;
+        .recipe-rendered-body th { background-color: #f8f9fa; }
+
+        .recipe-rendered-body blockquote {
+            background: #F8FAFC;
+            border-left: 4px solid var(--text-muted);
+            padding: 0.75rem 1rem;
+            margin: 0.8rem 0;
+            border-radius: 6px;
         }
 
         .recipe-footer-actions {
-            margin-top: 2rem;
+            margin-top: 1.6rem;
             text-align: center;
         }
 
         .recipe-footer-actions a {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.45rem;
             color: var(--text-muted);
             text-decoration: none;
-            font-size: 0.9rem;
-            padding: 0.6rem 1.2rem;
+            font-size: 0.86rem;
+            padding: 0.55rem 1.1rem;
             border-radius: 50px;
             background: white;
             border: 1px solid #e9ecef;
-            transition: var(--transition);
         }
 
-        .recipe-footer-actions a:hover {
-            color: var(--primary);
-            border-color: var(--primary);
+        /* Toast notification */
+        .toast-notify {
+            position: fixed;
+            top: calc(1.2rem + var(--safe-top));
+            left: 50%;
+            transform: translateX(-50%) translateY(-120px);
+            background: #1D3557;
+            color: white;
+            padding: 0.72rem 1.3rem;
+            border-radius: 50px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.22);
+            z-index: 2500;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 92vw;
+            text-align: center;
         }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .toast-notify.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
         }
 
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .status-message {
+            text-align: center;
+            padding: 3.5rem 1rem;
+            color: var(--text-muted);
+            font-size: 1.08rem;
         }
 
-        /* Responsive */
-        @media (max-width: 600px) {
-            header h1 { font-size: 2.2rem; }
-            .modal-content { height: 100vh; border-radius: 0; }
-            .recipe-meta { flex-direction: column; gap: 0.5rem; align-items: center; }
-            .recipe-header h2 { font-size: 1.7rem; }
-            .modal-body { padding: 2.5rem 1.2rem; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Print Styles */
-        @media print {
-            .search-container, .category-tabs, .close-btn, .step-checkbox { display: none !important; }
-            .modal { position: relative; display: block; opacity: 1; }
-            .modal-content { height: auto; box-shadow: none; transform: none; }
+        @media (max-width: 640px) {
+            .container { padding: 1.4rem 1rem; }
+            header h1 { font-size: 2.1rem; }
+            .modal-content { height: 100vh; max-width: 100%; border-radius: 0; }
+            .modal-body { padding: 1.1rem 1.05rem 2.5rem; }
+            .recipe-header h2 { font-size: 1.55rem; }
+            .serving-top-row { flex-direction: column; align-items: stretch; }
+            .serving-stepper { justify-content: space-between; }
+            .ingredients-list { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -745,10 +1147,18 @@
 <div class="container">
     <header>
         <h1>김용훈의 레시피</h1>
-        <p>맛있는 일상의 기록, 나만의 비밀 레시피 북</p>
+        <p>인분 자동 계산 & 스마트 타이머 레시피 북</p>
+        <div class="header-bar-actions">
+            <a id="apk-download-link" class="apk-download-btn" href="https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk">
+                📲 안드로이드 앱(APK) 다운로드
+            </a>
+            <button class="sync-pill" onclick="syncRecipesFromGitHub(true)" title="GitHub에서 최신 레시피 동기화">
+                🔄 <span id="sync-status-label">최신 레시피 동기화</span>
+            </button>
+        </div>
     </header>
 
-    <!-- Filter Controls (Category & Status) -->
+    <!-- Filter Controls -->
     <div class="filter-controls">
         <div class="category-tabs" id="category-tabs">
             <button class="category-tab active" onclick="filterByCategory('all')">전체 보기</button>
@@ -762,15 +1172,14 @@
 
     <div class="search-container">
         <div class="search-wrapper">
-            <i class="fa-solid fa-magnifying-glass"></i>
+            <span class="search-icon">🔍</span>
             <input type="text" id="search-input" placeholder="레시피 이름이나 재료를 검색해보세요...">
         </div>
     </div>
 
     <div id="recipe-grid">
         <div class="status-message">
-            <i class="fa-solid fa-spinner fa-spin"></i>
-            <p>레시피를 불러오는 중입니다...</p>
+            <p>🍳 레시피를 불러오는 중입니다...</p>
         </div>
     </div>
 </div>
@@ -778,27 +1187,37 @@
 <!-- Recipe Detail Modal -->
 <div id="recipe-modal" class="modal">
     <div class="modal-content">
-        <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
-        <div class="modal-body" id="modal-body">
-            <!-- Details will be injected here -->
+        <div class="modal-sticky-topbar">
+            <button id="wakelock-btn" class="wakelock-btn" onclick="toggleWakeLock()">
+                🔆 화면 켜짐 유지 OFF
+            </button>
+            <button class="close-btn" onclick="closeModal()" aria-label="닫기">✕</button>
         </div>
+        <div class="modal-body" id="modal-body"></div>
     </div>
 </div>
 
+<!-- Floating Multi-Timer Dock -->
+<div id="floating-timer-dock" class="floating-timer-dock"></div>
+
 <!-- Toast notification popup -->
 <div id="toast-notify" class="toast-notify">
-    <i class="fa-solid fa-circle-check"></i>
     <span id="toast-text">저장되었습니다!</span>
 </div>
 
 <script>
-    // GitHub Repository Configuration
     const GITHUB_REPO = 'ddkkinf/cookbook';
     const GITHUB_BRANCH = 'main';
+    const LOCAL_STORAGE_KEY = 'cookbook_recipe_states_v1';
+    const CACHED_RECIPES_KEY = 'cookbook_cached_md_v1';
+    const GITHUB_TOKEN_KEY = 'cookbook_github_pat';
 
     let allRecipes = [];
     let currentCategory = 'all';
-    let currentStatus = 'all'; // 'all' | 'verified' | 'needs_fix'
+    let currentStatus = 'all';
+    let activeRecipeId = null;
+    let currentServings = 1;
+    let smartScaleEnabled = true;
 
     const grid = document.getElementById('recipe-grid');
     const searchInput = document.getElementById('search-input');
@@ -807,7 +1226,13 @@
     const modal = document.getElementById('recipe-modal');
     const modalBody = document.getElementById('modal-body');
 
-    // Category display map (folder name -> readable category name)
+    // Hide APK download link when running inside installed Capacitor Android app
+    const isNativeApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+    if (isNativeApp) {
+        const apkLink = document.getElementById('apk-download-link');
+        if (apkLink) apkLink.style.display = 'none';
+    }
+
     const categoryMap = {
         'korean': '한식',
         'western': '양식',
@@ -818,14 +1243,13 @@
         'etc': '기타'
     };
 
-    // Auto-detect emoji icon based on title/category
-    function detectIcon(title, category) {
+    function detectIcon(title) {
         if (/떡볶이|오뎅|어묵|순대|튀김/.test(title)) return '🥘';
         if (/고등어|생선|갈치|연어|회|해물|조개|새우/.test(title)) return '🐟';
-        if (/고기|삼겹살|스테이크|소고기|돼지|갈비|불고기/.test(title)) return '🥩';
+        if (/제육|고기|삼겹살|스테이크|소고기|돼지|갈비|불고기/.test(title)) return '🥩';
         if (/치킨|닭|백숙|삼계탕/.test(title)) return '🍗';
         if (/파스타|스파게티|면|라멘|국수|우동/.test(title)) return '🍝';
-        if (/밥|볶음밥|비빔밥|덮밥|카레/.test(title)) return '🍚';
+        if (/부타동|밥|볶음밥|비빔밥|덮밥|카레/.test(title)) return '🍚';
         if (/찌개|탕|국|전골/.test(title)) return '🍲';
         if (/샐러드|채소|야채/.test(title)) return '🥗';
         if (/빵|토스트|샌드위치/.test(title)) return '🥪';
@@ -833,9 +1257,536 @@
         return '🍳';
     }
 
-    // Markdown text parser to structured recipe object
+    // =========================================================================
+    // 1. SMART CULINARY SCALING ENGINE (인분 계산 & 비선형 양념 비율 보정)
+    // =========================================================================
+
+    function parseBaseServings(servingsStr) {
+        if (!servingsStr) return 1;
+        // e.g. "2인분 기준", "1~2인분" -> take first number (1 or 2)
+        const rangeMatch = servingsStr.match(/(\d+(?:\.\d+)?)\s*[~-]\s*(\d+(?:\.\d+)?)\s*인분/);
+        if (rangeMatch) return parseFloat(rangeMatch[1]);
+        const singleMatch = servingsStr.match(/(\d+(?:\.\d+)?)\s*인분/);
+        if (singleMatch) return parseFloat(singleMatch[1]);
+        return 1;
+    }
+
+    /**
+     * Classify an ingredient into culinary scaling behavior:
+     * - 'oil': 팬 코팅용 기름 (팬 면적 고정으로 완만하게 증가)
+     * - 'liquid': 국물/육수용 물 (100ml 이상이거나 육수 — 증발량 차이 보정)
+     * - 'coating': 부침가루/전분/밀가루 (겉면 코팅 후 털어내는 여분 보정)
+     * - 'strong_seasoning': 소금, 간장, 고추장, 굴소스, 다시다 등 고염도 양념 (다인분 염도 누적 방지)
+     * - 'mild_seasoning': 설탕, 물엿, 고춧가루, 맛술, 청주, 다진 마늘, 참기름 등 보조 양념
+     * - 'main': 고기, 생선, 떡, 밥, 채소 등 주재료 (정비례 n배)
+     */
+    function classifyIngredientRole(name, amount, sectionTitle = '') {
+        const n = name.replace(/\s+/g, '');
+        if (/식용유|포도씨유|카놀라유|올리브유|버터|기름/.test(n) && !/참기름|들기름|고추기름/.test(n)) {
+            return 'oil';
+        }
+        if (/^(?:물|육수|멸치육수|다시마물)/.test(n) || /물\(또는육수\)/.test(n)) {
+            // Check if it's broth-level water (>= 100ml) vs 2~3큰술 splash
+            const mlMatch = amount.match(/(\d+)\s*(?:ml|g|컵)/i);
+            if (mlMatch && parseFloat(mlMatch[1]) >= 80) {
+                return 'liquid';
+            }
+        }
+        if (/부침가루|전분|밀가루|튀김가루|녹말/.test(n)) {
+            return 'coating';
+        }
+        if (/소금|맛소금|꽃소금|천일염|진간장|국간장|간장|고추장|된장|쌈장|굴소스|다시다|치킨스톡|액젓|까나리|멸치액젓|연두|미원|소고기다시다/.test(n)) {
+            return 'strong_seasoning';
+        }
+        if (/설탕|황설탕|물엿|올리고당|꿀|매실청|고춧가루|맛술|미림|청주|소주|참기름|들기름|다진마늘|마늘|생강|식초|후추|후춧가루|레몬즙|와사비/.test(n) || /양념|소스/.test(sectionTitle)) {
+            // Avoid misclassifying main items if sectionTitle had 소스
+            if (!/고기|삼겹살|목살|앞다리|갈치|고등어|떡|어묵|양파|대파|밥|달걀|계란|스팸|김치/.test(n)) {
+                return 'mild_seasoning';
+            }
+        }
+        return 'main';
+    }
+
+    function getSmartScaleFactor(role, rawRatio, smartEnabled) {
+        if (!smartEnabled || Math.abs(rawRatio - 1) < 0.001) {
+            return { factor: rawRatio, reason: null };
+        }
+        if (role === 'oil') {
+            const factor = rawRatio > 1
+                ? 1 + (rawRatio - 1) * 0.45
+                : Math.max(0.6, 1 - (1 - rawRatio) * 0.5);
+            return { factor, reason: '🍳 팬 코팅유 비율 보정' };
+        }
+        if (role === 'liquid') {
+            const factor = rawRatio > 1
+                ? 1 + (rawRatio - 1) * 0.80
+                : 1 - (1 - rawRatio) * 0.78;
+            return { factor, reason: '💧 냄비 증발량 보정' };
+        }
+        if (role === 'coating') {
+            const factor = rawRatio > 1
+                ? Math.pow(rawRatio, 0.82)
+                : Math.max(0.6, Math.pow(rawRatio, 0.85));
+            return { factor, reason: '🌾 가루 코팅 여분 보정' };
+        }
+        if (role === 'strong_seasoning') {
+            const factor = rawRatio > 1
+                ? Math.pow(rawRatio, 0.85)
+                : Math.pow(rawRatio, 0.90);
+            return { factor, reason: '🧂 염도·간 과다 방지 보정' };
+        }
+        if (role === 'mild_seasoning') {
+            const factor = rawRatio > 1
+                ? Math.pow(rawRatio, 0.90)
+                : Math.pow(rawRatio, 0.93);
+            return { factor, reason: '✨ 양념 밸런스 보정' };
+        }
+        return { factor: rawRatio, reason: null };
+    }
+
+    function parseNumToken(token) {
+        const t = token.trim();
+        if (t.includes('/')) {
+            const [num, den] = t.split('/').map(Number);
+            if (den) return num / den;
+        }
+        return parseFloat(t);
+    }
+
+    function formatScaledNumber(val, unit) {
+        const u = (unit || '').trim();
+        if (val <= 0) return '약간';
+
+        // Grams or milliliters
+        if (/^(?:g|ml|cc)\b/i.test(u)) {
+            if (val >= 100) return String(Math.round(val / 5) * 5);
+            if (val >= 10) return String(Math.round(val));
+            const half = Math.round(val * 2) / 2;
+            return String(half || 0.5);
+        }
+
+        // Spoons / cups / bowls (clean 0.1 decimal, e.g. 0.5, 1.5, 1.8, 3.6)
+        if (/큰술|작은술|스푼|컵|공기|줌/.test(u)) {
+            if (val < 0.2) return '0.2';
+            const tenth = Math.round(val * 10) / 10;
+            return Number(tenth.toFixed(1)).toString();
+        }
+
+        // Countable items (개, 장, 쪽, 토막, 대, 꼬집, 캔)
+        if (/꼬집|번/.test(u)) {
+            return String(Math.max(1, Math.round(val)));
+        }
+
+        const half = Math.round(val * 2) / 2;
+        if (Math.abs(val - half) <= 0.12) {
+            return Number(half.toFixed(1)).toString();
+        }
+        return Number((Math.round(val * 10) / 10).toFixed(1)).toString();
+    }
+
+    function scaleAmountText(amountText, factor) {
+        if (!amountText || Math.abs(factor - 1) < 0.01) return amountText;
+        // Skip purely descriptive strings
+        if (!/\d/.test(amountText)) return amountText;
+
+        // Match ranges like "10~12g", "1/2~1개", "0.75~1큰술" or single numbers "2큰술", "1/2개", "300g"
+        const numPattern = /(\d+\s*\/\s*\d+|\d+(?:\.\d+)?)(?:\s*([~-])\s*(\d+\s*\/\s*\d+|\d+(?:\.\d+)?))?(\s*[가-힣a-zA-Z°%]*)/g;
+
+        return amountText.replace(numPattern, (fullMatch, n1, sep, n2, unitPart) => {
+            const unitTrim = (unitPart || '').trim();
+            // Do not scale thickness/length/temperature/time descriptors if any appear
+            if (/^(?:mm|cm|°C|도|분|초|%)/i.test(unitTrim)) {
+                return fullMatch;
+            }
+            const v1 = parseNumToken(n1) * factor;
+            if (sep && n2) {
+                const v2 = parseNumToken(n2) * factor;
+                const s1 = formatScaledNumber(v1, unitTrim);
+                const s2 = formatScaledNumber(v2, unitTrim);
+                if (s1 === s2) return `${s1}${unitPart}`;
+                return `${s1}${sep}${s2}${unitPart}`;
+            }
+            const s1 = formatScaledNumber(v1, unitTrim);
+            return `${s1}${unitPart}`;
+        });
+    }
+
+    // =========================================================================
+    // 2. SMART TIMER DETECTOR & MULTI-TIMER ENGINE (Web Audio + Vibration)
+    // =========================================================================
+
+    let activeTimers = []; // { id, label, totalSec, remainingMs, endTime, running, finished }
+    let timerTickInterval = null;
+    let alarmAudioInterval = null;
+    let audioCtx = null;
+
+    function extractTimersFromStep(stepTitle, plainText) {
+        const timers = [];
+        const seenSeconds = new Set();
+
+        // Clean out long marinating phrases like "24시간" or "30분 ~ 하루" from quick frying timers unless reasonable
+        // 1) "N분 M초 ~ K분" or "N분 M초"
+        const minSecRegex = /(\d+)\s*분\s*(\d+)\s*초(?:\s*[~-]\s*(\d+)\s*분(?:\s*(\d+)\s*초)?)?/g;
+        let cleaned = plainText;
+
+        cleaned = cleaned.replace(minSecRegex, (match, m1, s1, m2, s2) => {
+            const sec1 = parseInt(m1, 10) * 60 + parseInt(s1, 10);
+            if (sec1 > 0 && sec1 <= 7200 && !seenSeconds.has(sec1)) {
+                seenSeconds.add(sec1);
+                timers.push({ seconds: sec1, display: `${m1}분 ${s1}초` });
+            }
+            if (m2) {
+                const sec2 = parseInt(m2, 10) * 60 + (s2 ? parseInt(s2, 10) : 0);
+                if (sec2 > 0 && sec2 <= 7200 && !seenSeconds.has(sec2)) {
+                    seenSeconds.add(sec2);
+                    timers.push({ seconds: sec2, display: s2 ? `${m2}분 ${s2}초` : `${m2}분` });
+                }
+            }
+            return ' ';
+        });
+
+        // 2) Range or single minutes: "3~4분", "10분", "1~2분"
+        const minRegex = /(\d+)\s*(?:[~-]\s*(\d+)\s*)?분(?!\s*량)/g;
+        cleaned = cleaned.replace(minRegex, (match, m1, m2) => {
+            const v1 = parseInt(m1, 10);
+            const v2 = m2 ? parseInt(m2, 10) : null;
+            if (v2) {
+                // Offer start of range and upper bound (or midpoint if 1 min apart)
+                const sec1 = v1 * 60;
+                const sec2 = v2 * 60;
+                if (sec1 > 0 && sec1 <= 7200 && !seenSeconds.has(sec1)) {
+                    seenSeconds.add(sec1);
+                    timers.push({ seconds: sec1, display: `${v1}분` });
+                }
+                if (sec2 > 0 && sec2 <= 7200 && !seenSeconds.has(sec2)) {
+                    seenSeconds.add(sec2);
+                    timers.push({ seconds: sec2, display: `${v2}분` });
+                }
+            } else if (v1 > 0 && v1 <= 120) {
+                const sec = v1 * 60;
+                if (!seenSeconds.has(sec)) {
+                    seenSeconds.add(sec);
+                    timers.push({ seconds: sec, display: `${v1}분` });
+                }
+            }
+            return ' ';
+        });
+
+        // 3) Seconds: "30초", "10~15초", "5~10초"
+        const secRegex = /(\d+)\s*(?:[~-]\s*(\d+)\s*)?초/g;
+        cleaned.replace(secRegex, (match, s1, s2) => {
+            const targetSec = s2 ? parseInt(s2, 10) : parseInt(s1, 10);
+            if (targetSec >= 5 && targetSec <= 300 && !seenSeconds.has(targetSec)) {
+                seenSeconds.add(targetSec);
+                timers.push({ seconds: targetSec, display: `${targetSec}초` });
+            }
+            return ' ';
+        });
+
+        return timers.map(t => ({
+            ...t,
+            label: `${stepTitle} (${t.display})`
+        }));
+    }
+
+    function ensureAudioContext() {
+        try {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        } catch (e) {
+            console.warn('AudioContext unavailable:', e);
+        }
+    }
+
+    function playKitchenBeepPattern() {
+        ensureAudioContext();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        // Crisp 3-beep kitchen timer chime (A5 - A5 - E6)
+        const notes = [
+            { freq: 880, offset: 0, dur: 0.11 },
+            { freq: 880, offset: 0.16, dur: 0.11 },
+            { freq: 1318.5, offset: 0.32, dur: 0.22 }
+        ];
+        notes.forEach(n => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(n.freq, now + n.offset);
+            gain.gain.setValueAtTime(0.001, now + n.offset);
+            gain.gain.exponentialRampToValueAtTime(0.35, now + n.offset + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + n.offset + n.dur);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + n.offset);
+            osc.stop(now + n.offset + n.dur + 0.02);
+        });
+        if (navigator.vibrate) {
+            navigator.vibrate([300, 150, 300, 150, 500]);
+        }
+    }
+
+    function syncAlarmLoop() {
+        const anyFinished = activeTimers.some(t => t.finished);
+        if (anyFinished && !alarmAudioInterval) {
+            playKitchenBeepPattern();
+            let count = 0;
+            alarmAudioInterval = setInterval(() => {
+                count++;
+                if (!activeTimers.some(t => t.finished) || count > 12) {
+                    clearInterval(alarmAudioInterval);
+                    alarmAudioInterval = null;
+                    return;
+                }
+                playKitchenBeepPattern();
+            }, 1400);
+        } else if (!anyFinished && alarmAudioInterval) {
+            clearInterval(alarmAudioInterval);
+            alarmAudioInterval = null;
+        }
+    }
+
+    function startCookingTimer(seconds, label, event) {
+        if (event) event.stopPropagation();
+        ensureAudioContext();
+        requestWakeLockAutomatically();
+
+        const id = 't_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        const totalMs = seconds * 1000;
+        activeTimers.push({
+            id,
+            label: label || `${Math.floor(seconds / 60)}분 타이머`,
+            totalMs,
+            remainingMs: totalMs,
+            endTime: Date.now() + totalMs,
+            running: true,
+            finished: false
+        });
+
+        ensureTimerLoop();
+        renderTimerDock();
+        showToast(`⏱️ '${label}' 타이머가 시작되었습니다!`);
+    }
+
+    function openCustomTimerPrompt() {
+        const input = prompt('타이머 시간을 분 단위로 입력하세요 (예: 3, 1.5, 0.5 = 30초):', '3');
+        if (input === null) return;
+        const mins = parseFloat(input);
+        if (isNaN(mins) || mins <= 0) {
+            showToast('올바른 시간을 입력해 주세요.');
+            return;
+        }
+        const secs = Math.round(mins * 60);
+        const recipe = allRecipes.find(r => r.id === activeRecipeId);
+        const prefix = recipe ? recipe.title : '직접 설정';
+        startCookingTimer(secs, `${prefix} (${mins}분)`);
+    }
+
+    function toggleTimerPause(id) {
+        const t = activeTimers.find(x => x.id === id);
+        if (!t) return;
+        if (t.finished) {
+            dismissTimer(id);
+            return;
+        }
+        if (t.running) {
+            t.remainingMs = Math.max(0, t.endTime - Date.now());
+            t.running = false;
+        } else {
+            t.endTime = Date.now() + t.remainingMs;
+            t.running = true;
+            ensureAudioContext();
+        }
+        renderTimerDock();
+    }
+
+    function addTimerSeconds(id, addSec) {
+        const t = activeTimers.find(x => x.id === id);
+        if (!t) return;
+        const addMs = addSec * 1000;
+        if (t.finished) {
+            t.finished = false;
+            t.running = true;
+            t.remainingMs = addMs;
+            t.totalMs = addMs;
+            t.endTime = Date.now() + addMs;
+            syncAlarmLoop();
+        } else if (t.running) {
+            t.endTime += addMs;
+            t.remainingMs = Math.max(0, t.endTime - Date.now());
+            t.totalMs = Math.max(t.totalMs, t.remainingMs);
+        } else {
+            t.remainingMs += addMs;
+            t.totalMs = Math.max(t.totalMs, t.remainingMs);
+        }
+        ensureTimerLoop();
+        renderTimerDock();
+    }
+
+    function dismissTimer(id) {
+        activeTimers = activeTimers.filter(x => x.id !== id);
+        syncAlarmLoop();
+        renderTimerDock();
+    }
+
+    function formatClock(ms) {
+        const totalSec = Math.ceil(Math.max(0, ms) / 1000);
+        const m = Math.floor(totalSec / 60);
+        const s = totalSec % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function ensureTimerLoop() {
+        if (timerTickInterval) return;
+        timerTickInterval = setInterval(() => {
+            if (activeTimers.length === 0) {
+                clearInterval(timerTickInterval);
+                timerTickInterval = null;
+                return;
+            }
+            const now = Date.now();
+            let stateChanged = false;
+
+            activeTimers.forEach(t => {
+                if (t.running && !t.finished) {
+                    t.remainingMs = Math.max(0, t.endTime - now);
+                    if (t.remainingMs <= 0) {
+                        t.running = false;
+                        t.finished = true;
+                        stateChanged = true;
+                    }
+                }
+            });
+
+            if (stateChanged) {
+                syncAlarmLoop();
+            }
+            renderTimerDock();
+        }, 250);
+    }
+
+    function renderTimerDock() {
+        const dock = document.getElementById('floating-timer-dock');
+        if (!dock) return;
+        if (activeTimers.length === 0) {
+            dock.classList.remove('active');
+            dock.innerHTML = '';
+            return;
+        }
+        dock.classList.add('active');
+        dock.innerHTML = activeTimers.map(t => {
+            const pct = t.totalMs > 0 ? Math.max(0, Math.min(100, (t.remainingMs / t.totalMs) * 100)) : 0;
+            if (t.finished) {
+                return `
+                    <div class="timer-card finished">
+                        <div class="timer-card-main">
+                            <div class="timer-info">
+                                <div class="timer-label">🔔 조리 시간 완료! · ${t.label}</div>
+                                <div class="timer-digits">00:00 완료!</div>
+                            </div>
+                            <div class="timer-controls">
+                                <button class="t-btn" onclick="addTimerSeconds('${t.id}', 60)">+1분 더</button>
+                                <button class="t-btn stop-alarm" onclick="dismissTimer('${t.id}')">알람 끄기</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            return `
+                <div class="timer-card">
+                    <div class="timer-card-main">
+                        <div class="timer-info">
+                            <div class="timer-label">⏱️ ${t.label}</div>
+                            <div class="timer-digits">${formatClock(t.remainingMs)}</div>
+                        </div>
+                        <div class="timer-controls">
+                            <button class="t-btn primary" onclick="toggleTimerPause('${t.id}')">${t.running ? '⏸ 일시정지' : '▶ 재개'}</button>
+                            <button class="t-btn" onclick="addTimerSeconds('${t.id}', 30)">+30초</button>
+                            <button class="t-btn" onclick="addTimerSeconds('${t.id}', 60)">+1분</button>
+                            <button class="t-btn" onclick="dismissTimer('${t.id}')" aria-label="타이머 삭제">✕</button>
+                        </div>
+                    </div>
+                    <div class="timer-progress-track">
+                        <div class="timer-progress-bar" style="width: ${pct}%;"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Screen Wake Lock (조리 중 화면 꺼짐 방지)
+    let wakeLockSentinel = null;
+    let wakeLockWanted = false;
+
+    async function requestWakeLockAutomatically() {
+        if (!('wakeLock' in navigator)) return;
+        try {
+            if (!wakeLockSentinel) {
+                wakeLockSentinel = await navigator.wakeLock.request('screen');
+                wakeLockWanted = true;
+                wakeLockSentinel.addEventListener('release', () => {
+                    wakeLockSentinel = null;
+                    updateWakeLockButtonUI();
+                });
+                updateWakeLockButtonUI();
+            }
+        } catch (_) {}
+    }
+
+    async function toggleWakeLock() {
+        if (!('wakeLock' in navigator)) {
+            showToast('이 기기/브라우저에서는 화면 자동 켜짐 유지를 지원하지 않습니다.');
+            return;
+        }
+        if (wakeLockSentinel) {
+            wakeLockWanted = false;
+            await wakeLockSentinel.release();
+            wakeLockSentinel = null;
+            updateWakeLockButtonUI();
+            showToast('화면 켜짐 유지가 해제되었습니다.');
+        } else {
+            await requestWakeLockAutomatically();
+            if (wakeLockSentinel) {
+                showToast('🔆 조리 중 화면이 꺼지지 않도록 유지합니다!');
+            }
+        }
+    }
+
+    function updateWakeLockButtonUI() {
+        const btn = document.getElementById('wakelock-btn');
+        if (!btn) return;
+        if (wakeLockSentinel) {
+            btn.classList.add('active');
+            btn.textContent = '🔆 화면 켜짐 유지 ON';
+        } else {
+            btn.classList.remove('active');
+            btn.textContent = '🔆 화면 켜짐 유지 OFF';
+        }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && wakeLockWanted && modal.classList.contains('active')) {
+            requestWakeLockAutomatically();
+        }
+    });
+
+    // =========================================================================
+    // 3. MARKDOWN PARSER (Ingredients + Smart Roles + Timed Steps)
+    // =========================================================================
+
+    function formatInlineMd(text) {
+        return text
+            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>');
+    }
+
     function parseRecipeMarkdown(mdContent, filePath) {
-        // Path analysis: e.g. recipe/korean/RECIPE_TTEOKBOKKI.md -> folder: korean
         const parts = filePath.split('/');
         let folderCategory = '기타';
         if (parts.length >= 3) {
@@ -843,55 +1794,38 @@
             folderCategory = categoryMap[rawCat] || rawCat;
         }
 
-        // Title: first # Heading
         const titleMatch = mdContent.match(/^#\s+(.+)$/m);
         let rawTitle = titleMatch ? titleMatch[1].trim() : parts[parts.length - 1].replace(/\.md$/i, '');
-        
-        // Extract emoji from title if exists
+
         let icon = null;
         const emojiMatch = rawTitle.match(/^([\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27BF]|\uFE0F|[\u{1F300}-\u{1F9FF}])/u);
         if (emojiMatch) {
             icon = emojiMatch[0];
             rawTitle = rawTitle.replace(emojiMatch[0], '').trim();
         }
-        // Remove trailing "레시피" if redundant in card title
         const cleanTitle = rawTitle.replace(/\s+레시피$/, '').trim();
+        if (!icon) icon = detectIcon(cleanTitle);
 
-        if (!icon) {
-            icon = detectIcon(cleanTitle, folderCategory);
-        }
-
-        // Description: paragraph right after title or under '개요'
         let description = '맛있는 정성 가득 홈메이드 레시피';
         const overviewSection = mdContent.match(/##\s*📌?\s*개요\s*\n([\s\S]*?)(?=\n##|$)/);
         if (overviewSection) {
             const firstLine = overviewSection[1].split('\n').map(l => l.trim()).find(l => l && !l.startsWith('*') && !l.startsWith('-'));
             if (firstLine) description = firstLine;
-        } else {
-            const lines = mdContent.split('\n');
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (line && !line.startsWith('#') && !line.startsWith('-') && !line.startsWith('>')) {
-                    description = line;
-                    break;
-                }
-            }
         }
 
-        // Metadata extraction (servings, time, difficulty, category, status, comment)
         function extractMeta(regex, defaultValue) {
             const m = mdContent.match(regex);
             return (m && m[1]) ? m[1].replace(/\*\*/g, '').trim() : defaultValue;
         }
 
-        const servings = extractMeta(/(?:조리\s*분량|분량)[^*:\n]*[:*]+\s*([^\n*]+)/i, '2인분');
-        const time = extractMeta(/(?:조리\s*시간|소요\s*시간)[^*:\n]*[:*]+\s*([^\n*]+)/i, '20분');
-        const difficulty = extractMeta(/난이도[^*:\n]*[:*]+\s*([^\n*]+)/i, '보통');
+        const servings = extractMeta(/(?:조리\s*분량|분량)[^*:\n]*[:*]+\s*([^\n*]+)/i, '1인분');
+        const baseServings = parseBaseServings(servings);
+        const time = extractMeta(/(?:조리\s*시간|소요\s*시간)[^*:\n]*[:*]+\s*([^\n*]+)/i, '15분');
+        const difficulty = extractMeta(/난이도[^*:\n]*[:*]+\s*([^\n*]+)/i, '쉬움');
         const category = extractMeta(/(?:분류|카테고리)[^*:\n]*[:*]+\s*([^\n*]+)/i, folderCategory);
 
-        // Verification status & comment
         const rawStatus = extractMeta(/(?:검증\s*상태|검증|상태)[^*:\n]*[:*]+\s*([^\n*]+)/i, '');
-        let status = 'unverified'; // 'verified' | 'needs_fix' | 'unverified'
+        let status = 'unverified';
         let statusText = '미검증';
         if (/완료|성공|통과|검증됨|pass|verified|ok/i.test(rawStatus)) {
             status = 'verified';
@@ -905,37 +1839,61 @@
         let comment = (commentMatch && commentMatch[1]) ? commentMatch[1].replace(/\*\*/g, '').trim() : '';
         if (comment === '---' || comment === '-') comment = '';
 
-        // Parse ingredients from markdown tables or list
+        // Extract ingredients section (supports BOTH tables AND bullet lists inside ## 🛒 재료)
         const ingredients = [];
-        const tableRows = mdContent.matchAll(/\|\s*\*\*?([^*|]+)\*\*?\s*\|\s*([^|]+)\s*\|/g);
-        for (const match of tableRows) {
-            const name = match[1].replace(/\*\*/g, '').trim();
-            const amount = match[2].replace(/\*\*/g, '').trim();
-            if (name && !/^(?:재료|양념\s*재료)$/.test(name) && !name.includes('---')) {
-                ingredients.push({ name, amount });
+        const ingSectionMatch = mdContent.match(/##\s*🛒?\s*재료[^\n]*\n([\s\S]*?)(?=\n##\s|$)/i);
+        const ingScope = ingSectionMatch ? ingSectionMatch[1] : mdContent;
+
+        // Parse by subsections so we know whether an item is under 양념/소스
+        const subBlocks = ingScope.split(/(?=###\s+)/);
+        for (const sub of subBlocks) {
+            const subHeaderMatch = sub.match(/^###\s+([^\n]+)/);
+            const subTitle = subHeaderMatch ? subHeaderMatch[1].trim() : '';
+
+            // 1) Table rows in this subsection
+            const tableRows = sub.matchAll(/^\|\s*([^|]+)\|\s*([^|]+)\|(?:\s*([^|]*)\|)?/gm);
+            for (const match of tableRows) {
+                const name = match[1].replace(/\*\*/g, '').trim();
+                const amount = match[2].replace(/\*\*/g, '').trim();
+                const note = (match[3] || '').replace(/\*\*/g, '').replace(/\*/g, '').trim();
+                if (name && !/^(?:재료|양념\s*재료|품목)$/.test(name) && !name.includes('---') && !amount.includes('---')) {
+                    const role = classifyIngredientRole(name, amount, subTitle);
+                    ingredients.push({ name, amount, note, role, group: subTitle });
+                }
             }
-        }
-        if (ingredients.length === 0) {
-            const listItems = mdContent.matchAll(/^[*-]\s*\*\*?([^:\n*]+)\*\*?:\s*([^\n]+)$/gm);
-            for (const match of listItems) {
-                ingredients.push({ name: match[1].trim(), amount: match[2].trim() });
+
+            // 2) Bullet list items in this subsection (outside blockquotes)
+            const lines = sub.split('\n');
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('>')) continue;
+                const bulletMatch = trimmed.match(/^[*-]\s+\*\*([^:*]+?)(?::\*\*|\*\*\s*:)\s*([^\n]+)/);
+                if (bulletMatch) {
+                    const name = bulletMatch[1].trim();
+                    let rawAmt = bulletMatch[2].trim();
+                    let note = '';
+                    const noteMatch = rawAmt.match(/(?:—|-|\*?\()([^*)]+)\)?\*?$/);
+                    if (noteMatch && rawAmt.indexOf(noteMatch[0]) > 0) {
+                        note = noteMatch[1].replace(/\*/g, '').trim();
+                        rawAmt = rawAmt.slice(0, rawAmt.indexOf(noteMatch[0])).replace(/[—\-\s]+$/, '').trim();
+                    }
+                    rawAmt = rawAmt.replace(/\*/g, '').trim();
+                    const role = classifyIngredientRole(name, rawAmt, subTitle);
+                    ingredients.push({ name, amount: rawAmt, note, role, group: subTitle });
+                }
             }
         }
 
-        // Helper to convert inline markdown bold/italic/code for step cards
-        function formatInlineMd(text) {
-            return text
-                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-                .replace(/`([^`]+)`/g, '<code>$1</code>');
-        }
-
-        // Parse step instructions with clean line breaks
+        // Parse step instructions + automatic timer extraction
         const steps = [];
-        const stepBlocks = mdContent.matchAll(/###\s*Step\s*\d+[^.\n]*\.?\s*([^\n]+)([\s\S]*?)(?=###\s*Step|\n---|(?:\n##\s)|$)/gi);
+        const stepBlocks = mdContent.matchAll(/###\s*(Step\s*\d+[^.\n]*\.?\s*[^\n]+)([\s\S]*?)(?=###\s*Step|\n---|(?:\n##\s)|$)/gi);
+        let stepCounter = 0;
         for (const block of stepBlocks) {
-            const stepTitle = formatInlineMd(block[1].trim());
-            const stepLines = block[2].trim()
+            stepCounter++;
+            const rawStepHeader = block[1].replace(/^Step\s*\d+\s*\.?\s*/i, '').trim();
+            const stepTitle = formatInlineMd(rawStepHeader);
+            const rawBody = block[2].trim();
+            const stepLines = rawBody
                 .split('\n')
                 .map(l => l.trim())
                 .filter(l => l && !l.startsWith('>'))
@@ -945,13 +1903,31 @@
                     }
                     return formatInlineMd(l);
                 });
-            const stepBody = stepLines.join('<br>');
-            steps.push(stepBody ? `<strong>${stepTitle}</strong><br>${stepBody}` : `<strong>${stepTitle}</strong>`);
+            const stepBodyHtml = stepLines.join('<br>');
+            const plainForTimer = rawBody.replace(/[*_`>#]/g, '');
+            const timers = extractTimersFromStep(`Step ${stepCounter}`, plainForTimer);
+
+            steps.push({
+                index: stepCounter,
+                titleHtml: stepTitle,
+                bodyHtml: stepBodyHtml,
+                timers
+            });
         }
-        if (steps.length === 0) {
-            const numSteps = mdContent.matchAll(/^\d+\.\s+([^\n]+)/gm);
-            for (const match of numSteps) {
-                steps.push(formatInlineMd(match[1].trim()));
+
+        // Also check if there is an Air Fryer section with timed steps!
+        const airFryerMatch = mdContent.match(/##\s*🍳?\s*에어프라이어[^\n]*\n([\s\S]*?)(?=\n---|(?:\n##\s)|$)/i);
+        if (airFryerMatch) {
+            const afBody = airFryerMatch[1].trim();
+            const afLines = afBody.split('\n').map(l => l.trim()).filter(Boolean).map(formatInlineMd);
+            if (afLines.length > 0) {
+                stepCounter++;
+                steps.push({
+                    index: stepCounter,
+                    titleHtml: '에어프라이어 조리 시 (선택)',
+                    bodyHtml: afLines.join('<br>'),
+                    timers: extractTimersFromStep('에어프라이어', afBody.replace(/[*_`>#]/g, ''))
+                });
             }
         }
 
@@ -962,6 +1938,7 @@
             description,
             time,
             servings,
+            baseServings,
             difficulty,
             category,
             ingredients,
@@ -974,97 +1951,143 @@
         };
     }
 
-    // Fetch all recipes from GitHub Tree API
-    async function loadAllRecipes() {
-        try {
-            // Use GitHub Git Trees API for recursive file listing
-            const treeUrl = `https://api.github.com/repos/${GITHUB_REPO}/git/trees/${GITHUB_BRANCH}?recursive=1`;
-            const treeRes = await fetch(treeUrl);
-            
-            if (!treeRes.ok) {
-                throw new Error(`GitHub API HTTP ${treeRes.status}`);
+    // =========================================================================
+    // 4. HYBRID OFFLINE BUNDLE + GITHUB LIVE SYNC LOADER
+    // =========================================================================
+
+    function applyLocalOverrides(recipes) {
+        recipes.forEach(recipe => {
+            const localData = getLocalRecipeState(recipe.id);
+            if (localData) {
+                if (localData.status) {
+                    recipe.status = localData.status;
+                    recipe.statusText = localData.status === 'verified' ? '검증 완료' : (localData.status === 'needs_fix' ? '수정 필요' : '미검증');
+                }
+                if (typeof localData.comment === 'string') {
+                    recipe.comment = localData.comment;
+                }
             }
+        });
+    }
 
-            const treeData = await treeRes.json();
-            
-            // Filter all markdown files inside recipe/ folder (or root RECIPE_*.md as fallback)
-            const recipeFiles = treeData.tree.filter(item => 
-                item.type === 'blob' && 
-                item.path.endsWith('.md') && 
-                (item.path.startsWith('recipe/') || item.path.startsWith('recipes/') || item.path.startsWith('RECIPE_'))
-            );
+    function loadInitialRecipes() {
+        const mapByPath = new Map();
 
-            if (recipeFiles.length === 0) {
-                grid.innerHTML = `
-                    <div class="status-message">
-                        <i class="fa-solid fa-utensils"></i>
-                        <p>등록된 레시피가 없습니다.<br><code>/recipe/카테고리/</code> 경로에 레시피 .md 파일을 추가해 보세요!</p>
-                    </div>`;
-                return;
-            }
-
-            // Fetch markdown content for all recipe files in parallel
-            const fetchPromises = recipeFiles.map(async file => {
-                const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${file.path}`;
-                const res = await fetch(rawUrl);
-                if (!res.ok) return null;
-                const mdText = await res.text();
-                return parseRecipeMarkdown(mdText, file.path);
-            });
-
-            const results = await Promise.all(fetchPromises);
-            allRecipes = results.filter(r => r !== null);
-
-            // Synchronize with local storage overrides (web-based status & comments)
-            allRecipes.forEach(recipe => {
-                const localData = getLocalRecipeState(recipe.id);
-                if (localData) {
-                    if (localData.status) {
-                        recipe.status = localData.status;
-                        recipe.statusText = localData.status === 'verified' ? '검증 완료' : (localData.status === 'needs_fix' ? '수정 필요' : '미검증');
-                    }
-                    if (typeof localData.comment === 'string') {
-                        recipe.comment = localData.comment;
-                    }
+        // 1) Bundled offline recipes (always available inside APK & web)
+        if (Array.isArray(window.BUNDLED_RECIPES)) {
+            window.BUNDLED_RECIPES.forEach(item => {
+                if (item && item.path && item.content) {
+                    mapByPath.set(item.path, item.content);
                 }
             });
+        }
 
-            // Setup category & status filter tabs
+        // 2) Cached GitHub recipes from previous online syncs
+        try {
+            const rawCache = localStorage.getItem(CACHED_RECIPES_KEY);
+            if (rawCache) {
+                const cachedArr = JSON.parse(rawCache);
+                if (Array.isArray(cachedArr)) {
+                    cachedArr.forEach(item => {
+                        if (item && item.path && item.content) {
+                            mapByPath.set(item.path, item.content);
+                        }
+                    });
+                }
+            }
+        } catch (_) {}
+
+        if (mapByPath.size > 0) {
+            const parsed = [];
+            for (const [p, content] of mapByPath.entries()) {
+                parsed.push(parseRecipeMarkdown(content, p));
+            }
+            applyLocalOverrides(parsed);
+            allRecipes = parsed;
             setupFilterTabs();
+            applyFilter();
+        }
 
-            // Initial render
-            renderRecipes(allRecipes);
+        // 3) Sync latest from GitHub in the background
+        syncRecipesFromGitHub(false);
+    }
 
+    async function syncRecipesFromGitHub(manualTrigger = false) {
+        const label = document.getElementById('sync-status-label');
+        if (label) label.textContent = '동기화 중...';
+
+        try {
+            const treeUrl = `https://api.github.com/repos/${GITHUB_REPO}/git/trees/${GITHUB_BRANCH}?recursive=1`;
+            const treeRes = await fetch(treeUrl, { cache: 'no-store' });
+            if (!treeRes.ok) throw new Error(`HTTP ${treeRes.status}`);
+            const treeData = await treeRes.json();
+
+            const recipeFiles = treeData.tree.filter(item =>
+                item.type === 'blob' &&
+                item.path.endsWith('.md') &&
+                (item.path.startsWith('recipe/') || item.path.startsWith('recipes/'))
+            );
+
+            if (recipeFiles.length > 0) {
+                const fetchedRaw = await Promise.all(recipeFiles.map(async file => {
+                    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${file.path}?t=${Date.now()}`;
+                    const res = await fetch(rawUrl);
+                    if (!res.ok) return null;
+                    const content = await res.text();
+                    return { path: file.path, content };
+                }));
+
+                const validItems = fetchedRaw.filter(Boolean);
+                if (validItems.length > 0) {
+                    try {
+                        localStorage.setItem(CACHED_RECIPES_KEY, JSON.stringify(validItems));
+                    } catch (_) {}
+
+                    const parsed = validItems.map(item => parseRecipeMarkdown(item.content, item.path));
+                    applyLocalOverrides(parsed);
+                    allRecipes = parsed;
+                    setupFilterTabs();
+                    applyFilter();
+
+                    if (label) label.textContent = `동기화 완료 (${allRecipes.length}개)`;
+                    if (manualTrigger) showToast(`✅ GitHub에서 최신 레시피 ${allRecipes.length}개를 동기화했습니다!`);
+                    return;
+                }
+            }
+            if (label) label.textContent = `내장 레시피 (${allRecipes.length}개)`;
         } catch (err) {
-            console.error('Error loading recipes from GitHub:', err);
-            grid.innerHTML = `
-                <div class="status-message">
-                    <i class="fa-solid fa-circle-exclamation" style="color: #E63946;"></i>
-                    <p>레시피 목록을 불러오지 못했습니다.<br><small style="color: #888;">${err.message}</small></p>
-                </div>`;
+            if (label) label.textContent = `오프라인 모드 (${allRecipes.length}개)`;
+            if (manualTrigger) {
+                showToast('오프라인 상태입니다. 내장된 레시피를 표시합니다.');
+            }
+            if (allRecipes.length === 0) {
+                grid.innerHTML = `<div class="status-message"><p>네트워크 연결을 확인해 주세요.</p></div>`;
+            }
         }
     }
 
-    function setupFilterTabs() {
-        // Category tabs
-        const categories = Array.from(new Set(allRecipes.map(r => r.category))).filter(Boolean);
-        categoryTabsContainer.innerHTML = `
-            <button class="category-tab ${currentCategory === 'all' ? 'active' : ''}" onclick="filterByCategory('all')">전체 분류 (${allRecipes.length})</button>
-            ${categories.map(cat => {
-                const count = allRecipes.filter(r => r.category === cat).length;
-                return `<button class="category-tab ${currentCategory === cat ? 'active' : ''}" onclick="filterByCategory('${cat}')">${cat} (${count})</button>`;
-            }).join('')}
-        `;
+    // =========================================================================
+    // 5. FILTERING, RENDERING & INTERACTIVE MODAL
+    // =========================================================================
 
-        // Status tabs count
+    function setupFilterTabs() {
+        const categories = Array.from(new Set(allRecipes.map(r => r.category))).filter(Boolean);
+        let catHtml = `<button class="category-tab ${currentCategory === 'all' ? 'active' : ''}" onclick="filterByCategory('all')">전체 (${allRecipes.length})</button>`;
+        categories.forEach(cat => {
+            const count = allRecipes.filter(r => r.category === cat).length;
+            catHtml += `<button class="category-tab ${currentCategory === cat ? 'active' : ''}" onclick="filterByCategory('${cat}')">${cat} (${count})</button>`;
+        });
+        categoryTabsContainer.innerHTML = catHtml;
+
         const verifiedCount = allRecipes.filter(r => r.status === 'verified').length;
         const needsFixCount = allRecipes.filter(r => r.status === 'needs_fix').length;
         const unverifiedCount = allRecipes.filter(r => r.status === 'unverified').length;
+
         statusTabsContainer.innerHTML = `
-            <button class="status-tab ${currentStatus === 'all' ? 'active' : ''}" data-status="all" onclick="filterByStatus('all')">전체 상태 (${allRecipes.length})</button>
-            <button class="status-tab ${currentStatus === 'unverified' ? 'active' : ''}" data-status="unverified" onclick="filterByStatus('unverified')">⚪ 미검증 (${unverifiedCount})</button>
+            <button class="status-tab ${currentStatus === 'all' ? 'active' : ''}" data-status="all" onclick="filterByStatus('all')">전체 상태</button>
             <button class="status-tab ${currentStatus === 'verified' ? 'active' : ''}" data-status="verified" onclick="filterByStatus('verified')">✅ 검증 완료 (${verifiedCount})</button>
             <button class="status-tab ${currentStatus === 'needs_fix' ? 'active' : ''}" data-status="needs_fix" onclick="filterByStatus('needs_fix')">⚠️ 수정 필요 (${needsFixCount})</button>
+            <button class="status-tab ${currentStatus === 'unverified' ? 'active' : ''}" data-status="unverified" onclick="filterByStatus('unverified')">⚪ 미검증 (${unverifiedCount})</button>
         `;
     }
 
@@ -1081,16 +2104,17 @@
     }
 
     function applyFilter() {
-        const term = searchInput.value.toLowerCase().trim();
+        const query = searchInput.value.toLowerCase().trim();
         const filtered = allRecipes.filter(r => {
-            const matchesCat = (currentCategory === 'all') || (r.category === currentCategory);
-            const matchesStatus = (currentStatus === 'all') || (r.status === currentStatus);
-            const matchesSearch = !term || 
-                r.title.toLowerCase().includes(term) ||
-                r.description.toLowerCase().includes(term) ||
-                (r.comment && r.comment.toLowerCase().includes(term)) ||
-                r.ingredients.some(i => i.name.toLowerCase().includes(term));
-            return matchesCat && matchesStatus && matchesSearch;
+            const matchCategory = currentCategory === 'all' || r.category === currentCategory;
+            const matchStatus = currentStatus === 'all' || r.status === currentStatus;
+            const matchSearch = !query ||
+                r.title.toLowerCase().includes(query) ||
+                r.description.toLowerCase().includes(query) ||
+                (r.comment && r.comment.toLowerCase().includes(query)) ||
+                r.ingredients.some(i => i.name.toLowerCase().includes(query)) ||
+                r.rawMarkdown.toLowerCase().includes(query);
+            return matchCategory && matchStatus && matchSearch;
         });
         renderRecipes(filtered);
     }
@@ -1101,22 +2125,23 @@
         if (items.length === 0) {
             grid.innerHTML = `
                 <div class="status-message" style="grid-column: 1 / -1;">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <p>조건에 맞는 레시피가 없습니다.</p>
+                    <p>🔍 조건에 맞는 레시피가 없습니다.</p>
                 </div>`;
             return;
         }
 
-        grid.innerHTML = items.map((recipe, index) => {
+        grid.innerHTML = items.map(recipe => {
             const statusBadgeHtml = recipe.status === 'verified'
-                ? `<span class="card-status-badge status-verified"><i class="fa-solid fa-circle-check"></i> 검증 완료</span>`
+                ? `<span class="card-status-badge status-verified">✓ 검증 완료</span>`
                 : (recipe.status === 'needs_fix'
-                    ? `<span class="card-status-badge status-needs_fix"><i class="fa-solid fa-triangle-exclamation"></i> 수정 필요</span>`
+                    ? `<span class="card-status-badge status-needs_fix">! 수정 필요</span>`
                     : '');
 
             const commentHtml = recipe.comment
-                ? `<div class="card-comment-snippet"><i class="fa-regular fa-comment-dots"></i> ${recipe.comment}</div>`
+                ? `<div class="card-comment-snippet">💬 ${recipe.comment}</div>`
                 : '';
+
+            const totalTimers = recipe.steps.reduce((acc, s) => acc + s.timers.length, 0);
 
             return `
                 <div class="recipe-card" onclick="openRecipe('${recipe.id.replace(/'/g, "\\'")}')">
@@ -1132,9 +2157,9 @@
                             ${commentHtml}
                         </div>
                         <div class="card-info">
-                            <span><i class="fa-solid fa-user-group"></i> ${recipe.servings}</span>
-                            <span><i class="fa-regular fa-clock"></i> ${recipe.time}</span>
-                            <span><i class="fa-solid fa-gauge-high"></i> ${recipe.difficulty}</span>
+                            <span>👥 기본 ${recipe.baseServings}인분</span>
+                            <span>🕒 ${recipe.time}</span>
+                            ${totalTimers > 0 ? `<span>⏱️ 타이머 ${totalTimers}개</span>` : `<span>📊 ${recipe.difficulty}</span>`}
                         </div>
                     </div>
                 </div>
@@ -1142,9 +2167,98 @@
         }).join('');
     }
 
-    function openRecipe(id) {
+    function renderIngredientsHtml(recipe, targetServings, smartEnabled) {
+        const rawRatio = targetServings / (recipe.baseServings || 1);
+        let anySmartAdjusted = false;
+
+        const itemsHtml = recipe.ingredients.map(ing => {
+            const { factor, reason } = getSmartScaleFactor(ing.role, rawRatio, smartEnabled);
+            const scaledAmt = scaleAmountText(ing.amount, factor);
+            const isNonLinearAdjusted = reason && Math.abs(factor - rawRatio) / Math.max(0.1, rawRatio) >= 0.05 && /\d/.test(ing.amount);
+            if (isNonLinearAdjusted) anySmartAdjusted = true;
+
+            const ratioDiffText = isNonLinearAdjusted
+                ? `<span class="smart-adj-badge">${reason} (${rawRatio.toFixed(1).replace(/\.0$/, '')}배 → ${factor.toFixed(2).replace(/0$/, '').replace(/\.$/, '')}배)</span>`
+                : '';
+
+            const noteHtml = ing.note ? `<span>${ing.note}</span>` : '<span></span>';
+
+            return `
+                <li class="${isNonLinearAdjusted ? 'scaled-highlight' : ''}">
+                    <div class="ing-row-main">
+                        <span class="ing-name">${ing.name}</span>
+                        <span class="ing-amount">${scaledAmt}</span>
+                    </div>
+                    ${(ing.note || ratioDiffText) ? `
+                    <div class="ing-meta-row">
+                        ${noteHtml}
+                        ${ratioDiffText}
+                    </div>` : ''}
+                </li>
+            `;
+        }).join('');
+
+        return { itemsHtml, anySmartAdjusted, rawRatio };
+    }
+
+    function updateServingPortion(newServings) {
+        const recipe = allRecipes.find(r => r.id === activeRecipeId);
+        if (!recipe) return;
+
+        const parsed = parseFloat(newServings);
+        if (isNaN(parsed) || parsed < 0.5) return;
+        currentServings = Math.min(20, Math.round(parsed * 2) / 2);
+
+        const inputEl = document.getElementById('serving-number-input');
+        if (inputEl && document.activeElement !== inputEl) {
+            inputEl.value = currentServings;
+        }
+        const minusBtn = document.getElementById('serving-minus-btn');
+        if (minusBtn) minusBtn.disabled = currentServings <= 0.5;
+
+        // Update preset chips active state
+        document.querySelectorAll('.preset-chip[data-servings]').forEach(chip => {
+            const val = parseFloat(chip.getAttribute('data-servings'));
+            chip.classList.toggle('active', Math.abs(val - currentServings) < 0.01);
+        });
+
+        // Re-render ingredients list & smart banner
+        const { itemsHtml, anySmartAdjusted, rawRatio } = renderIngredientsHtml(recipe, currentServings, smartScaleEnabled);
+        const listEl = document.getElementById('scaled-ingredients-list');
+        if (listEl) listEl.innerHTML = itemsHtml;
+
+        const bannerEl = document.getElementById('smart-scale-banner');
+        if (bannerEl) {
+            if (anySmartAdjusted && smartScaleEnabled) {
+                bannerEl.classList.add('visible');
+                bannerEl.innerHTML = `💡 <strong>스마트 양념 보정 적용 중 (${recipe.baseServings}인분 → ${currentServings}인분):</strong> 주재료는 정확히 <strong>${Number(rawRatio.toFixed(2))}배</strong>로 변경하고, 짜지거나 기름지지 않도록 <strong>소금·간장·고추장(염도), 팬 코팅 식용유, 국물 증발량</strong>은 요리 비율에 맞춰 자동 보정했습니다.`;
+            } else {
+                bannerEl.classList.remove('visible');
+            }
+        }
+    }
+
+    function changeServingDelta(delta) {
+        const step = (currentServings <= 1 && delta < 0) ? 0.5 : (currentServings === 0.5 && delta > 0 ? 0.5 : 1);
+        const next = currentServings + (delta > 0 ? step : -step);
+        const clamped = Math.max(0.5, Math.min(20, next));
+        const inputEl = document.getElementById('serving-number-input');
+        if (inputEl) inputEl.value = clamped;
+        updateServingPortion(clamped);
+    }
+
+    function toggleSmartScale(checked) {
+        smartScaleEnabled = checked;
+        updateServingPortion(currentServings);
+    }
+
+    function openRecipe(id, pushHistory = true) {
         const recipe = allRecipes.find(r => r.id === id);
         if (!recipe) return;
+
+        activeRecipeId = id;
+        // Default display is recipe's base 1~2인분
+        currentServings = recipe.baseServings || 1;
 
         const cleanedMd = recipe.rawMarkdown
             .replace(/^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*$/gm, (_, type) => {
@@ -1152,110 +2266,159 @@
                 return `> **${labelMap[type] || type}**`;
             });
         const renderedMarkdown = typeof marked !== 'undefined' ? marked.parse(cleanedMd, { breaks: true }) : '';
+        const { itemsHtml } = renderIngredientsHtml(recipe, currentServings, smartScaleEnabled);
+        const escapedId = recipe.id.replace(/'/g, "\\'");
 
         modalBody.innerHTML = `
             <div class="recipe-header">
                 <h2>${recipe.icon} ${recipe.title}</h2>
                 <p>${recipe.description}</p>
-                <div id="modal-status-badge-container" style="margin-top: 0.8rem;">
+                <div id="modal-status-badge-container" style="margin-top: 0.7rem;">
                     ${renderStatusBadgeHtml(recipe.status)}
                 </div>
             </div>
 
-            <!-- Interactive Web Status & Comment Panel -->
-            <div class="interactive-status-panel">
-                <h4>
-                    <span><i class="fa-solid fa-sliders"></i> 내 검증 상태 & 코멘트</span>
-                    <span style="display:flex; align-items:center; gap:0.5rem;">
-                        <span id="sync-mode-label">${getGitHubToken() ? '🟢 GitHub 원본 + 브라우저 저장' : '💾 브라우저 자동 저장'}</span>
-                        <button onclick="configureGitHubToken('${recipe.id.replace(/'/g, "\\'")}')" style="background:none; border:1px solid #D1D5DB; border-radius:6px; padding:0.2rem 0.5rem; font-size:0.75rem; cursor:pointer; color:#4B5563;" title="GitHub 토큰을 등록하면 웹에서 변경 시 마크다운 파일도 자동 수정됩니다">
-                            <i class="fa-brands fa-github"></i> ${getGitHubToken() ? '연동됨' : 'GitHub 연동'}
-                        </button>
-                    </span>
-                </h4>
-                
-                <div class="status-button-group" id="modal-status-btn-group">
-                    <button class="status-btn ${recipe.status === 'unverified' ? 'selected-unverified' : ''}" onclick="updateRecipeStatus('${recipe.id.replace(/'/g, "\\'")}', 'unverified')">
-                        ⚪ 미검증
-                    </button>
-                    <button class="status-btn ${recipe.status === 'verified' ? 'selected-verified' : ''}" onclick="updateRecipeStatus('${recipe.id.replace(/'/g, "\\'")}', 'verified')">
-                        <i class="fa-solid fa-circle-check"></i> 검증 완료
-                    </button>
-                    <button class="status-btn ${recipe.status === 'needs_fix' ? 'selected-needs_fix' : ''}" onclick="updateRecipeStatus('${recipe.id.replace(/'/g, "\\'")}', 'needs_fix')">
-                        <i class="fa-solid fa-triangle-exclamation"></i> 수정 필요
-                    </button>
-                </div>
-
-                <div class="comment-editor-wrapper">
-                    <input type="text" id="recipe-comment-input" class="comment-input" placeholder="나만의 조리 팁이나 수정 메모를 남겨보세요..." value="${recipe.comment ? recipe.comment.replace(/"/g, '&quot;') : ''}" onkeydown="if(event.key==='Enter') saveRecipeComment('${recipe.id.replace(/'/g, "\\'")}')">
-                    <button class="save-comment-btn" onclick="saveRecipeComment('${recipe.id.replace(/'/g, "\\'")}')">
-                        <i class="fa-solid fa-floppy-disk"></i> 저장
-                    </button>
-                </div>
-            </div>
-
-            <div id="modal-comment-box-container">
-                ${recipe.comment ? `
-                <div class="recipe-comment-box">
-                    <i class="fa-solid fa-note-sticky"></i>
-                    <div>
-                        <strong>테스터/작성자 코멘트:</strong><br>
-                        ${recipe.comment}
-                    </div>
-                </div>` : ''}
-            </div>
-
             <div class="recipe-meta">
-                <span><i class="fa-solid fa-user-group"></i> <strong>분량:</strong> ${recipe.servings}</span>
-                <span><i class="fa-regular fa-clock"></i> <strong>소요시간:</strong> ${recipe.time}</span>
-                <span><i class="fa-solid fa-gauge-high"></i> <strong>난이도:</strong> ${recipe.difficulty}</span>
-                <span><i class="fa-solid fa-utensils"></i> <strong>분류:</strong> ${recipe.category}</span>
+                <span>👥 <strong>기본 분량:</strong> ${recipe.servings}</span>
+                <span>🕒 <strong>소요시간:</strong> ${recipe.time}</span>
+                <span>📊 <strong>난이도:</strong> ${recipe.difficulty}</span>
+                <span>🍽️ <strong>분류:</strong> ${recipe.category}</span>
             </div>
-            
+
+            <!-- SMART SERVING & PORTION CALCULATOR -->
             ${recipe.ingredients.length > 0 ? `
+            <div class="serving-calculator-card">
+                <div class="serving-top-row">
+                    <div class="serving-title-group">
+                        <h4>⚖️ 인분 조절 & 재료 자동 계량</h4>
+                        <span class="serving-base-hint">레시피 기준: ${recipe.baseServings}인분 · 인분을 바꾸면 양념 비율이 알맞게 자동 조정됩니다</span>
+                    </div>
+                    <div class="serving-stepper">
+                        <button id="serving-minus-btn" class="stepper-btn" onclick="changeServingDelta(-1)" ${currentServings <= 0.5 ? 'disabled' : ''}>−</button>
+                        <input id="serving-number-input" type="number" step="0.5" min="0.5" max="20" class="serving-input" value="${currentServings}" oninput="updateServingPortion(this.value)">
+                        <span class="serving-unit-label">인분</span>
+                        <button class="stepper-btn" onclick="changeServingDelta(1)">+</button>
+                    </div>
+                </div>
+                <div class="serving-presets-row">
+                    <div class="preset-chips">
+                        ${[1, 2, 3, 4].map(n => `
+                            <button class="preset-chip ${currentServings === n ? 'active' : ''}" data-servings="${n}" onclick="document.getElementById('serving-number-input').value=${n}; updateServingPortion(${n});">
+                                ${n}인분${n === recipe.baseServings ? ' (기본)' : ''}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <label class="smart-scale-toggle">
+                        <input type="checkbox" ${smartScaleEnabled ? 'checked' : ''} onchange="toggleSmartScale(this.checked)">
+                        🧠 스마트 양념 보정
+                    </label>
+                </div>
+                <div id="smart-scale-banner" class="smart-scale-banner"></div>
+            </div>
+
             <div class="recipe-section">
-                <h4><i class="fa-solid fa-basket-shopping"></i> 재료 (Ingredients)</h4>
-                <ul class="ingredients-list">
-                    ${recipe.ingredients.map(ing => `
-                        <li><span>${ing.name}</span> <span>${ing.amount}</span></li>
-                    `).join('')}
+                <div class="recipe-section-header">
+                    <h4>🛒 필요 재료</h4>
+                </div>
+                <ul id="scaled-ingredients-list" class="ingredients-list">
+                    ${itemsHtml}
                 </ul>
             </div>` : ''}
 
             ${recipe.steps.length > 0 ? `
             <div class="recipe-section">
-                <h4><i class="fa-solid fa-fire-burner"></i> 조리 순서 (Instructions)</h4>
+                <div class="recipe-section-header">
+                    <h4>🔥 조리 순서 & 타이머</h4>
+                    <button class="custom-timer-trigger" onclick="openCustomTimerPrompt()">⏱️ + 직접 타이머 설정</button>
+                </div>
                 <div class="steps-list">
-                    ${recipe.steps.map((step, index) => `
+                    ${recipe.steps.map(step => `
                         <div class="step-item" onclick="toggleStep(this)">
-                            <div class="step-checkbox"><i class="fa-solid fa-check"></i></div>
-                            <div class="step-text"><strong>Step ${index + 1}.</strong> ${step}</div>
+                            <div class="step-checkbox">✓</div>
+                            <div class="step-content-col">
+                                <div class="step-text">
+                                    <strong>Step ${step.index}. ${step.titleHtml}</strong><br>
+                                    ${step.bodyHtml}
+                                </div>
+                                ${step.timers.length > 0 ? `
+                                <div class="step-timers-bar">
+                                    ${step.timers.map(tm => `
+                                        <button class="step-timer-pill" onclick="startCookingTimer(${tm.seconds}, '${(recipe.title + ' · ' + tm.label).replace(/'/g, "\\'")}', event)">
+                                            ⏱️ ${tm.display} 타이머 시작
+                                        </button>
+                                    `).join('')}
+                                </div>` : ''}
+                            </div>
                         </div>
                     `).join('')}
                 </div>
             </div>` : ''}
 
-            <div class="recipe-section">
-                <h4><i class="fa-solid fa-book-open"></i> 전체 원문 보기</h4>
-                <div class="recipe-rendered-body">
-                    ${renderedMarkdown}
+            <div id="modal-comment-box-container">
+                ${recipe.comment ? `
+                <div class="recipe-comment-box">
+                    <span>📝</span>
+                    <div>
+                        <strong>나만의 조리 메모:</strong><br>
+                        ${recipe.comment}
+                    </div>
+                </div>` : ''}
+            </div>
+
+            <!-- Interactive Status & Comment Panel -->
+            <div class="interactive-status-panel">
+                <h4>
+                    <span>🏷️ 내 검증 상태 & 코멘트 기록</span>
+                    <span style="display:flex; align-items:center; gap:0.45rem;">
+                        <span style="font-size:0.76rem; color:var(--text-muted); font-weight:500;">${getGitHubToken() ? '🟢 GitHub + 기기 저장' : '💾 기기 자동 저장'}</span>
+                        <button onclick="configureGitHubToken('${escapedId}')" style="background:none; border:1px solid #D1D5DB; border-radius:6px; padding:0.2rem 0.5rem; font-size:0.74rem; cursor:pointer; color:#4B5563;">
+                            ${getGitHubToken() ? 'GitHub 연동됨' : 'GitHub 연동'}
+                        </button>
+                    </span>
+                </h4>
+
+                <div class="status-button-group" id="modal-status-btn-group">
+                    <button class="status-btn ${recipe.status === 'unverified' ? 'selected-unverified' : ''}" onclick="updateRecipeStatus('${escapedId}', 'unverified')">⚪ 미검증</button>
+                    <button class="status-btn ${recipe.status === 'verified' ? 'selected-verified' : ''}" onclick="updateRecipeStatus('${escapedId}', 'verified')">✅ 검증 완료</button>
+                    <button class="status-btn ${recipe.status === 'needs_fix' ? 'selected-needs_fix' : ''}" onclick="updateRecipeStatus('${escapedId}', 'needs_fix')">⚠️ 수정 필요</button>
                 </div>
+
+                <div class="comment-editor-wrapper">
+                    <input type="text" id="recipe-comment-input" class="comment-input" placeholder="간 조절이나 다음번 조리 메모를 남겨보세요..." value="${recipe.comment ? recipe.comment.replace(/"/g, '&quot;') : ''}" onkeydown="if(event.key==='Enter') saveRecipeComment('${escapedId}')">
+                    <button class="save-comment-btn" onclick="saveRecipeComment('${escapedId}')">저장</button>
+                </div>
+            </div>
+
+            <div class="recipe-section">
+                <details class="raw-md-details">
+                    <summary>📖 레시피 원문 및 꿀팁 전체 보기 <span>▾</span></summary>
+                    <div class="recipe-rendered-body">
+                        ${renderedMarkdown}
+                    </div>
+                </details>
             </div>
 
             <div class="recipe-footer-actions">
                 <a href="https://github.com/${GITHUB_REPO}/blob/${GITHUB_BRANCH}/${recipe.path}" target="_blank">
-                    <i class="fa-brands fa-github"></i> GitHub에서 이 레시피 파일 보기 (${recipe.path})
+                    GitHub 원본 파일 보기 (${recipe.path})
                 </a>
             </div>
         `;
 
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
+        updateWakeLockButtonUI();
+
+        if (pushHistory) {
+            try {
+                history.pushState({ modalOpen: true, recipeId: id }, '');
+            } catch (_) {}
+        }
     }
 
-    // --- LocalStorage & GitHub Direct Sync Helpers ---
-    const LOCAL_STORAGE_KEY = 'cookbook_recipe_states_v1';
-    const GITHUB_TOKEN_KEY = 'cookbook_github_pat';
+    // =========================================================================
+    // 6. LOCAL STORAGE & GITHUB DIRECT SYNC HELPERS
+    // =========================================================================
 
     function getLocalRecipeState(recipeId) {
         try {
@@ -1272,11 +2435,7 @@
         try {
             const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
             const map = raw ? JSON.parse(raw) : {};
-            map[recipeId] = {
-                status: status,
-                comment: comment,
-                updatedAt: new Date().toISOString()
-            };
+            map[recipeId] = { status, comment, updatedAt: new Date().toISOString() };
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(map));
         } catch (e) {
             console.error('Failed to save to localStorage:', e);
@@ -1290,26 +2449,26 @@
     function configureGitHubToken(currentRecipeId) {
         const current = getGitHubToken();
         const input = prompt(
-            'GitHub Personal Access Token을 입력하면 웹에서 상태/코멘트 변경 시 GitHub의 마크다운(.md) 원본 파일도 자동으로 수정·커밋됩니다.\n(비워두고 확인을 누르면 연동이 해제되며 브라우저 자동 저장만 사용합니다.)',
+            'GitHub Personal Access Token을 입력하면 상태/코멘트 변경 시 GitHub의 마크다운(.md) 원본도 자동 업데이트됩니다.\n(비워두고 확인을 누르면 기기 저장 모드로 전환됩니다.)',
             current
         );
         if (input === null) return;
         const trimmed = input.trim();
         if (trimmed) {
             localStorage.setItem(GITHUB_TOKEN_KEY, trimmed);
-            showToast('GitHub 연동이 설정되었습니다! 이제 마크다운 원본도 함께 업데이트됩니다.');
+            showToast('GitHub 연동이 설정되었습니다!');
         } else {
             localStorage.removeItem(GITHUB_TOKEN_KEY);
-            showToast('GitHub 연동이 해제되었습니다. (브라우저 자동 저장 모드)');
+            showToast('기기 저장 모드로 전환되었습니다.');
         }
-        if (currentRecipeId) openRecipe(currentRecipeId);
+        if (currentRecipeId) openRecipe(currentRecipeId, false);
     }
 
     function renderStatusBadgeHtml(status) {
         if (status === 'verified') {
-            return '<span class="card-status-badge status-verified" style="position:static;"><i class="fa-solid fa-circle-check"></i> 검증 완료</span>';
+            return '<span class="card-status-badge status-verified" style="position:static;">✓ 검증 완료</span>';
         } else if (status === 'needs_fix') {
-            return '<span class="card-status-badge status-needs_fix" style="position:static;"><i class="fa-solid fa-triangle-exclamation"></i> 수정 필요</span>';
+            return '<span class="card-status-badge status-needs_fix" style="position:static;">! 수정 필요</span>';
         }
         return '<span class="card-status-badge status-unverified" style="position:static;">⚪ 미검증</span>';
     }
@@ -1329,18 +2488,16 @@
 
     function updateMarkdownStatusAndComment(mdContent, statusText, comment) {
         let updated = mdContent;
-        // Update or insert 검증 상태
         if (/^[*-]?\s*\*\*?(?:검증\s*상태|검증|상태|status)[^*:\n]*[:*]+\s*([^\n\r]*)/im.test(updated)) {
             updated = updated.replace(
                 /^([*-]?\s*\*\*?(?:검증\s*상태|검증|상태|status)[^*:\n]*[:*]+)[ \t]*([^\n\r]*)/im,
                 `$1 ${statusText}`
             );
         }
-        // Update or insert 코멘트
         if (/^[*-]?\s*\*\*?(?:코멘트|메모|피드백|노트|comment)[^*:\n\r]*[:*]+[ \t]*([^\r\n]*)/im.test(updated)) {
             updated = updated.replace(
                 /^([*-]?\s*\*\*?(?:코멘트|메모|피드백|노트|comment)[^*:\n\r]*[:*]+)[ \t]*([^\r\n]*)/im,
-                 comment ? `$1 ${comment}` : `$1 `
+                comment ? `$1 ${comment}` : `$1 `
             );
         }
         return updated;
@@ -1349,7 +2506,6 @@
     async function syncRecipeToGitHub(recipe) {
         const token = getGitHubToken();
         if (!token) return false;
-
         try {
             const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${recipe.path}?ref=${GITHUB_BRANCH}`;
             const getRes = await fetch(apiUrl, {
@@ -1358,13 +2514,11 @@
                     'Accept': 'application/vnd.github.v3+json'
                 }
             });
-            if (!getRes.ok) throw new Error(`GitHub 조회 실패 (${getRes.status})`);
+            if (!getRes.ok) throw new Error(`조회 실패 (${getRes.status})`);
             const fileData = await getRes.json();
 
             const updatedMd = updateMarkdownStatusAndComment(recipe.rawMarkdown, recipe.statusText, recipe.comment);
             recipe.rawMarkdown = updatedMd;
-
-            // Encode UTF-8 string to base64
             const base64Content = btoa(unescape(encodeURIComponent(updatedMd)));
 
             const putRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${recipe.path}`, {
@@ -1375,18 +2529,17 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    message: `docs(${recipe.title}): 웹에서 상태(${recipe.statusText}) 및 코멘트 업데이트`,
+                    message: `docs(${recipe.title}): 앱/웹에서 상태(${recipe.statusText}) 및 코멘트 업데이트`,
                     content: base64Content,
                     sha: fileData.sha,
                     branch: GITHUB_BRANCH
                 })
             });
 
-            if (!putRes.ok) throw new Error(`GitHub 저장 실패 (${putRes.status})`);
+            if (!putRes.ok) throw new Error(`저장 실패 (${putRes.status})`);
             return true;
         } catch (e) {
-            console.error('GitHub sync error:', e);
-            showToast(`⚠️ 브라우저엔 저장되었으나 GitHub 반영 실패: ${e.message}`);
+            showToast(`⚠️ 기기엔 저장되었으나 GitHub 반영 실패: ${e.message}`);
             return false;
         }
     }
@@ -1399,13 +2552,10 @@
         recipe.statusText = newStatus === 'verified' ? '검증 완료' : (newStatus === 'needs_fix' ? '수정 필요' : '미검증');
 
         const commentInput = document.getElementById('recipe-comment-input');
-        if (commentInput) {
-            recipe.comment = commentInput.value.trim();
-        }
+        if (commentInput) recipe.comment = commentInput.value.trim();
 
         saveLocalRecipeState(recipe.id, recipe.status, recipe.comment);
 
-        // Update Modal UI immediately
         const badgeContainer = document.getElementById('modal-status-badge-container');
         if (badgeContainer) badgeContainer.innerHTML = renderStatusBadgeHtml(recipe.status);
 
@@ -1413,15 +2563,9 @@
         if (btnGroup) {
             const escapedId = recipe.id.replace(/'/g, "\\'");
             btnGroup.innerHTML = `
-                <button class="status-btn ${recipe.status === 'unverified' ? 'selected-unverified' : ''}" onclick="updateRecipeStatus('${escapedId}', 'unverified')">
-                    ⚪ 미검증
-                </button>
-                <button class="status-btn ${recipe.status === 'verified' ? 'selected-verified' : ''}" onclick="updateRecipeStatus('${escapedId}', 'verified')">
-                    <i class="fa-solid fa-circle-check"></i> 검증 완료
-                </button>
-                <button class="status-btn ${recipe.status === 'needs_fix' ? 'selected-needs_fix' : ''}" onclick="updateRecipeStatus('${escapedId}', 'needs_fix')">
-                    <i class="fa-solid fa-triangle-exclamation"></i> 수정 필요
-                </button>
+                <button class="status-btn ${recipe.status === 'unverified' ? 'selected-unverified' : ''}" onclick="updateRecipeStatus('${escapedId}', 'unverified')">⚪ 미검증</button>
+                <button class="status-btn ${recipe.status === 'verified' ? 'selected-verified' : ''}" onclick="updateRecipeStatus('${escapedId}', 'verified')">✅ 검증 완료</button>
+                <button class="status-btn ${recipe.status === 'needs_fix' ? 'selected-needs_fix' : ''}" onclick="updateRecipeStatus('${escapedId}', 'needs_fix')">⚠️ 수정 필요</button>
             `;
         }
 
@@ -1429,11 +2573,10 @@
         applyFilter();
 
         if (getGitHubToken()) {
-            showToast(`'${recipe.statusText}' 상태 저장 및 GitHub 마크다운 반영 중...`);
             const ok = await syncRecipeToGitHub(recipe);
-            if (ok) showToast(`✅ '${recipe.statusText}' 상태가 GitHub 마크다운까지 완벽 반영되었습니다!`);
+            if (ok) showToast(`✅ '${recipe.statusText}' 상태가 GitHub까지 반영되었습니다!`);
         } else {
-            showToast(`상태가 '${recipe.statusText}'(으)로 변경되었습니다!`);
+            showToast(`상태가 '${recipe.statusText}'(으)로 저장되었습니다!`);
         }
     }
 
@@ -1442,8 +2585,7 @@
         if (!recipe) return;
 
         const commentInput = document.getElementById('recipe-comment-input');
-        const newComment = commentInput ? commentInput.value.trim() : '';
-        recipe.comment = newComment;
+        recipe.comment = commentInput ? commentInput.value.trim() : '';
 
         saveLocalRecipeState(recipe.id, recipe.status, recipe.comment);
 
@@ -1451,9 +2593,9 @@
         if (commentBoxContainer) {
             commentBoxContainer.innerHTML = recipe.comment ? `
                 <div class="recipe-comment-box">
-                    <i class="fa-solid fa-note-sticky"></i>
+                    <span>📝</span>
                     <div>
-                        <strong>테스터/작성자 코멘트:</strong><br>
+                        <strong>나만의 조리 메모:</strong><br>
                         ${recipe.comment}
                     </div>
                 </div>` : '';
@@ -1462,29 +2604,36 @@
         applyFilter();
 
         if (getGitHubToken()) {
-            showToast('코멘트 저장 및 GitHub 마크다운 반영 중...');
             const ok = await syncRecipeToGitHub(recipe);
-            if (ok) showToast('✅ 코멘트가 GitHub 마크다운까지 완벽 저장되었습니다!');
+            if (ok) showToast('✅ 코멘트가 GitHub 마크다운까지 저장되었습니다!');
         } else {
             showToast(recipe.comment ? '코멘트가 저장되었습니다!' : '코멘트가 삭제되었습니다.');
         }
     }
 
-    function closeModal() {
+    function closeModal(fromPopState = false) {
+        if (!modal.classList.contains('active')) return;
         modal.classList.remove('active');
         document.body.style.overflow = 'auto';
+        activeRecipeId = null;
+        if (!fromPopState && history.state && history.state.modalOpen) {
+            try { history.back(); } catch (_) {}
+        }
     }
 
     function toggleStep(element) {
         element.classList.toggle('completed');
     }
 
-    // Close modal on outside click or ESC key
     window.onclick = function(event) {
-        if (event.target == modal) {
-            closeModal();
-        }
+        if (event.target === modal) closeModal();
     };
+
+    window.addEventListener('popstate', () => {
+        if (modal.classList.contains('active')) {
+            closeModal(true);
+        }
+    });
 
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal.classList.contains('active')) {
@@ -1492,8 +2641,21 @@
         }
     });
 
-    // Run initialization
-    loadAllRecipes();
+    // Android Hardware Back Button support via Capacitor App plugin
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+        window.Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
+            if (modal.classList.contains('active')) {
+                closeModal();
+            } else if (canGoBack) {
+                window.history.back();
+            } else {
+                window.Capacitor.Plugins.App.exitApp();
+            }
+        });
+    }
+
+    // Initialize app immediately with bundled recipes + background GitHub sync
+    loadInitialRecipes();
 </script>
 
 </body>

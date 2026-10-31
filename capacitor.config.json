@@ -1,0 +1,8 @@
+{
+  "appId": "com.ddkkinf.cookbook",
+  "appName": "김용훈의 레시피",
+  "webDir": "docs",
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "kim-cookbook",
+  "version": "1.0.0",
+  "private": true,
+  "description": "김용훈의 레시피 - 하이브리드 웹 & 안드로이드 앱",
+  "scripts": {
+    "bundle": "node scripts/bundle-recipes.mjs",
+    "sync": "node scripts/bundle-recipes.mjs && npx cap sync android",
+    "build": "node scripts/bundle-recipes.mjs && npx cap copy android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.0",
+    "marked": "^18.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.0"
+  }
+}
