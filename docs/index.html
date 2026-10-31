@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Offline-bundled Marked.js & Bundled Recipes -->
     <script src="./vendor/marked.min.js"></script>
-    <script src="./bundled-recipes.js"></script>
+    <script src="./bundled-recipes.js?v=mvw2nbnz"></script>
     <style>
         :root {
             --primary: #E63946;
@@ -1325,9 +1325,9 @@
 <div class="container">
     <header>
         <h1>김용훈의 레시피</h1>
-        <p>인분 자동 계산 & 스마트 타이머 레시피 북</p>
+        <p>인분 자동 계산 · 베리에이션 · 스마트 타이머 레시피 북 <span style="display:inline-block; background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE; font-size:0.75rem; font-weight:700; padding:0.1rem 0.5rem; border-radius:50px; vertical-align:middle; margin-left:0.3rem;">v1.1</span></p>
         <div class="header-bar-actions">
-            <a id="apk-download-link" class="apk-download-btn" href="https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk">
+            <a id="apk-download-link" class="apk-download-btn" href="https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk" onclick="this.href='https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk?t='+Date.now()">
                 📲 안드로이드 앱(APK) 다운로드
             </a>
             <button class="sync-pill" onclick="syncRecipesFromGitHub(true)" title="GitHub에서 최신 레시피 동기화">
@@ -1387,7 +1387,7 @@
     const GITHUB_REPO = 'ddkkinf/cookbook';
     const GITHUB_BRANCH = 'main';
     const LOCAL_STORAGE_KEY = 'cookbook_recipe_states_v1';
-    const CACHED_RECIPES_KEY = 'cookbook_cached_md_v1';
+    const CACHED_RECIPES_KEY = 'cookbook_cached_md_v2';
     const GITHUB_TOKEN_KEY = 'cookbook_github_pat';
     const RECENT_VIEWS_KEY = 'cookbook_recent_views_v1';
     const QUALIFIED_VIEW_MS = 30000; // 최소 30초 이상 조회 시 최근 본 레시피로 인정
@@ -1409,11 +1409,14 @@
     const modal = document.getElementById('recipe-modal');
     const modalBody = document.getElementById('modal-body');
 
-    // Hide APK download link when running inside installed Capacitor Android app
+    // Inside installed Capacitor Android app, repurpose button as "최신 앱 업데이트 다운로드"
     const isNativeApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
     if (isNativeApp) {
         const apkLink = document.getElementById('apk-download-link');
-        if (apkLink) apkLink.style.display = 'none';
+        if (apkLink) {
+            apkLink.textContent = '📲 최신 앱(APK) 업데이트 받기';
+            apkLink.target = '_blank';
+        }
     }
 
     const categoryMap = {
@@ -2294,6 +2297,7 @@
 
     function loadInitialRecipes() {
         const mapByPath = new Map();
+        const bundledTime = window.BUNDLED_AT ? Date.parse(window.BUNDLED_AT) : 0;
 
         // 1) Bundled offline recipes (always available inside APK & web)
         if (Array.isArray(window.BUNDLED_RECIPES)) {
@@ -2304,17 +2308,22 @@
             });
         }
 
-        // 2) Cached GitHub recipes from previous online syncs
+        // 2) Cached GitHub recipes ONLY if synced AFTER this bundle was built (prevents stale cache overwriting newer app/web bundle)
         try {
+            localStorage.removeItem('cookbook_cached_md_v1');
             const rawCache = localStorage.getItem(CACHED_RECIPES_KEY);
             if (rawCache) {
-                const cachedArr = JSON.parse(rawCache);
-                if (Array.isArray(cachedArr)) {
-                    cachedArr.forEach(item => {
+                const cacheObj = JSON.parse(rawCache);
+                const cachedTime = (cacheObj && cacheObj.syncedAt) ? Date.parse(cacheObj.syncedAt) : 0;
+                if (cacheObj && Array.isArray(cacheObj.items) && cachedTime > bundledTime) {
+                    mapByPath.clear();
+                    cacheObj.items.forEach(item => {
                         if (item && item.path && item.content) {
                             mapByPath.set(item.path, item.content);
                         }
                     });
+                } else {
+                    localStorage.removeItem(CACHED_RECIPES_KEY);
                 }
             }
         } catch (_) {}
@@ -2339,7 +2348,20 @@
         if (label) label.textContent = '동기화 중...';
 
         try {
-            const treeUrl = `https://api.github.com/repos/${GITHUB_REPO}/git/trees/${GITHUB_BRANCH}?recursive=1`;
+            // Fetch exact latest commit SHA on main so raw.githubusercontent.com bypasses Fastly branch CDN cache
+            let refSha = GITHUB_BRANCH;
+            try {
+                const commitRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/commits/${GITHUB_BRANCH}`, {
+                    cache: 'no-store',
+                    headers: { 'Accept': 'application/vnd.github.v3+json' }
+                });
+                if (commitRes.ok) {
+                    const commitJson = await commitRes.json();
+                    if (commitJson && commitJson.sha) refSha = commitJson.sha;
+                }
+            } catch (_) {}
+
+            const treeUrl = `https://api.github.com/repos/${GITHUB_REPO}/git/trees/${refSha}?recursive=1`;
             const treeRes = await fetch(treeUrl, { cache: 'no-store' });
             if (!treeRes.ok) throw new Error(`HTTP ${treeRes.status}`);
             const treeData = await treeRes.json();
@@ -2352,8 +2374,8 @@
 
             if (recipeFiles.length > 0) {
                 const fetchedRaw = await Promise.all(recipeFiles.map(async file => {
-                    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${file.path}?t=${Date.now()}`;
-                    const res = await fetch(rawUrl);
+                    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${refSha}/${file.path}`;
+                    const res = await fetch(rawUrl, { cache: 'no-store' });
                     if (!res.ok) return null;
                     const content = await res.text();
                     return { path: file.path, content };
@@ -2362,7 +2384,11 @@
                 const validItems = fetchedRaw.filter(Boolean);
                 if (validItems.length > 0) {
                     try {
-                        localStorage.setItem(CACHED_RECIPES_KEY, JSON.stringify(validItems));
+                        localStorage.setItem(CACHED_RECIPES_KEY, JSON.stringify({
+                            syncedAt: new Date().toISOString(),
+                            commitSha: refSha,
+                            items: validItems
+                        }));
                     } catch (_) {}
 
                     const parsed = validItems.map(item => parseRecipeMarkdown(item.content, item.path));

@@ -35,27 +35,22 @@ jobs:
           SDK_MGR=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager | head -n 1)
           yes | "$SDK_MGR" --licenses > /dev/null || true
 
-      - name: Persist Android debug keystore across builds for seamless app updates
-        uses: actions/cache@v4
-        with:
-          path: ~/.android/debug.keystore
-          key: cookbook-android-debug-keystore-v1
-
       - name: Install dependencies & sync recipes into Android assets
         run: |
           npm ci
           npm run sync
 
-      - name: Build Android APK
+      - name: Build signed Release Android APK
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease --no-daemon
 
-      - name: Prepare APK file
+      - name: Prepare & verify signed APK file
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk kim-cookbook.apk
+          cp android/app/build/outputs/apk/release/app-release.apk kim-cookbook.apk
           ls -lh kim-cookbook.apk
+          keytool -printcert -jarfile kim-cookbook.apk | head -n 12
 
       - name: Upload APK to GitHub Actions Artifacts
         uses: actions/upload-artifact@v4
@@ -68,14 +63,14 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "김용훈의 레시피 Android App (최신 빌드)"
+          name: "김용훈의 레시피 Android App (최신 빌드 v1.1.${{ github.run_number }})"
           body: |
-            📱 **안드로이드 설치 파일 (`kim-cookbook.apk`)**
-            - 빌드 번호: `1.0.${{ github.run_number }}`
+            📱 **안드로이드 정식 서명 설치 파일 (`kim-cookbook.apk`)**
+            - 버전: `v1.1.${{ github.run_number }}` (`versionCode: 10${{ github.run_number }}`)
             - 커밋: `${{ github.sha }}`
-            - 기본 레시피 오프라인 내장 + GitHub 최신 레시피 실시간 동기화
-            - 스마트 인분 자동 계산기 (염도·기름·국물 증발량 비선형 보정)
-            - 단계별 원터치 조리 타이머 (알람음·진동·화면 켜짐 유지)
+            - 고정 서명 키스토어 적용 완료 (이후 모든 업데이트 시 삭제 없이 바로 덮어쓰기 업데이트 가능)
+            - 인터랙티브 베리에이션(모드/옵션) + 30초 이상 조회 시 최상단 정렬 + 인분 계산기 + 멀티 타이머
           files: kim-cookbook.apk
+          overwrite_files: true
           prerelease: false
           make_latest: true
