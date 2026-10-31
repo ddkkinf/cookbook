@@ -30,8 +30,10 @@ jobs:
           java-version: '21'
           cache: 'gradle'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Accept Android SDK licenses
+        run: |
+          SDK_MGR=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager | head -n 1)
+          yes | "$SDK_MGR" --licenses > /dev/null || true
 
       - name: Persist Android debug keystore across builds for seamless app updates
         uses: actions/cache@v4
