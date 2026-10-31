@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <radialGradient id="paperWarm" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#FFFDF9"/>
+      <stop offset="100%" stop-color="#F5EDE0"/>
+    </radialGradient>
+    <radialGradient id="panDark" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#393C44"/>
+      <stop offset="100%" stop-color="#1E2025"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#paperWarm)" rx="18"/>
+  <rect x="16" y="16" width="768" height="418" fill="none" stroke="#E3D5C0" stroke-width="2" stroke-dasharray="6 6" rx="14"/>
+
+  <!-- Skillet Handle -->
+  <path d="M 555 262 L 738 324 C 754 330 756 350 742 360 C 728 368 708 362 692 355 L 538 292 Z" fill="#4A3525" stroke="#281A10" stroke-width="3.5"/>
+
+  <!-- Skillet -->
+  <ellipse cx="365" cy="235" rx="218" ry="162" fill="#1A1B1E" stroke="#111214" stroke-width="4"/>
+  <ellipse cx="365" cy="232" rx="196" ry="144" fill="url(#panDark)" stroke="#4E525B" stroke-width="2.5"/>
+
+  <!-- Golden Seared Pork Belly Slices (Left/Top) -->
+  <g>
+    <rect x="208" y="152" width="108" height="44" rx="12" transform="rotate(-12 262 174)" fill="#C97A40" stroke="#6F3814" stroke-width="3"/>
+    <line x1="222" y1="168" x2="302" y2="152" stroke="#F3D5B5" stroke-width="5" stroke-linecap="round"/>
+    <rect x="202" y="212" width="112" height="44" rx="12" transform="rotate(6 258 234)" fill="#B8642A" stroke="#6F3814" stroke-width="3"/>
+    <line x1="216" y1="232" x2="298" y2="238" stroke="#F3D5B5" stroke-width="5" stroke-linecap="round"/>
+    <rect x="235" y="268" width="106" height="42" rx="12" transform="rotate(-6 288 289)" fill="#C97A40" stroke="#6F3814" stroke-width="3"/>
+    <!-- Charred Green Onion Segments -->
+    <rect x="315" y="132" width="58" height="24" rx="8" transform="rotate(18 344 144)" fill="#7FB069" stroke="#3B592F" stroke-width="2.5"/>
+    <ellipse cx="344" cy="144" rx="10" ry="5" transform="rotate(18 344 144)" fill="#4A2C11" opacity="0.7"/>
+    <rect x="335" y="182" width="58" height="24" rx="8" transform="rotate(-14 364 194)" fill="#8CB369" stroke="#3B592F" stroke-width="2.5"/>
+    <ellipse cx="364" cy="194" rx="10" ry="5" transform="rotate(-14 364 194)" fill="#4A2C11" opacity="0.7"/>
+  </g>
+
+  <!-- Rendered Pork Oil Pool Being Wiped Away -->
+  <ellipse cx="445" cy="258" rx="64" ry="44" fill="#F9DC5C" opacity="0.45" stroke="#F4A261" stroke-width="2" stroke-dasharray="6 4"/>
+
+  <!-- Folded Kitchen Paper Towel Absorbing Oil -->
+  <path d="M 402 225 L 486 212 L 502 276 L 414 292 Z" fill="#FFFDF9" stroke="#94A3B8" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="452" cy="264" rx="28" ry="16" fill="#F6BD60" opacity="0.75"/>
+
+  <!-- Kitchen Tongs Holding Paper Towel -->
+  <path d="M 605 78 L 458 232" stroke="#94A3B8" stroke-width="9" stroke-linecap="round"/>
+  <path d="M 605 78 L 458 232" stroke="#E2E8F0" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 624 96 L 474 246" stroke="#64748B" stroke-width="9" stroke-linecap="round"/>
+  <path d="M 624 96 L 474 246" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Callout Badges -->
+  <rect x="38" y="38" width="275" height="46" rx="23" fill="#FFFFFF" stroke="#BC6C25" stroke-width="2.5"/>
+  <text x="175" y="67" font-family="-apple-system, 'Noto Sans KR', sans-serif" font-size="15.5" font-weight="700" fill="#7F4F24" text-anchor="middle">① 고기·대파 노릇하게 마이야르</text>
+
+  <rect x="415" y="372" width="345" height="46" rx="23" fill="#F0FDF4" stroke="#2A9D8F" stroke-width="2.5"/>
+  <text x="587" y="401" font-family="-apple-system, 'Noto Sans KR', sans-serif" font-size="15.5" font-weight="700" fill="#1B6B61" text-anchor="middle">② 타레 소스 붓기 전 기름 80~90% 닦기!</text>
+</svg>

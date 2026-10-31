@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Offline-bundled Marked.js & Bundled Recipes -->
     <script src="./vendor/marked.min.js"></script>
-    <script src="./bundled-recipes.js?v=mvw2nbnz"></script>
+    <script src="./bundled-recipes.js?v=mvw3h2e0"></script>
     <style>
         :root {
             --primary: #E63946;
@@ -293,14 +293,27 @@
         }
 
         .card-image {
-            height: 155px;
-            background: linear-gradient(135deg, var(--accent), var(--text-muted));
+            height: 175px;
+            background: linear-gradient(135deg, #FFF8EB, #F3E5D0);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-size: 3.6rem;
             position: relative;
+            overflow: hidden;
+        }
+
+        .card-hero-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .recipe-card:hover .card-hero-img {
+            transform: scale(1.045);
         }
 
         .card-badge {
@@ -952,6 +965,97 @@
             line-height: 1.65;
         }
 
+        .modal-hero-banner {
+            margin: 0 auto 1.4rem;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+            border: 2px solid #F3E8D6;
+            background: #FFFDF8;
+            max-height: 310px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-in;
+        }
+
+        .modal-hero-banner img {
+            width: 100%;
+            max-height: 310px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .step-guide-figure {
+            margin-top: 0.85rem;
+            background: #FFFDF8;
+            border: 1.5px solid #EDE0CC;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+            cursor: zoom-in;
+        }
+
+        .step-guide-figure img {
+            width: 100%;
+            max-height: 270px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .step-guide-caption {
+            padding: 0.45rem 0.8rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #78350F;
+            background: #FEF9EE;
+            border-top: 1px solid #F3E8D6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .recipe-rendered-body img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            margin: 0.7rem 0;
+            border: 1px solid #EDE0CC;
+        }
+
+        .image-lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.88);
+            z-index: 2200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 1.2rem;
+            gap: 0.75rem;
+        }
+
+        .image-lightbox.active {
+            display: flex;
+        }
+
+        .image-lightbox img {
+            max-width: min(94vw, 880px);
+            max-height: 80vh;
+            border-radius: 16px;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.45);
+            background: #FFFDF8;
+        }
+
+        .image-lightbox-caption {
+            color: #F8FAFC;
+            font-size: 0.92rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
         .step-timers-bar {
             display: flex;
             flex-wrap: wrap;
@@ -1325,7 +1429,7 @@
 <div class="container">
     <header>
         <h1>김용훈의 레시피</h1>
-        <p>인분 자동 계산 · 베리에이션 · 스마트 타이머 레시피 북 <span style="display:inline-block; background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE; font-size:0.75rem; font-weight:700; padding:0.1rem 0.5rem; border-radius:50px; vertical-align:middle; margin-left:0.3rem;">v1.1</span></p>
+        <p>인분 자동 계산 · 베리에이션 · 스마트 타이머 레시피 북 <span style="display:inline-block; background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE; font-size:0.75rem; font-weight:700; padding:0.1rem 0.5rem; border-radius:50px; vertical-align:middle; margin-left:0.3rem;">v1.2 · 일러스트</span></p>
         <div class="header-bar-actions">
             <a id="apk-download-link" class="apk-download-btn" href="https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk" onclick="this.href='https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk?t='+Date.now()">
                 📲 안드로이드 앱(APK) 다운로드
@@ -1381,6 +1485,12 @@
 <!-- Toast notification popup -->
 <div id="toast-notify" class="toast-notify">
     <span id="toast-text">저장되었습니다!</span>
+</div>
+
+<!-- Fullscreen Illustration Lightbox -->
+<div id="image-lightbox" class="image-lightbox" onclick="closeImageLightbox()">
+    <img id="image-lightbox-img" src="" alt="">
+    <div id="image-lightbox-caption" class="image-lightbox-caption"></div>
 </div>
 
 <script>
@@ -2039,6 +2149,55 @@
     // 3. MARKDOWN PARSER (Ingredients + Smart Roles + Timed Steps + Variations)
     // =========================================================================
 
+    function resolveRecipeImageUrl(rawSrc) {
+        if (!rawSrc) return '';
+        const s = rawSrc.trim();
+        if (/^https?:\/\//i.test(s)) return s;
+        // Convert relative markdown paths like ../../docs/images/recipes/foo.jpg -> ./images/recipes/foo.jpg
+        const docsIdx = s.indexOf('docs/images/');
+        if (docsIdx >= 0) {
+            return './' + s.slice(docsIdx + 'docs/'.length);
+        }
+        if (s.startsWith('images/')) return './' + s;
+        return s;
+    }
+
+    function handleRecipeImgError(imgEl, fallbackEmoji) {
+        if (!imgEl) return;
+        const currentSrc = imgEl.getAttribute('src') || '';
+        // Online fallback if a new GitHub recipe image isn't bundled locally yet
+        if (!imgEl.dataset.triedRemote && currentSrc.startsWith('./images/')) {
+            imgEl.dataset.triedRemote = '1';
+            imgEl.src = `https://ddkkinf.github.io/cookbook/${currentSrc.slice(2)}`;
+            return;
+        }
+        if (fallbackEmoji && imgEl.parentElement) {
+            imgEl.style.display = 'none';
+            const span = document.createElement('span');
+            span.textContent = fallbackEmoji;
+            imgEl.parentElement.insertBefore(span, imgEl);
+        } else {
+            imgEl.style.display = 'none';
+        }
+    }
+
+    function openImageLightbox(src, caption, event) {
+        if (event) event.stopPropagation();
+        const box = document.getElementById('image-lightbox');
+        const img = document.getElementById('image-lightbox-img');
+        const cap = document.getElementById('image-lightbox-caption');
+        if (!box || !img) return;
+        img.src = src;
+        img.alt = caption || '';
+        if (cap) cap.textContent = caption ? `🎨 ${caption} (화면을 터치하면 닫힙니다)` : '화면을 터치하면 닫힙니다';
+        box.classList.add('active');
+    }
+
+    function closeImageLightbox() {
+        const box = document.getElementById('image-lightbox');
+        if (box) box.classList.remove('active');
+    }
+
     function formatInlineMd(text) {
         return text
             .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
@@ -2075,24 +2234,38 @@
             const stepTitle = formatInlineMd(rawStepHeader);
             // Stop at horizontal rule '---' or next H2 '## ' if present
             const rawBody = match[2].split(/\n---|\n##\s/)[0].trim();
-            const stepLines = rawBody
-                .split('\n')
-                .map(l => l.trim())
-                .filter(l => l && !l.startsWith('>'))
-                .map(l => {
-                    if (/^[*-]\s+/.test(l)) {
-                        return '&nbsp;&nbsp;• ' + formatInlineMd(l.replace(/^[*-]\s+/, ''));
-                    }
-                    return formatInlineMd(l);
-                });
+
+            const stepImages = [];
+            const textOnlyLines = [];
+            for (const rawLine of rawBody.split('\n')) {
+                const l = rawLine.trim();
+                if (!l || l.startsWith('>')) continue;
+                const imgMatch = l.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+                if (imgMatch) {
+                    stepImages.push({
+                        alt: imgMatch[1].trim() || `${rawStepHeader} 참고 그림`,
+                        src: resolveRecipeImageUrl(imgMatch[2])
+                    });
+                    continue;
+                }
+                textOnlyLines.push(l);
+            }
+
+            const stepLines = textOnlyLines.map(l => {
+                if (/^[*-]\s+/.test(l)) {
+                    return '&nbsp;&nbsp;• ' + formatInlineMd(l.replace(/^[*-]\s+/, ''));
+                }
+                return formatInlineMd(l);
+            });
             const stepBodyHtml = stepLines.join('<br>');
-            const plainForTimer = rawBody.replace(/[*_`>#]/g, '');
+            const plainForTimer = textOnlyLines.join('\n').replace(/[*_`>#]/g, '');
             const timers = extractTimersFromStep(`${timerPrefix} ${counter}`, plainForTimer);
 
             parsedSteps.push({
                 index: counter,
                 titleHtml: stepTitle,
                 bodyHtml: stepBodyHtml,
+                images: stepImages,
                 timers
             });
         }
@@ -2122,8 +2295,18 @@
         let description = '맛있는 정성 가득 홈메이드 레시피';
         const overviewSection = mdContent.match(/##\s*📌?\s*개요\s*\n([\s\S]*?)(?=\n##|$)/);
         if (overviewSection) {
-            const firstLine = overviewSection[1].split('\n').map(l => l.trim()).find(l => l && !l.startsWith('*') && !l.startsWith('-'));
+            const firstLine = overviewSection[1].split('\n').map(l => l.trim()).find(l => l && !l.startsWith('*') && !l.startsWith('-') && !l.startsWith('!['));
             if (firstLine) description = firstLine;
+        }
+
+        // Extract top hero illustration if placed before the first H2 section
+        let heroImage = '';
+        let heroImageAlt = cleanTitle;
+        const introBlock = mdContent.split(/\n##\s/)[0] || '';
+        const heroImgMatch = introBlock.match(/!\[([^\]]*)\]\(([^)]+)\)/);
+        if (heroImgMatch) {
+            heroImageAlt = heroImgMatch[1].trim() || cleanTitle;
+            heroImage = resolveRecipeImageUrl(heroImgMatch[2]);
         }
 
         function extractMeta(regex, defaultValue) {
@@ -2259,6 +2442,8 @@
             path: filePath,
             title: cleanTitle,
             description,
+            heroImage,
+            heroImageAlt,
             time,
             servings,
             baseServings,
@@ -2511,10 +2696,14 @@
 
             const totalTimers = recipe.steps.reduce((acc, s) => acc + s.timers.length, 0);
 
+            const cardMediaHtml = recipe.heroImage
+                ? `<img class="card-hero-img" src="${recipe.heroImage}" alt="${recipe.title.replace(/"/g, '&quot;')}" loading="lazy" onerror="handleRecipeImgError(this, '${recipe.icon}')">`
+                : `${recipe.icon}`;
+
             return `
                 <div class="recipe-card" onclick="openRecipe('${recipe.id.replace(/'/g, "\\'")}')">
                     <div class="card-image">
-                        ${recipe.icon}
+                        ${cardMediaHtml}
                         ${statusBadgeHtml}
                         <span class="card-badge">${recipe.category}</span>
                     </div>
@@ -2627,6 +2816,22 @@
             const addonPrefix = step.isAddon
                 ? `<span class="addon-ing-badge" style="margin-right:0.35rem; vertical-align:middle;">➕ ${step.addonTitle}</span>`
                 : '';
+            const stepImagesHtml = (step.images && step.images.length > 0)
+                ? step.images.map(img => {
+                    const safeSrc = img.src.replace(/'/g, "\\'");
+                    const safeAlt = (img.alt || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    return `
+                        <div class="step-guide-figure" onclick="openImageLightbox('${safeSrc}', '${safeAlt}', event)">
+                            <img src="${img.src}" alt="${safeAlt}" loading="lazy" onerror="handleRecipeImgError(this, '')">
+                            <div class="step-guide-caption">
+                                <span>🎨 조리 포인트 그림 · ${img.alt}</span>
+                                <span style="font-weight:500; opacity:0.75;">🔍 크게 보기</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('')
+                : '';
+
             return `
                 <div class="step-item ${step.isAddon ? 'addon-step-item' : ''}" onclick="toggleStep(this)">
                     <div class="step-checkbox">✓</div>
@@ -2635,6 +2840,7 @@
                             ${addonPrefix}<strong>Step ${step.index}. ${step.titleHtml}</strong><br>
                             ${step.bodyHtml}
                         </div>
+                        ${stepImagesHtml}
                         ${step.timers.length > 0 ? `
                         <div class="step-timers-bar">
                             ${step.timers.map(tm => `
@@ -2776,7 +2982,8 @@
             .replace(/^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*$/gm, (_, type) => {
                 const labelMap = { NOTE: '📌 참고', TIP: '💡 팁', IMPORTANT: '⭐ 핵심 체크', WARNING: '⚠️ 주의', CAUTION: '🚨 주의' };
                 return `> **${labelMap[type] || type}**`;
-            });
+            })
+            .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => `![${alt}](${resolveRecipeImageUrl(url)})`);
         const renderedMarkdown = typeof marked !== 'undefined' ? marked.parse(cleanedMd, { breaks: true }) : '';
         const { itemsHtml } = renderIngredientsHtml(recipe, currentServings, smartScaleEnabled);
         const stepsHtml = renderStepsHtml(recipe);
@@ -2820,6 +3027,12 @@
             </div>
         ` : '';
 
+        const heroBannerHtml = recipe.heroImage ? `
+            <div class="modal-hero-banner" onclick="openImageLightbox('${recipe.heroImage.replace(/'/g, "\\'")}', '${(recipe.heroImageAlt || recipe.title).replace(/'/g, "\\'").replace(/"/g, '&quot;')}', event)">
+                <img src="${recipe.heroImage}" alt="${recipe.title.replace(/"/g, '&quot;')}" onerror="this.parentElement.style.display='none'">
+            </div>
+        ` : '';
+
         modalBody.innerHTML = `
             <div class="recipe-header">
                 <h2>${recipe.icon} ${recipe.title}</h2>
@@ -2828,6 +3041,8 @@
                     ${renderStatusBadgeHtml(recipe.status)}
                 </div>
             </div>
+
+            ${heroBannerHtml}
 
             <div class="recipe-meta">
                 <span>👥 <strong>기본 분량:</strong> ${recipe.servings}</span>

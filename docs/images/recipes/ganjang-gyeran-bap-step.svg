@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <radialGradient id="bgCream" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#FFFDF9"/>
+      <stop offset="100%" stop-color="#F7EFE1"/>
+    </radialGradient>
+    <radialGradient id="skilletGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#363940"/>
+      <stop offset="100%" stop-color="#1E2024"/>
+    </radialGradient>
+    <radialGradient id="yolkGrad" cx="38%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#FFD166"/>
+      <stop offset="55%" stop-color="#F77F00"/>
+      <stop offset="100%" stop-color="#D65A00"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bgCream)" rx="18"/>
+  <rect x="16" y="16" width="768" height="418" fill="none" stroke="#E6D7C3" stroke-width="2" stroke-dasharray="6 6" rx="14"/>
+
+  <!-- Handle -->
+  <path d="M 555 255 L 742 315 C 758 320 760 342 745 352 C 732 360 712 355 696 348 L 538 288 Z" fill="#583101" stroke="#2D1900" stroke-width="3.5"/>
+
+  <!-- Frying Pan -->
+  <ellipse cx="370" cy="230" rx="215" ry="162" fill="#18191C" stroke="#101113" stroke-width="4"/>
+  <ellipse cx="370" cy="227" rx="194" ry="144" fill="url(#skilletGrad)" stroke="#494D57" stroke-width="2.5"/>
+
+  <!-- Shimmering Oil Ring -->
+  <ellipse cx="370" cy="230" rx="142" ry="104" fill="none" stroke="#F9C74F" stroke-width="3" stroke-dasharray="12 8" opacity="0.55"/>
+
+  <!-- Crispy Golden-Brown Lacy Outer Edge -->
+  <path d="M 248 212 C 238 175, 272 142, 315 136 C 345 122, 398 124, 432 138 C 478 148, 506 182, 496 222 C 504 262, 474 302, 428 312 C 388 326, 332 322, 295 306 C 254 292, 236 250, 248 212 Z" fill="#D48C3B" stroke="#9C5A14" stroke-width="3.5"/>
+
+  <!-- Soft Tender Egg White Body -->
+  <path d="M 262 214 C 254 182, 284 154, 322 148 C 350 136, 396 138, 424 150 C 464 158, 486 188, 478 222 C 484 256, 458 288, 418 298 C 382 310, 336 306, 304 292 C 268 280, 252 246, 262 214 Z" fill="#FFFDF7" stroke="#F3E5AB" stroke-width="2.5"/>
+
+  <!-- Sizzling Oil Bubbles on Crispy Edge -->
+  <circle cx="268" cy="182" r="5" fill="#FCEFB4" stroke="#B06D1E" stroke-width="1.5"/>
+  <circle cx="476" cy="186" r="6" fill="#FCEFB4" stroke="#B06D1E" stroke-width="1.5"/>
+  <circle cx="482" cy="248" r="5" fill="#FCEFB4" stroke="#B06D1E" stroke-width="1.5"/>
+  <circle cx="272" cy="268" r="6" fill="#FCEFB4" stroke="#B06D1E" stroke-width="1.5"/>
+  <circle cx="368" cy="308" r="5" fill="#FCEFB4" stroke="#B06D1E" stroke-width="1.5"/>
+
+  <!-- Plump Glossy Runny Orange Yolk -->
+  <ellipse cx="372" cy="222" rx="52" ry="46" fill="url(#yolkGrad)" stroke="#C84B00" stroke-width="3"/>
+  <!-- Yolk Gloss Highlight -->
+  <ellipse cx="352" cy="204" rx="16" ry="9" transform="rotate(-25 352 204)" fill="#FFF8E7" opacity="0.88"/>
+  <circle cx="340" cy="218" r="4.5" fill="#FFF8E7" opacity="0.8"/>
+
+  <!-- Pointer Callouts -->
+  <line x1="252" y1="168" x2="185" y2="95" stroke="#B06D1E" stroke-width="2.5"/>
+  <rect x="34" y="44" width="268" height="46" rx="23" fill="#FFF8EB" stroke="#D48C3B" stroke-width="2.5"/>
+  <text x="168" y="73" font-family="-apple-system, 'Noto Sans KR', sans-serif" font-size="15.5" font-weight="700" fill="#8C4A08" text-anchor="middle">겉 테두리: 갈색빛 바삭 레이스</text>
+
+  <line x1="395" y1="205" x2="525" y2="92" stroke="#E76F51" stroke-width="2.5"/>
+  <rect x="468" y="44" width="292" height="46" rx="23" fill="#FFF5F2" stroke="#E76F51" stroke-width="2.5"/>
+  <text x="614" y="73" font-family="-apple-system, 'Noto Sans KR', sans-serif" font-size="15.5" font-weight="700" fill="#B5381A" text-anchor="middle">노른자: 뒤집지 않고 촉촉 반숙 (1분 30초)</text>
+</svg>

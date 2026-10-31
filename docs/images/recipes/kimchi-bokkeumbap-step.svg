@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <radialGradient id="paperBg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#FFFDF8"/>
+      <stop offset="100%" stop-color="#F6EFE2"/>
+    </radialGradient>
+    <radialGradient id="panInner" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3B3E45"/>
+      <stop offset="85%" stop-color="#26282D"/>
+      <stop offset="100%" stop-color="#1B1C20"/>
+    </radialGradient>
+    <radialGradient id="soyBubble" cx="45%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#7C3F1D"/>
+      <stop offset="70%" stop-color="#431E0B"/>
+      <stop offset="100%" stop-color="#281004"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Warm Cookbook Paper Background -->
+  <rect width="800" height="450" fill="url(#paperBg)" rx="18"/>
+  <rect x="16" y="16" width="768" height="418" fill="none" stroke="#E5D8C3" stroke-width="2" stroke-dasharray="6 6" rx="14"/>
+
+  <!-- Pan Handle -->
+  <path d="M 555 260 L 735 325 C 752 331 756 352 740 362 C 726 370 708 365 692 358 L 535 292 Z" fill="#4A3525" stroke="#2B1D12" stroke-width="3.5" stroke-linejoin="round"/>
+  <circle cx="722" cy="343" r="7" fill="#F6EFE2" stroke="#2B1D12" stroke-width="2.5"/>
+
+  <!-- Skillet Rim & Body -->
+  <ellipse cx="365" cy="235" rx="220" ry="165" fill="#1F2024" stroke="#141518" stroke-width="4"/>
+  <ellipse cx="365" cy="232" rx="198" ry="146" fill="url(#panInner)" stroke="#4F535C" stroke-width="2.5"/>
+
+  <!-- Center Divider Dashed Guide -->
+  <line x1="365" y1="98" x2="365" y2="365" stroke="#F4D35E" stroke-width="2.5" stroke-dasharray="8 7" opacity="0.75"/>
+
+  <!-- Left Side: Stir-fried Kimchi Pushed Aside -->
+  <g>
+    <path d="M 195 225 C 185 155, 255 112, 338 122 C 352 158, 350 298, 332 340 C 252 348, 192 298, 195 225 Z" fill="#C83E2B" opacity="0.92" stroke="#7E1F14" stroke-width="3"/>
+    <!-- Kimchi chunks & scallions -->
+    <path d="M 225 180 Q 255 165 280 185 Q 260 205 230 198 Z" fill="#E85D3F" stroke="#8C2515" stroke-width="2"/>
+    <path d="M 265 225 Q 300 208 322 232 Q 298 252 268 242 Z" fill="#F07148" stroke="#8C2515" stroke-width="2"/>
+    <path d="M 218 252 Q 248 242 272 268 Q 245 285 220 272 Z" fill="#E04F33" stroke="#8C2515" stroke-width="2"/>
+    <path d="M 278 282 Q 312 272 328 298 Q 300 315 275 302 Z" fill="#EB6540" stroke="#8C2515" stroke-width="2"/>
+    <path d="M 248 145 Q 282 135 308 156 Q 282 172 252 162 Z" fill="#F27D52" stroke="#8C2515" stroke-width="2"/>
+    <!-- Green onion rings -->
+    <circle cx="255" cy="212" r="7" fill="#6A994E" stroke="#386641" stroke-width="2"/>
+    <circle cx="302" cy="188" r="6" fill="#6A994E" stroke="#386641" stroke-width="2"/>
+    <circle cx="282" cy="265" r="7" fill="#6A994E" stroke="#386641" stroke-width="2"/>
+  </g>
+
+  <!-- Right Side: Sizzling Soy Sauce on Hot Bare Pan -->
+  <g>
+    <ellipse cx="458" cy="248" rx="68" ry="52" fill="url(#soyBubble)" stroke="#9C5227" stroke-width="2.5"/>
+    <!-- Caramelizing bubbles -->
+    <circle cx="435" cy="236" r="8" fill="#B66A38" opacity="0.85"/>
+    <circle cx="468" cy="228" r="11" fill="#C97A42" opacity="0.8"/>
+    <circle cx="485" cy="258" r="7" fill="#B66A38" opacity="0.85"/>
+    <circle cx="448" cy="268" r="9" fill="#D4894E" opacity="0.75"/>
+    <circle cx="462" cy="248" r="5" fill="#FFE6C7" opacity="0.9"/>
+    <circle cx="474" cy="232" r="4" fill="#FFE6C7" opacity="0.9"/>
+
+    <!-- Spoon Pouring 1 Tbsp Soy Sauce -->
+    <path d="M 595 95 L 495 168 C 482 178 462 178 455 168 C 448 158 462 142 480 135 L 582 72 Z" fill="#D8E2DC" stroke="#4A4E69" stroke-width="3" stroke-linejoin="round"/>
+    <ellipse cx="474" cy="158" rx="22" ry="12" transform="rotate(-22 474 158)" fill="#3D1A08" stroke="#2B1205" stroke-width="2"/>
+    <!-- Droplets -->
+    <path d="M 462 172 C 456 186, 456 198, 462 204 C 468 198, 468 186, 462 172 Z" fill="#431E0B"/>
+    <circle cx="462" cy="215" r="4.5" fill="#431E0B"/>
+
+    <!-- Aromatic Smoky Wok Steam Waves -->
+    <path d="M 432 205 Q 420 180 435 160 Q 448 140 434 118" fill="none" stroke="#DDA15E" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+    <path d="M 465 198 Q 455 175 470 155" fill="none" stroke="#DDA15E" stroke-width="3" stroke-linecap="round" opacity="0.75"/>
+    <path d="M 498 212 Q 512 188 498 166 Q 486 146 502 125" fill="none" stroke="#DDA15E" stroke-width="3.5" stroke-linecap="round" opacity="0.85"/>
+  </g>
+
+  <!-- Clean Callout Badges -->
+  <rect x="42" y="38" width="245" height="44" rx="22" fill="#FFFFFF" stroke="#E07A5F" stroke-width="2.5"/>
+  <text x="164" y="66" font-family="-apple-system, 'Noto Sans KR', sans-serif" font-size="16" font-weight="700" fill="#9B2226" text-anchor="middle">① 김치는 한쪽으로 밀어두기</text>
+
+  <rect x="470" y="372" width="288" height="46" rx="23" fill="#FFF8EB" stroke="#BC6C25" stroke-width="2.5"/>
+  <text x="614" y="401" font-family="-apple-system, 'Noto Sans KR', sans-serif" font-size="16" font-weight="700" fill="#7F4F24" text-anchor="middle">② 빈 바닥에 간장 10초 끓여 불맛!</text>
+</svg>
