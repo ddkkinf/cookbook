@@ -1,4 +1,4 @@
-# 🍳 김용훈의 레시피 (Web & Android Hybrid App)
+# 👨‍💻🍳 개발자의레시피 · Developer's Recipe (Web & Android Hybrid App)
 
 GitHub Markdown 기반의 **스마트 레시피 웹 & 안드로이드 하이브리드 앱**입니다.  
 `/recipe` 폴더 하위에 마크다운(`.md`) 파일로 새 레시피를 추가하면 **웹페이지**와 **안드로이드 앱** 모두에 실시간으로 자동 반영됩니다!

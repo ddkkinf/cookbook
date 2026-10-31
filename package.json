@@ -2,7 +2,7 @@
   "name": "kim-cookbook",
   "version": "1.0.0",
   "private": true,
-  "description": "김용훈의 레시피 - 하이브리드 웹 & 안드로이드 앱",
+  "description": "개발자의레시피 (Developer's Recipe) - 하이브리드 웹 & 안드로이드 앱",
   "scripts": {
     "bundle": "node scripts/bundle-recipes.mjs",
     "sync": "node scripts/bundle-recipes.mjs --stamp-html && npx cap sync android",

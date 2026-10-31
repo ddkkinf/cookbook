@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#E63946">
+    <meta name="theme-color" content="#0F172A">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>김용훈의 레시피</title>
+    <meta name="apple-mobile-web-app-title" content="개발자의레시피">
+    <link rel="icon" type="image/png" href="./images/app-icon-192.png">
+    <link rel="apple-touch-icon" href="./images/app-icon-192.png">
+    <title>개발자의레시피 · Developer's Recipe</title>
     <!-- Fonts (online progressive enhancement, graceful system fallback offline) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Offline-bundled Marked.js & Bundled Recipes -->
     <script src="./vendor/marked.min.js"></script>
-    <script src="./bundled-recipes.js?v=mvwa18ja"></script>
+    <script src="./bundled-recipes.js?v=mvwaacl3"></script>
     <style>
         :root {
             --primary: #E63946;
@@ -64,14 +67,46 @@
             animation: fadeInDown 0.6s ease-out;
         }
 
+        .header-brand-row {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .header-app-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 13px;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.22);
+            flex-shrink: 0;
+        }
+
+        .header-title-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+        }
+
         header h1 {
-            font-size: 2.7rem;
+            font-size: 2.35rem;
             font-weight: 800;
-            margin-bottom: 0.4rem;
+            line-height: 1.12;
+            margin-bottom: 0.1rem;
             letter-spacing: -1px;
-            background: linear-gradient(135deg, var(--text-main), var(--primary));
+            background: linear-gradient(135deg, #0F172A, var(--primary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+        }
+
+        .header-en-sub {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #475569;
+            letter-spacing: 0.02em;
         }
 
         header p {
@@ -1457,7 +1492,13 @@
 
 <div class="container">
     <header>
-        <h1>김용훈의 레시피</h1>
+        <div class="header-brand-row">
+            <img class="header-app-icon" src="./images/app-icon-192.png" alt="Developer's Recipe Icon">
+            <div class="header-title-stack">
+                <h1>개발자의레시피</h1>
+                <span class="header-en-sub">&lt;/&gt; Developer's Recipe</span>
+            </div>
+        </div>
         <p>인분 자동 계산 · 베리에이션 · 스마트 타이머 레시피 북 <span style="display:inline-block; background:#ECFDF5; color:#047857; border:1px solid #A7F3D0; font-size:0.75rem; font-weight:700; padding:0.1rem 0.5rem; border-radius:50px; vertical-align:middle; margin-left:0.3rem;">v1.3 · 자동 동기화</span></p>
         <div class="header-bar-actions">
             <a id="apk-download-link" class="apk-download-btn" href="https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk" onclick="this.href='https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk?t='+Date.now()">

@@ -1,7 +1,9 @@
 {
-  "generatedAt": "2026-10-31T10:47:14.037Z",
+  "generatedAt": "2026-10-31T10:54:19.190Z",
   "contentHash": "8:29915:47232f0aabbb833a",
   "imageHashes": {
+    "images/app-icon-192.png": "b862110115",
+    "images/app-icon-512.png": "68e09085bc",
     "images/recipes/butadon-hero.jpg": "971157a838",
     "images/recipes/butadon-step.svg": "5ecf0cd85f",
     "images/recipes/cream-pasta-hero.jpg": "9c8270b52b",
