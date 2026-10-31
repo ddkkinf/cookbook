@@ -71,13 +71,13 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "개발자의레시피 · Developer's Recipe Android App (최신 빌드 v1.3.${{ github.run_number }})"
+          name: "개발자의레시피 · Developer's Recipe Android App (최신 빌드 v1.4.${{ github.run_number }})"
           body: |
             📱 **개발자의레시피 (`Developer's Recipe`) 안드로이드 정식 서명 설치 파일 (`kim-cookbook.apk`)**
-            - 버전: `v1.3.${{ github.run_number }}` (`versionCode: 10${{ github.run_number }}`)
+            - 버전: `v1.4.${{ github.run_number }}` (`versionCode: 10${{ github.run_number }}`)
             - 커밋: `${{ github.sha }}`
-            - **앱 기동/복귀 시 웹 레시피 자동 감지·반영 + 오프라인 로컬 폴백 엔진(`v1.3`)** 탑재
-            - 이후 레시피 수정·신규 추가·일러스트 변경은 APK 재설치 없이 앱을 켜기만 하면 자동 반영됩니다.
+            - **홈 메뉴 대시보드 + 하단 탭 네비게이션(홈 · 레시피 · 설정) + 고추장 비율 일괄 조절 옵션(`v1.4`)** 탑재
+            - 앱 기동/복귀 시 웹 레시피 자동 감지·반영 + 오프라인 로컬 폴백 지원
           files: kim-cookbook.apk
           overwrite_files: true
           prerelease: false

@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Offline-bundled Marked.js & Bundled Recipes -->
     <script src="./vendor/marked.min.js"></script>
-    <script src="./bundled-recipes.js?v=mvwaacl3"></script>
+    <script src="./bundled-recipes.js?v=mvwd9mbp"></script>
     <style>
         :root {
             --primary: #E63946;
@@ -50,7 +50,7 @@
             line-height: 1.6;
             overflow-x: hidden;
             padding-top: var(--safe-top);
-            padding-bottom: calc(5rem + var(--safe-bottom));
+            padding-bottom: calc(6.5rem + var(--safe-bottom));
         }
 
         /* Layout */
@@ -1168,7 +1168,7 @@
            ========================================== */
         .floating-timer-dock {
             position: fixed;
-            bottom: calc(0.85rem + var(--safe-bottom));
+            bottom: calc(4.9rem + var(--safe-bottom));
             left: 50%;
             transform: translateX(-50%);
             width: calc(100% - 1.5rem);
@@ -1177,6 +1177,11 @@
             display: none;
             flex-direction: column;
             gap: 0.55rem;
+            transition: bottom 0.2s ease;
+        }
+
+        body.modal-open .floating-timer-dock {
+            bottom: calc(0.85rem + var(--safe-bottom));
         }
 
         .floating-timer-dock.active {
@@ -1473,12 +1478,672 @@
             font-size: 1.08rem;
         }
 
+        /* ==========================================
+           HOME DASHBOARD, BOTTOM TAB BAR & SETTINGS
+           ========================================== */
+        .app-view {
+            display: none;
+            animation: fadeIn 0.22s ease-out;
+        }
+
+        .app-view.active {
+            display: block;
+        }
+
+        .home-hero-card {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            color: #F8FAFC;
+            border-radius: 22px;
+            padding: 1.45rem 1.4rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .home-hero-card::after {
+            content: '';
+            position: absolute;
+            right: -30px;
+            bottom: -40px;
+            width: 170px;
+            height: 170px;
+            background: radial-gradient(circle, rgba(230, 57, 70, 0.28) 0%, rgba(230, 57, 70, 0) 70%);
+            pointer-events: none;
+        }
+
+        .home-hero-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .home-hero-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 15px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+            border: 1.5px solid rgba(255, 255, 255, 0.14);
+            flex-shrink: 0;
+        }
+
+        .home-hero-titles h1 {
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -0.5px;
+            line-height: 1.18;
+            margin: 0 0 0.15rem 0;
+            background: none;
+            -webkit-text-fill-color: initial;
+        }
+
+        .home-hero-titles .en-sub {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.8rem;
+            color: #94A3B8;
+            font-weight: 700;
+        }
+
+        .home-hero-desc {
+            font-size: 0.88rem;
+            color: #CBD5E1;
+            margin-bottom: 1rem;
+        }
+
+        .home-status-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .home-taste-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.38rem 0.8rem;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #F8FAFC;
+            font-size: 0.77rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .home-taste-pill:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .home-section-block {
+            margin-bottom: 1.65rem;
+        }
+
+        .home-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .home-section-header h2 {
+            font-size: 1.08rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .home-more-link {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0.2rem 0.4rem;
+        }
+
+        .home-menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.85rem;
+        }
+
+        .home-menu-card {
+            background: white;
+            border: 1.5px solid rgba(0, 0, 0, 0.06);
+            border-radius: 18px;
+            padding: 1.15rem 1.1rem;
+            text-align: left;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 0.55rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .home-menu-card:hover, .home-menu-card:active {
+            transform: translateY(-2px);
+            border-color: #FCA5A5;
+            box-shadow: 0 8px 20px rgba(230, 57, 70, 0.1);
+        }
+
+        .home-menu-card.primary-menu {
+            background: linear-gradient(135deg, #FFF5F5 0%, #FFFFFF 100%);
+            border-color: #FECACA;
+        }
+
+        .home-menu-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            background: #F8FAFC;
+        }
+
+        .home-menu-card.primary-menu .home-menu-icon {
+            background: #FEE2E2;
+        }
+
+        .home-menu-title {
+            font-size: 1.02rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .home-menu-sub {
+            font-size: 0.8rem;
+            color: #64748B;
+            line-height: 1.4;
+        }
+
+        .home-cat-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+        }
+
+        .home-cat-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.42rem;
+            padding: 0.62rem 1rem;
+            background: white;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 14px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-main);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            transition: var(--transition);
+        }
+
+        .home-cat-chip:hover, .home-cat-chip:active {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .home-cat-count {
+            background: #F1F5F9;
+            color: #475569;
+            padding: 0.1rem 0.48rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .home-recent-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+
+        .home-recent-item {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            background: white;
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 16px;
+            padding: 0.7rem 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            transition: var(--transition);
+        }
+
+        .home-recent-item:hover, .home-recent-item:active {
+            transform: translateX(2px);
+            border-color: #CBD5E1;
+        }
+
+        .home-recent-thumb {
+            width: 58px;
+            height: 58px;
+            border-radius: 12px;
+            background: #FFF5F5;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+        }
+
+        .home-recent-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .home-recent-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .home-recent-info h4 {
+            font-size: 0.98rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 0.15rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .home-recent-meta {
+            font-size: 0.79rem;
+            color: #64748B;
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .home-recent-arrow {
+            color: #94A3B8;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* Recipes Subview Topbar */
+        .view-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 1.15rem;
+            flex-wrap: wrap;
+        }
+
+        .view-topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .back-home-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.42rem 0.85rem;
+            border-radius: 50px;
+            border: 1px solid #CBD5E1;
+            background: white;
+            color: var(--text-main);
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .view-topbar h2 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        /* Gochujang Ratio Controls & Badges */
+        .gochujang-adj-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            background: #FEE2E2;
+            color: #B91C1C;
+            border: 1px solid #FECACA;
+            padding: 0.1rem 0.48rem;
+            border-radius: 50px;
+            font-size: 0.71rem;
+            font-weight: 800;
+        }
+
+        .gochujang-inline-bar {
+            margin-top: 0.85rem;
+            padding-top: 0.8rem;
+            border-top: 1px dashed #FECACA;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+        }
+
+        .gochujang-inline-label {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #991B1B;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .gochujang-chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            align-items: center;
+        }
+
+        .gochujang-chip {
+            padding: 0.28rem 0.68rem;
+            border-radius: 50px;
+            border: 1px solid #FECACA;
+            background: white;
+            color: #7F1D1D;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .gochujang-chip.active {
+            background: #DC2626;
+            border-color: #DC2626;
+            color: white;
+        }
+
+        .step-gochujang-note {
+            margin-top: 0.55rem;
+            padding: 0.45rem 0.75rem;
+            border-radius: 10px;
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            color: #991B1B;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* Settings Screen */
+        .settings-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+        }
+
+        .settings-card {
+            background: white;
+            border-radius: 18px;
+            padding: 1.25rem 1.3rem;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+        }
+
+        .settings-card-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .settings-card-desc {
+            font-size: 0.83rem;
+            color: #64748B;
+            margin-bottom: 1rem;
+            line-height: 1.48;
+        }
+
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.85rem 0;
+            border-top: 1px solid #F1F5F9;
+        }
+
+        .settings-row:first-of-type {
+            border-top: none;
+            padding-top: 0.25rem;
+        }
+
+        .settings-row-info h4 {
+            font-size: 0.93rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.15rem;
+        }
+
+        .settings-row-info p {
+            font-size: 0.79rem;
+            color: #64748B;
+            line-height: 1.4;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 27px;
+            flex-shrink: 0;
+            display: inline-block;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: #CBD5E1;
+            transition: 0.22s;
+            border-radius: 50px;
+        }
+
+        .toggle-slider::before {
+            position: absolute;
+            content: "";
+            height: 21px;
+            width: 21px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.22s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(21px);
+        }
+
+        .gochujang-settings-box {
+            background: #FFF5F5;
+            border: 1.5px solid #FECACA;
+            border-radius: 14px;
+            padding: 1rem 1.05rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .gochujang-preset-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .gochujang-preset-btn {
+            padding: 0.45rem 0.85rem;
+            border-radius: 12px;
+            border: 1.5px solid #FCA5A5;
+            background: white;
+            color: #7F1D1D;
+            font-size: 0.83rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .gochujang-preset-btn.active {
+            background: #DC2626;
+            border-color: #DC2626;
+            color: white;
+            box-shadow: 0 4px 10px rgba(220, 38, 38, 0.24);
+        }
+
+        .gochujang-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.65rem;
+        }
+
+        .gochujang-slider-row input[type="range"] {
+            flex: 1;
+            accent-color: #DC2626;
+            height: 6px;
+            cursor: pointer;
+        }
+
+        .gochujang-pct-readout {
+            min-width: 58px;
+            text-align: right;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #DC2626;
+        }
+
+        .gochujang-preview-note {
+            font-size: 0.81rem;
+            color: #7F1D1D;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 0.55rem 0.75rem;
+            border-radius: 9px;
+            line-height: 1.45;
+        }
+
+        .settings-btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+            margin-top: 0.65rem;
+        }
+
+        .settings-action-btn {
+            padding: 0.52rem 0.95rem;
+            border-radius: 11px;
+            border: 1px solid #CBD5E1;
+            background: #F8FAFC;
+            color: var(--text-main);
+            font-size: 0.83rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .settings-action-btn.primary {
+            background: #0F172A;
+            border-color: #0F172A;
+            color: white;
+        }
+
+        /* Fixed Bottom Navigation Bar */
+        .bottom-tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            padding: 0.38rem 0.75rem calc(0.38rem + var(--safe-bottom));
+            z-index: 900;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 -4px 18px rgba(15, 23, 42, 0.06);
+        }
+
+        .bottom-tab-inner {
+            width: 100%;
+            max-width: 540px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.35rem;
+        }
+
+        .bottom-tab-btn {
+            border: none;
+            background: transparent;
+            padding: 0.35rem 0.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.12rem;
+            color: #64748B;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+
+        .bottom-tab-btn .tab-icon {
+            font-size: 1.25rem;
+            line-height: 1.1;
+        }
+
+        .bottom-tab-btn .tab-label {
+            font-size: 0.74rem;
+            font-weight: 700;
+        }
+
+        .bottom-tab-btn.active {
+            color: var(--primary);
+            background: #FFF5F5;
+        }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
 
         @media (max-width: 640px) {
-            .container { padding: 1.4rem 1rem; }
+            .container { padding: 1.15rem 0.95rem; }
             header h1 { font-size: 2.1rem; }
+            .home-menu-grid { grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
             .modal-content { height: 100vh; max-width: 100%; border-radius: 0; }
             .modal-body { padding: 1.1rem 1.05rem 2.5rem; }
             .recipe-header h2 { font-size: 1.55rem; }
@@ -1491,50 +2156,152 @@
 <body>
 
 <div class="container">
-    <header>
-        <div class="header-brand-row">
-            <img class="header-app-icon" src="./images/app-icon-192.png" alt="Developer's Recipe Icon">
-            <div class="header-title-stack">
-                <h1>개발자의레시피</h1>
-                <span class="header-en-sub">&lt;/&gt; Developer's Recipe</span>
+    <!-- ==========================================
+         VIEW 1: HOME MENU DASHBOARD (앱 시작 홈 화면)
+         ========================================== -->
+    <section id="view-home" class="app-view active">
+        <div class="home-hero-card">
+            <div class="home-hero-brand">
+                <img class="home-hero-icon" src="./images/app-icon-192.png" alt="Developer's Recipe Icon">
+                <div class="home-hero-titles">
+                    <h1>개발자의레시피</h1>
+                    <span class="en-sub">&lt;/&gt; Developer's Recipe · v1.4</span>
+                </div>
+            </div>
+            <p class="home-hero-desc">인분·양념 스마트 계량과 멀티 타이머를 지원하는 나만의 요리 북</p>
+            <div class="home-status-bar">
+                <button id="sync-status-btn" class="sync-pill" onclick="syncRecipesFromGitHub(true)" title="웹 최신 레시피 확인 및 동기화">
+                    <span id="sync-status-icon">🔄</span> <span id="sync-status-label">최신 레시피 확인 중</span>
+                </button>
+                <button id="home-gochujang-pill" class="home-taste-pill" onclick="navigateToTab('settings')">
+                    🌶️ 고추장 비율 100%
+                </button>
             </div>
         </div>
-        <p>인분 자동 계산 · 베리에이션 · 스마트 타이머 레시피 북 <span style="display:inline-block; background:#ECFDF5; color:#047857; border:1px solid #A7F3D0; font-size:0.75rem; font-weight:700; padding:0.1rem 0.5rem; border-radius:50px; vertical-align:middle; margin-left:0.3rem;">v1.3 · 자동 동기화</span></p>
-        <div class="header-bar-actions">
-            <a id="apk-download-link" class="apk-download-btn" href="https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk" onclick="this.href='https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk?t='+Date.now()">
-                📲 안드로이드 앱(APK) 다운로드
-            </a>
-            <button id="sync-status-btn" class="sync-pill" onclick="syncRecipesFromGitHub(true)" title="웹 최신 레시피 확인 및 동기화">
-                <span id="sync-status-icon">🔄</span> <span id="sync-status-label">최신 레시피 동기화</span>
+
+        <div class="home-section-block">
+            <div class="home-section-header">
+                <h2>🧭 메인 메뉴</h2>
+            </div>
+            <div class="home-menu-grid">
+                <button class="home-menu-card primary-menu" onclick="openRecipesMenu({ category: 'all', status: 'all', mealPrepOnly: false })">
+                    <span class="home-menu-icon">📖</span>
+                    <div>
+                        <div class="home-menu-title">전체 레시피 보기 <span>›</span></div>
+                        <div class="home-menu-sub" id="home-total-recipes-sub">등록된 모든 요리 둘러보기</div>
+                    </div>
+                </button>
+                <button class="home-menu-card" onclick="openRecipesMenu({ category: 'all', status: 'all', mealPrepOnly: true })">
+                    <span class="home-menu-icon">🫙</span>
+                    <div>
+                        <div class="home-menu-title">밀프렙 · 양념 모드 <span>›</span></div>
+                        <div class="home-menu-sub">양념육·만능소스 미리 만들기</div>
+                    </div>
+                </button>
+                <button class="home-menu-card" onclick="openCustomTimerPrompt()">
+                    <span class="home-menu-icon">⏱️</span>
+                    <div>
+                        <div class="home-menu-title">주방 빠른 타이머 <span>›</span></div>
+                        <div class="home-menu-sub" id="home-timer-sub">독립 멀티 타이머 바로 실행</div>
+                    </div>
+                </button>
+                <button class="home-menu-card" onclick="navigateToTab('settings')">
+                    <span class="home-menu-icon">⚙️</span>
+                    <div>
+                        <div class="home-menu-title">입맛 & 앱 설정 <span>›</span></div>
+                        <div class="home-menu-sub" id="home-settings-sub">고추장 비율 · 양념 · 동기화</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <div class="home-section-block">
+            <div class="home-section-header">
+                <h2>🍽️ 카테고리별 바로가기</h2>
+            </div>
+            <div id="home-category-grid" class="home-cat-grid"></div>
+        </div>
+
+        <div class="home-section-block">
+            <div class="home-section-header">
+                <h2 id="home-recent-heading">🕘 최근 살펴본 요리</h2>
+                <button class="home-more-link" onclick="openRecipesMenu({ category: 'all', status: 'all', mealPrepOnly: false })">전체 목록 보기 →</button>
+            </div>
+            <div id="home-recent-list" class="home-recent-list"></div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 2: RECIPES BROWSER (레시피 목록 화면)
+         ========================================== -->
+    <section id="view-recipes" class="app-view">
+        <div class="view-topbar">
+            <div class="view-topbar-left">
+                <button class="back-home-btn" onclick="navigateToTab('home')">← 홈</button>
+                <h2 id="recipes-view-title">📖 레시피 목록</h2>
+            </div>
+            <button class="home-taste-pill" style="background:white; color:#991B1B; border-color:#FECACA;" onclick="navigateToTab('settings')" id="recipes-gochujang-pill">
+                🌶️ 고추장 100%
             </button>
         </div>
-    </header>
 
-    <!-- Filter Controls -->
-    <div class="filter-controls">
-        <div class="category-tabs" id="category-tabs">
-            <button class="category-tab active" onclick="filterByCategory('all')">전체 보기</button>
+        <!-- Filter Controls -->
+        <div class="filter-controls">
+            <div class="category-tabs" id="category-tabs">
+                <button class="category-tab active" onclick="filterByCategory('all')">전체 보기</button>
+            </div>
+            <div class="status-tabs" id="status-tabs">
+                <button class="status-tab active" data-status="all" onclick="filterByStatus('all')">전체 상태</button>
+                <button class="status-tab" data-status="verified" onclick="filterByStatus('verified')">✅ 검증 완료</button>
+                <button class="status-tab" data-status="needs_fix" onclick="filterByStatus('needs_fix')">⚠️ 수정 필요</button>
+            </div>
         </div>
-        <div class="status-tabs" id="status-tabs">
-            <button class="status-tab active" data-status="all" onclick="filterByStatus('all')">전체 상태</button>
-            <button class="status-tab" data-status="verified" onclick="filterByStatus('verified')">✅ 검증 완료</button>
-            <button class="status-tab" data-status="needs_fix" onclick="filterByStatus('needs_fix')">⚠️ 수정 필요</button>
-        </div>
-    </div>
 
-    <div class="search-container">
-        <div class="search-wrapper">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="search-input" placeholder="레시피 이름이나 재료를 검색해보세요...">
+        <div class="search-container">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="레시피 이름이나 재료를 검색해보세요...">
+            </div>
         </div>
-    </div>
 
-    <div id="recipe-grid">
-        <div class="status-message">
-            <p>🍳 레시피를 불러오는 중입니다...</p>
+        <div id="recipe-grid">
+            <div class="status-message">
+                <p>🍳 레시피를 불러오는 중입니다...</p>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 3: EXTENSIBLE SETTINGS (설정 화면)
+         ========================================== -->
+    <section id="view-settings" class="app-view">
+        <div class="view-topbar">
+            <div class="view-topbar-left">
+                <button class="back-home-btn" onclick="navigateToTab('home')">← 홈</button>
+                <h2>⚙️ 입맛 & 앱 설정</h2>
+            </div>
+        </div>
+        <div id="settings-view-body" class="settings-container"></div>
+    </section>
 </div>
+
+<!-- Persistent Bottom Tab Bar -->
+<nav id="bottom-tab-bar" class="bottom-tab-bar" aria-label="메인 하단 메뉴">
+    <div class="bottom-tab-inner">
+        <button class="bottom-tab-btn active" data-tab="home" onclick="navigateToTab('home')">
+            <span class="tab-icon">🏠</span>
+            <span class="tab-label">홈</span>
+        </button>
+        <button class="bottom-tab-btn" data-tab="recipes" onclick="navigateToTab('recipes')">
+            <span class="tab-icon">📖</span>
+            <span class="tab-label">레시피</span>
+        </button>
+        <button class="bottom-tab-btn" data-tab="settings" onclick="navigateToTab('settings')">
+            <span class="tab-icon">⚙️</span>
+            <span class="tab-label">설정</span>
+        </button>
+    </div>
+</nav>
 
 <!-- Recipe Detail Modal -->
 <div id="recipe-modal" class="modal">
@@ -1571,16 +2338,48 @@
     const CACHED_RECIPES_KEY = 'cookbook_cached_md_v3';
     const GITHUB_TOKEN_KEY = 'cookbook_github_pat';
     const RECENT_VIEWS_KEY = 'cookbook_recent_views_v1';
+    const APP_SETTINGS_KEY = 'cookbook_app_settings_v1';
     const QUALIFIED_VIEW_MS = 30000; // 최소 30초 이상 조회 시 최근 본 레시피로 인정
     const SYNC_TIMEOUT_MS = 4500;    // 네트워크 지연 시 빠르게 로컬 보관본으로 폴백
     const AUTO_SYNC_COOLDOWN_MS = 2500;
+
+    // Extensible global app settings schema (추후 새로운 설정 항목도 여기에 추가하면 자동 연동)
+    const DEFAULT_APP_SETTINGS = {
+        gochujangRatio: 1.0,        // 고추장 전체 투입 비율 (0.3 ~ 1.3, 예: 0.7 = 70%)
+        defaultSmartScale: true,    // 다인분 변경 시 스마트 양념 보정 기본 켜기
+        autoWakeLockOnCook: false,  // 레시피 진입 시 조리 화면 자동 켜짐 유지
+        timerSoundEnabled: true,    // 타이머 완료 알람음 사용
+        timerVibrateEnabled: true   // 타이머 완료 진동 알림 사용
+    };
+
+    function loadAppSettings() {
+        try {
+            const raw = localStorage.getItem(APP_SETTINGS_KEY);
+            if (!raw) return { ...DEFAULT_APP_SETTINGS };
+            const parsed = JSON.parse(raw) || {};
+            const ratio = typeof parsed.gochujangRatio === 'number' && !isNaN(parsed.gochujangRatio)
+                ? Math.max(0.3, Math.min(1.3, Math.round(parsed.gochujangRatio * 20) / 20))
+                : DEFAULT_APP_SETTINGS.gochujangRatio;
+            return {
+                ...DEFAULT_APP_SETTINGS,
+                ...parsed,
+                gochujangRatio: ratio
+            };
+        } catch (_) {
+            return { ...DEFAULT_APP_SETTINGS };
+        }
+    }
+
+    let appSettings = loadAppSettings();
+    let currentTab = 'home';        // 'home' | 'recipes' | 'settings'
+    let mealPrepOnlyFilter = false; // 밀프렙(양념육·만능소스) 레시피 모아보기 필터
 
     let allRecipes = [];
     let currentCategory = 'all';
     let currentStatus = 'all';
     let activeRecipeId = null;
     let currentServings = 1;
-    let smartScaleEnabled = true;
+    let smartScaleEnabled = appSettings.defaultSmartScale;
     let activeVariationMode = 'base';
     let activeAddonIds = new Set();
     let activeViewSession = null; // { recipeId, accumulatedMs, resumedAt, qualified, intervalId }
@@ -1599,14 +2398,28 @@
     const statusTabsContainer = document.getElementById('status-tabs');
     const modal = document.getElementById('recipe-modal');
     const modalBody = document.getElementById('modal-body');
-
-    // Inside installed Capacitor Android app, repurpose button as "최신 앱 업데이트 다운로드"
     const isNativeApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
-    if (isNativeApp) {
-        const apkLink = document.getElementById('apk-download-link');
-        if (apkLink) {
-            apkLink.textContent = '📲 최신 앱(APK) 업데이트 받기';
-            apkLink.target = '_blank';
+
+    function saveAppSettings() {
+        try {
+            localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(appSettings));
+        } catch (_) {}
+        updateGochujangPillsUI();
+    }
+
+    function updateGochujangPillsUI() {
+        const pct = Math.round(appSettings.gochujangRatio * 100);
+        const homePill = document.getElementById('home-gochujang-pill');
+        if (homePill) {
+            homePill.textContent = pct === 100 ? `🌶️ 고추장 비율 100% (기본)` : `🌶️ 고추장 비율 ${pct}% 적용 중`;
+        }
+        const recPill = document.getElementById('recipes-gochujang-pill');
+        if (recPill) {
+            recPill.textContent = `🌶️ 고추장 ${pct}%`;
+        }
+        const setSub = document.getElementById('home-settings-sub');
+        if (setSub) {
+            setSub.textContent = `고추장 ${pct}% · 스마트보정 ${appSettings.defaultSmartScale ? 'ON' : 'OFF'}`;
         }
     }
 
@@ -1881,29 +2694,32 @@
     }
 
     function playKitchenBeepPattern() {
-        ensureAudioContext();
-        if (!audioCtx) return;
-        const now = audioCtx.currentTime;
-        // Crisp 3-beep kitchen timer chime (A5 - A5 - E6)
-        const notes = [
-            { freq: 880, offset: 0, dur: 0.11 },
-            { freq: 880, offset: 0.16, dur: 0.11 },
-            { freq: 1318.5, offset: 0.32, dur: 0.22 }
-        ];
-        notes.forEach(n => {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(n.freq, now + n.offset);
-            gain.gain.setValueAtTime(0.001, now + n.offset);
-            gain.gain.exponentialRampToValueAtTime(0.35, now + n.offset + 0.02);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + n.offset + n.dur);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start(now + n.offset);
-            osc.stop(now + n.offset + n.dur + 0.02);
-        });
-        if (navigator.vibrate) {
+        if (appSettings.timerSoundEnabled) {
+            ensureAudioContext();
+            if (audioCtx) {
+                const now = audioCtx.currentTime;
+                // Crisp 3-beep kitchen timer chime (A5 - A5 - E6)
+                const notes = [
+                    { freq: 880, offset: 0, dur: 0.11 },
+                    { freq: 880, offset: 0.16, dur: 0.11 },
+                    { freq: 1318.5, offset: 0.32, dur: 0.22 }
+                ];
+                notes.forEach(n => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(n.freq, now + n.offset);
+                    gain.gain.setValueAtTime(0.001, now + n.offset);
+                    gain.gain.exponentialRampToValueAtTime(0.35, now + n.offset + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + n.offset + n.dur);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + n.offset);
+                    osc.stop(now + n.offset + n.dur + 0.02);
+                });
+            }
+        }
+        if (appSettings.timerVibrateEnabled && navigator.vibrate) {
             navigator.vibrate([300, 150, 300, 150, 500]);
         }
     }
@@ -2048,6 +2864,12 @@
     }
 
     function renderTimerDock() {
+        const homeTimerSub = document.getElementById('home-timer-sub');
+        if (homeTimerSub) {
+            homeTimerSub.textContent = activeTimers.length > 0
+                ? `현재 실행 중 ${activeTimers.length}개 · 탭해서 추가`
+                : '독립 멀티 타이머 바로 실행';
+        }
         const dock = document.getElementById('floating-timer-dock');
         if (!dock) return;
         if (activeTimers.length === 0) {
@@ -2166,6 +2988,7 @@
             map[recipeId] = timestampMs;
             localStorage.setItem(RECENT_VIEWS_KEY, JSON.stringify(map));
         } catch (_) {}
+        renderHomeDashboard();
     }
 
     function getCurrentSessionVisibleMs(session) {
@@ -2684,6 +3507,11 @@
         allRecipes = parsed;
         setupFilterTabs();
         applyFilter();
+        renderHomeDashboard();
+        updateGochujangPillsUI();
+        if (currentTab === 'settings') {
+            renderSettingsView();
+        }
 
         if (refreshOpenModalIfChanged && activeRecipeId && modal.classList.contains('active')) {
             const updatedOpen = allRecipes.find(r => r.id === activeRecipeId);
@@ -2942,16 +3770,356 @@
     }
 
     // =========================================================================
-    // 5. FILTERING, RENDERING & INTERACTIVE MODAL
+    // 5. HOME DASHBOARD, SETTINGS, FILTERING & INTERACTIVE MODAL
     // =========================================================================
+
+    function hasMealPrepMode(recipe) {
+        return Array.isArray(recipe.modes) && recipe.modes.some(m => /양념육|소스|미리|숙성/.test(m.title));
+    }
+
+    function isGochujangIngredient(name) {
+        return /고추장/.test(name || '');
+    }
+
+    function recipeHasGochujang(recipe) {
+        if (!recipe) return false;
+        if ((recipe.ingredients || []).some(i => isGochujangIngredient(i.name))) return true;
+        if ((recipe.modes || []).some(m => (m.ingredients || []).some(i => isGochujangIngredient(i.name)))) return true;
+        if ((recipe.addons || []).some(a => (a.ingredients || []).some(i => isGochujangIngredient(i.name)))) return true;
+        return false;
+    }
+
+    function navigateToTab(tabName, options = {}) {
+        const target = (tabName === 'recipes' || tabName === 'settings') ? tabName : 'home';
+        const pushHistory = options.pushHistory !== false;
+        const prevTab = currentTab;
+        currentTab = target;
+
+        document.querySelectorAll('.app-view').forEach(sec => {
+            sec.classList.toggle('active', sec.id === `view-${target}`);
+        });
+        document.querySelectorAll('.bottom-tab-btn[data-tab]').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-tab') === target);
+        });
+
+        if (target === 'home') {
+            renderHomeDashboard();
+        } else if (target === 'settings') {
+            renderSettingsView();
+        } else if (target === 'recipes') {
+            setupFilterTabs();
+            applyFilter();
+        }
+
+        if (pushHistory && prevTab === 'home' && target !== 'home') {
+            try {
+                history.pushState({ tab: target }, '');
+            } catch (_) {}
+        }
+
+        try { window.scrollTo(0, 0); } catch (_) {}
+    }
+
+    function openRecipesMenu({ category = 'all', status = 'all', mealPrepOnly = false } = {}) {
+        currentCategory = category;
+        currentStatus = status;
+        mealPrepOnlyFilter = !!mealPrepOnly;
+        if (searchInput) searchInput.value = '';
+        const titleEl = document.getElementById('recipes-view-title');
+        if (titleEl) {
+            if (mealPrepOnlyFilter) {
+                titleEl.textContent = '🫙 밀프렙 · 양념 미리 만들기';
+            } else if (category !== 'all') {
+                titleEl.textContent = `📖 ${category} 레시피`;
+            } else if (status === 'verified') {
+                titleEl.textContent = '✅ 검증 완료 레시피';
+            } else {
+                titleEl.textContent = '📖 전체 레시피';
+            }
+        }
+        navigateToTab('recipes');
+    }
+
+    function renderHomeDashboard() {
+        const totalSub = document.getElementById('home-total-recipes-sub');
+        if (totalSub) {
+            const verifiedCnt = allRecipes.filter(r => r.status === 'verified').length;
+            totalSub.textContent = `총 ${allRecipes.length}종 등록 · 검증 완료 ${verifiedCnt}종`;
+        }
+        updateGochujangPillsUI();
+
+        // Category Quick Chips
+        const catGrid = document.getElementById('home-category-grid');
+        if (catGrid) {
+            const catIcons = { '한식': '🥘', '양식': '🍝', '일식': '🍚', '중식': '🥟', '디저트/베이킹': '🍰', '분식/간식': '🍢' };
+            const categories = Array.from(new Set(allRecipes.map(r => r.category))).filter(Boolean);
+            const verifiedCount = allRecipes.filter(r => r.status === 'verified').length;
+
+            let html = categories.map(cat => {
+                const cnt = allRecipes.filter(r => r.category === cat).length;
+                const ic = catIcons[cat] || '🍽️';
+                const safeCat = cat.replace(/'/g, "\\'");
+                return `
+                    <button class="home-cat-chip" onclick="openRecipesMenu({ category: '${safeCat}', status: 'all', mealPrepOnly: false })">
+                        <span>${ic} ${cat}</span>
+                        <span class="home-cat-count">${cnt}</span>
+                    </button>
+                `;
+            }).join('');
+
+            html += `
+                <button class="home-cat-chip" onclick="openRecipesMenu({ category: 'all', status: 'verified', mealPrepOnly: false })">
+                    <span>✅ 검증 완료</span>
+                    <span class="home-cat-count">${verifiedCount}</span>
+                </button>
+            `;
+            catGrid.innerHTML = html;
+        }
+
+        // Recent (or Featured) Compact List (max 3 items so Home stays clean & airy!)
+        const recentListEl = document.getElementById('home-recent-list');
+        const recentHeading = document.getElementById('home-recent-heading');
+        if (recentListEl) {
+            const recentMap = getRecentViewsMap();
+            const recentItems = allRecipes
+                .filter(r => !!recentMap[r.id])
+                .sort((a, b) => (recentMap[b.id] || 0) - (recentMap[a.id] || 0))
+                .slice(0, 3);
+
+            const displayItems = recentItems.length > 0 ? recentItems : allRecipes.slice(0, 3);
+            if (recentHeading) {
+                recentHeading.textContent = recentItems.length > 0 ? '🕘 최근 30초 이상 살펴본 요리' : '⭐ 바로 시작하기 좋은 대표 요리';
+            }
+
+            if (displayItems.length === 0) {
+                recentListEl.innerHTML = `<div style="color:#64748B; font-size:0.86rem; padding:0.8rem 0;">레시피를 불러오는 중입니다...</div>`;
+            } else {
+                recentListEl.innerHTML = displayItems.map(r => {
+                    const thumbHtml = r.heroImage
+                        ? `<img src="${r.heroImage}" alt="${r.title.replace(/"/g, '&quot;')}" loading="lazy" onerror="handleRecipeImgError(this, '${r.icon}')">`
+                        : `${r.icon}`;
+                    return `
+                        <div class="home-recent-item" onclick="openRecipe('${r.id.replace(/'/g, "\\'")}')">
+                            <div class="home-recent-thumb">${thumbHtml}</div>
+                            <div class="home-recent-info">
+                                <h4>${r.title}</h4>
+                                <div class="home-recent-meta">
+                                    <span>🍽️ ${r.category}</span>
+                                    <span>👥 기본 ${r.baseServings}인분</span>
+                                    <span>🕒 ${r.time}</span>
+                                </div>
+                            </div>
+                            <span class="home-recent-arrow">›</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+    }
+
+    function setGochujangRatio(newRatio, fromSlider = false) {
+        const parsed = parseFloat(newRatio);
+        if (isNaN(parsed)) return;
+        const clamped = Math.max(0.3, Math.min(1.3, Math.round(parsed * 20) / 20));
+        appSettings.gochujangRatio = clamped;
+        saveAppSettings();
+
+        // Update Settings screen readout/buttons if currently rendered
+        const readout = document.getElementById('settings-gochujang-readout');
+        if (readout) readout.textContent = `${Math.round(clamped * 100)}%`;
+        const slider = document.getElementById('settings-gochujang-slider');
+        if (slider && !fromSlider) slider.value = Math.round(clamped * 100);
+        const preview = document.getElementById('settings-gochujang-preview');
+        if (preview) {
+            preview.innerHTML = buildGochujangPreviewText(clamped);
+        }
+        document.querySelectorAll('[data-gochujang-preset]').forEach(btn => {
+            const pVal = parseFloat(btn.getAttribute('data-gochujang-preset'));
+            btn.classList.toggle('active', Math.abs(pVal - clamped) < 0.01);
+        });
+
+        // If a recipe modal is currently open, refresh its ingredients & steps live!
+        if (activeRecipeId && modal.classList.contains('active')) {
+            const recipe = allRecipes.find(r => r.id === activeRecipeId);
+            if (recipe) {
+                updateServingPortion(currentServings);
+                const stepsListEl = document.getElementById('modal-steps-list');
+                if (stepsListEl) stepsListEl.innerHTML = renderStepsHtml(recipe);
+            }
+        }
+
+        if (!fromSlider) {
+            showToast(`🌶️ 고추장 비율이 ${Math.round(clamped * 100)}%로 적용되었습니다!`);
+        }
+    }
+
+    function buildGochujangPreviewText(ratio) {
+        const pct = Math.round(ratio * 100);
+        const exTteok = scaleAmountText('1.5큰술 (약 30g)', ratio);
+        const exJeyuk = scaleAmountText('0.8큰술 (약 16g)', ratio);
+        return `📌 <strong>적용 예시 (${pct}%):</strong> 떡볶이(2인분) 고추장 1.5큰술(30g) → <strong>${exTteok}</strong> · 제육볶음(2인분) 0.8큰술(16g) → <strong>${exJeyuk}</strong>`;
+    }
+
+    function toggleAppSetting(key, checked) {
+        if (!(key in DEFAULT_APP_SETTINGS)) return;
+        appSettings[key] = !!checked;
+        if (key === 'defaultSmartScale') {
+            smartScaleEnabled = !!checked;
+        }
+        saveAppSettings();
+        showToast('⚙️ 설정이 저장되었습니다.');
+    }
+
+    function clearRecentViewHistory() {
+        localStorage.removeItem(RECENT_VIEWS_KEY);
+        applyFilter();
+        renderHomeDashboard();
+        showToast('🕘 최근 조회 정렬 기록이 초기화되었습니다.');
+    }
+
+    function resetAllAppSettings() {
+        appSettings = { ...DEFAULT_APP_SETTINGS };
+        smartScaleEnabled = appSettings.defaultSmartScale;
+        saveAppSettings();
+        renderSettingsView();
+        showToast('⚙️ 모든 앱 설정이 기본값으로 복원되었습니다.');
+    }
+
+    function renderSettingsView() {
+        const container = document.getElementById('settings-view-body');
+        if (!container) return;
+        const pct = Math.round(appSettings.gochujangRatio * 100);
+        const presets = [
+            { val: 0.5, label: '50% (반으로 줄임 · 아주 깔끔)' },
+            { val: 0.7, label: '70% (권장 차감 · 진한 고추장용)' },
+            { val: 0.85, label: '85% (살짝 줄임)' },
+            { val: 1.0, label: '100% (레시피 기본)' },
+            { val: 1.2, label: '120% (진하고 꾸덕하게)' }
+        ];
+
+        container.innerHTML = `
+            <div class="settings-card">
+                <div class="settings-card-title">🌶️ 내 입맛 & 양념 비율 설정</div>
+                <p class="settings-card-desc">
+                    집고추장·시판 태양초 등 고추장 종류와 농도에 맞춰 전체 레시피(베리에이션 포함)의 <strong>고추장 투입량</strong>을 일괄 조정합니다.
+                </p>
+
+                <div class="gochujang-settings-box">
+                    <div class="gochujang-preset-grid">
+                        ${presets.map(p => `
+                            <button class="gochujang-preset-btn ${Math.abs(appSettings.gochujangRatio - p.val) < 0.01 ? 'active' : ''}" data-gochujang-preset="${p.val}" onclick="setGochujangRatio(${p.val}, false)">
+                                ${p.label}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="gochujang-slider-row">
+                        <span style="font-size:0.8rem; font-weight:700; color:#7F1D1D;">세밀 조절</span>
+                        <input id="settings-gochujang-slider" type="range" min="30" max="130" step="5" value="${pct}" oninput="setGochujangRatio(this.value / 100, true)" onchange="showToast('🌶️ 고추장 비율이 ' + this.value + '%로 저장되었습니다!')">
+                        <span id="settings-gochujang-readout" class="gochujang-pct-readout">${pct}%</span>
+                    </div>
+                    <div id="settings-gochujang-preview" class="gochujang-preview-note">
+                        ${buildGochujangPreviewText(appSettings.gochujangRatio)}
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>🧠 다인분 스마트 양념 보정 기본 켜기</h4>
+                        <p>인분을 늘릴 때 소금·간장·고추장 염도와 식용유·국물 증발량을 요리 원리에 맞게 자동 보정합니다.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" ${appSettings.defaultSmartScale ? 'checked' : ''} onchange="toggleAppSetting('defaultSmartScale', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-title">🍳 조리 화면 & 타이머 설정</div>
+                <p class="settings-card-desc">요리하는 동안 손에 물이나 양념이 묻어도 편하게 볼 수 있도록 조리 환경을 설정합니다.</p>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>🔆 레시피 열 때 화면 켜짐 유지 자동 ON</h4>
+                        <p>레시피 상세 화면에 들어가면 자동으로 화면 꺼짐 방지(WakeLock)를 켭니다.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" ${appSettings.autoWakeLockOnCook ? 'checked' : ''} onchange="toggleAppSetting('autoWakeLockOnCook', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>🔔 타이머 완료 알람음</h4>
+                        <p>조리 타이머가 끝났을 때 주방 알림 벨소리를 울립니다.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" ${appSettings.timerSoundEnabled ? 'checked' : ''} onchange="toggleAppSetting('timerSoundEnabled', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>📳 타이머 완료 진동 알림</h4>
+                        <p>조리 타이머 종료 시 기기 진동으로 함께 알려줍니다.</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" ${appSettings.timerVibrateEnabled ? 'checked' : ''} onchange="toggleAppSetting('timerVibrateEnabled', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-title">☁️ 웹 동기화 & 데이터 관리</div>
+                <p class="settings-card-desc">
+                    앱 기동 시 웹의 변경된 레시피를 자동으로 가져오며, 오프라인일 때는 기기에 저장된 로컬 보관본을 표시합니다.
+                </p>
+
+                <div class="settings-btn-row">
+                    <button class="settings-action-btn primary" onclick="syncRecipesFromGitHub(true)">
+                        🔄 지금 웹 최신 레시피 동기화
+                    </button>
+                    <button class="settings-action-btn" onclick="configureGitHubToken(null); renderSettingsView();">
+                        🔑 ${getGitHubToken() ? 'GitHub 토큰 연동됨 (변경)' : 'GitHub 원본 저장 토큰 설정'}
+                    </button>
+                    <button class="settings-action-btn" onclick="clearRecentViewHistory()">
+                        🕘 최근 조회 정렬 초기화
+                    </button>
+                    <button class="settings-action-btn" onclick="resetAllAppSettings()">
+                        ↺ 설정 기본값 복원
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-card-title">👨‍💻 앱 정보 & 업데이트</div>
+                <p class="settings-card-desc">
+                    <strong>개발자의레시피 (&lt;/&gt; Developer's Recipe)</strong> · 버전 <code>v1.4</code><br>
+                    레시피 내용 및 일러스트 변경은 앱 재설치 없이 자동 동기화되며, 앱 기능 업데이트가 있을 때만 아래 APK를 덮어쓰기 설치하시면 됩니다.
+                </p>
+                <div class="settings-btn-row">
+                    <a class="settings-action-btn" href="https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk" target="_blank" onclick="this.href='https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk?t='+Date.now()">
+                        📲 ${isNativeApp ? '최신 앱(APK) 업데이트 받기' : '안드로이드 앱(APK) 다운로드'}
+                    </a>
+                </div>
+            </div>
+        `;
+    }
 
     function setupFilterTabs() {
         const categories = Array.from(new Set(allRecipes.map(r => r.category))).filter(Boolean);
-        let catHtml = `<button class="category-tab ${currentCategory === 'all' ? 'active' : ''}" onclick="filterByCategory('all')">전체 (${allRecipes.length})</button>`;
+        let catHtml = `<button class="category-tab ${(!mealPrepOnlyFilter && currentCategory === 'all') ? 'active' : ''}" onclick="filterByCategory('all')">전체 (${allRecipes.length})</button>`;
         categories.forEach(cat => {
             const count = allRecipes.filter(r => r.category === cat).length;
-            catHtml += `<button class="category-tab ${currentCategory === cat ? 'active' : ''}" onclick="filterByCategory('${cat}')">${cat} (${count})</button>`;
+            catHtml += `<button class="category-tab ${(!mealPrepOnlyFilter && currentCategory === cat) ? 'active' : ''}" onclick="filterByCategory('${cat}')">${cat} (${count})</button>`;
         });
+        const mealPrepCount = allRecipes.filter(hasMealPrepMode).length;
+        if (mealPrepCount > 0) {
+            catHtml += `<button class="category-tab ${mealPrepOnlyFilter ? 'active' : ''}" onclick="toggleMealPrepFilter()">🫙 밀프렙·소스 (${mealPrepCount})</button>`;
+        }
         categoryTabsContainer.innerHTML = catHtml;
 
         const verifiedCount = allRecipes.filter(r => r.status === 'verified').length;
@@ -2966,8 +4134,24 @@
         `;
     }
 
+    function toggleMealPrepFilter() {
+        mealPrepOnlyFilter = !mealPrepOnlyFilter;
+        if (mealPrepOnlyFilter) currentCategory = 'all';
+        const titleEl = document.getElementById('recipes-view-title');
+        if (titleEl) {
+            titleEl.textContent = mealPrepOnlyFilter ? '🫙 밀프렙 · 양념 미리 만들기' : '📖 전체 레시피';
+        }
+        setupFilterTabs();
+        applyFilter();
+    }
+
     function filterByCategory(cat) {
+        mealPrepOnlyFilter = false;
         currentCategory = cat;
+        const titleEl = document.getElementById('recipes-view-title');
+        if (titleEl) {
+            titleEl.textContent = cat === 'all' ? '📖 전체 레시피' : `📖 ${cat} 레시피`;
+        }
         setupFilterTabs();
         applyFilter();
     }
@@ -2983,6 +4167,7 @@
         const recentViews = getRecentViewsMap();
 
         const filtered = allRecipes.filter(r => {
+            const matchMealPrep = !mealPrepOnlyFilter || hasMealPrepMode(r);
             const matchCategory = currentCategory === 'all' || r.category === currentCategory;
             const matchStatus = currentStatus === 'all' || r.status === currentStatus;
             const matchSearch = !query ||
@@ -2991,7 +4176,7 @@
                 (r.comment && r.comment.toLowerCase().includes(query)) ||
                 r.ingredients.some(i => i.name.toLowerCase().includes(query)) ||
                 r.rawMarkdown.toLowerCase().includes(query);
-            return matchCategory && matchStatus && matchSearch;
+            return matchMealPrep && matchCategory && matchStatus && matchSearch;
         });
 
         // Sort recipes viewed for >= 30 seconds to the very top by most recent view timestamp
@@ -3116,10 +4301,14 @@
         const rawRatio = targetServings / (recipe.baseServings || 1);
         let anySmartAdjusted = false;
         const { ingredients: effectiveIngredients } = getEffectiveRecipeView(recipe);
+        const gRatio = appSettings.gochujangRatio;
+        const isGochujangCustom = Math.abs(gRatio - 1) >= 0.01;
 
         const itemsHtml = effectiveIngredients.map(ing => {
             const { factor, reason } = getSmartScaleFactor(ing.role, rawRatio, smartEnabled);
-            const scaledAmt = scaleAmountText(ing.amount, factor);
+            const isGochujang = isGochujangIngredient(ing.name);
+            const finalFactor = isGochujang ? (factor * gRatio) : factor;
+            const scaledAmt = scaleAmountText(ing.amount, finalFactor);
             const isNonLinearAdjusted = reason && Math.abs(factor - rawRatio) / Math.max(0.1, rawRatio) >= 0.05 && /\d/.test(ing.amount);
             if (isNonLinearAdjusted) anySmartAdjusted = true;
 
@@ -3127,15 +4316,19 @@
                 ? `<span class="smart-adj-badge">${reason} (${rawRatio.toFixed(1).replace(/\.0$/, '')}배 → ${factor.toFixed(2).replace(/0$/, '').replace(/\.$/, '')}배)</span>`
                 : '';
 
+            const gochujangBadgeHtml = (isGochujang && isGochujangCustom)
+                ? `<span class="gochujang-adj-badge">🌶️ 고추장 ${Math.round(gRatio * 100)}% 설정</span>`
+                : '';
+
             const addonBadgeHtml = ing.isAddon
                 ? `<span class="addon-ing-badge">➕ 옵션 추가</span>`
                 : '';
 
             const noteHtml = ing.note ? `<span>${ing.note}</span>` : '<span></span>';
-            const rightBadges = [addonBadgeHtml, ratioDiffText].filter(Boolean).join(' ');
+            const rightBadges = [addonBadgeHtml, gochujangBadgeHtml, ratioDiffText].filter(Boolean).join(' ');
 
             return `
-                <li class="${ing.isAddon ? 'addon-ing-item' : (isNonLinearAdjusted ? 'scaled-highlight' : '')}">
+                <li class="${ing.isAddon ? 'addon-ing-item' : ((isNonLinearAdjusted || (isGochujang && isGochujangCustom)) ? 'scaled-highlight' : '')}">
                     <div class="ing-row-main">
                         <span class="ing-name">${ing.name}</span>
                         <span class="ing-amount">${scaledAmt}</span>
@@ -3153,11 +4346,28 @@
     }
 
     function renderStepsHtml(recipe) {
-        const { steps: effectiveSteps } = getEffectiveRecipeView(recipe);
+        const { steps: effectiveSteps, ingredients: effectiveIngredients } = getEffectiveRecipeView(recipe);
+        const gRatio = appSettings.gochujangRatio;
+        const isGochujangCustom = Math.abs(gRatio - 1) >= 0.01;
+        const gochujangIng = effectiveIngredients.find(i => isGochujangIngredient(i.name));
+
         return effectiveSteps.map(step => {
             const addonPrefix = step.isAddon
                 ? `<span class="addon-ing-badge" style="margin-right:0.35rem; vertical-align:middle;">➕ ${step.addonTitle}</span>`
                 : '';
+            const stepMentionsGochujang = isGochujangCustom && /고추장/.test(step.bodyHtml || '');
+            let gochujangStepNoteHtml = '';
+            if (stepMentionsGochujang && gochujangIng) {
+                const rawRatio = currentServings / (recipe.baseServings || 1);
+                const { factor } = getSmartScaleFactor(gochujangIng.role, rawRatio, smartScaleEnabled);
+                const curGochujangAmt = scaleAmountText(gochujangIng.amount, factor * gRatio);
+                gochujangStepNoteHtml = `
+                    <div class="step-gochujang-note">
+                        🌶️ 고추장 ${Math.round(gRatio * 100)}% 설정 적용 중 → 고추장은 <strong>${curGochujangAmt}</strong> 넣어주세요!
+                    </div>
+                `;
+            }
+
             const stepImagesHtml = (step.images && step.images.length > 0)
                 ? step.images.map(img => {
                     const safeSrc = img.src.replace(/'/g, "\\'");
@@ -3182,6 +4392,7 @@
                             ${addonPrefix}<strong>Step ${step.index}. ${step.titleHtml}</strong><br>
                             ${step.bodyHtml}
                         </div>
+                        ${gochujangStepNoteHtml}
                         ${stepImagesHtml}
                         ${step.timers.length > 0 ? `
                         <div class="step-timers-bar">
@@ -3423,6 +4634,20 @@
                         🧠 스마트 양념 보정
                     </label>
                 </div>
+                ${recipeHasGochujang(recipe) ? `
+                <div class="gochujang-inline-bar">
+                    <span class="gochujang-inline-label">🌶️ 고추장 비율 옵션:</span>
+                    <div class="gochujang-chip-group">
+                        ${[0.5, 0.7, 0.85, 1.0].map(val => `
+                            <button class="gochujang-chip ${Math.abs(appSettings.gochujangRatio - val) < 0.01 ? 'active' : ''}" data-gochujang-preset="${val}" onclick="setGochujangRatio(${val}, false)">
+                                ${Math.round(val * 100)}%${val === 0.7 ? ' (깔끔)' : (val === 1.0 ? ' (기본)' : '')}
+                            </button>
+                        `).join('')}
+                        <button class="gochujang-chip" onclick="closeModal(); navigateToTab('settings');" title="설정에서 세밀 조절">
+                            ⚙️ 세밀 조절
+                        </button>
+                    </div>
+                </div>` : ''}
                 <div id="smart-scale-banner" class="smart-scale-banner"></div>
             </div>
 
@@ -3498,12 +4723,16 @@
         `;
 
         modal.classList.add('active');
+        document.body.classList.add('modal-open');
         document.body.style.overflow = 'hidden';
+        if (appSettings.autoWakeLockOnCook) {
+            requestWakeLockAutomatically();
+        }
         updateWakeLockButtonUI();
 
         if (pushHistory) {
             try {
-                history.pushState({ modalOpen: true, recipeId: id }, '');
+                history.pushState({ modalOpen: true, recipeId: id, tab: currentTab }, '');
             } catch (_) {}
         }
     }
@@ -3707,8 +4936,12 @@
         if (!modal.classList.contains('active')) return;
         finalizeRecipeViewTracker();
         modal.classList.remove('active');
+        document.body.classList.remove('modal-open');
         document.body.style.overflow = 'auto';
         activeRecipeId = null;
+        if (currentTab === 'home') {
+            renderHomeDashboard();
+        }
         if (!fromPopState && history.state && history.state.modalOpen) {
             try { history.back(); } catch (_) {}
         }
@@ -3726,9 +4959,14 @@
         if (event.target === modal) closeModal();
     };
 
-    window.addEventListener('popstate', () => {
+    window.addEventListener('popstate', (e) => {
         if (modal.classList.contains('active')) {
             closeModal(true);
+            return;
+        }
+        const targetTab = (e.state && e.state.tab) ? e.state.tab : 'home';
+        if (currentTab !== targetTab) {
+            navigateToTab(targetTab, { pushHistory: false });
         }
     });
 
@@ -3743,6 +4981,8 @@
         window.Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
             if (modal.classList.contains('active')) {
                 closeModal();
+            } else if (currentTab !== 'home') {
+                navigateToTab('home', { pushHistory: false });
             } else if (canGoBack) {
                 window.history.back();
             } else {
