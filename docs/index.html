@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Offline-bundled Marked.js & Bundled Recipes -->
     <script src="./vendor/marked.min.js"></script>
-    <script src="./bundled-recipes.js?v=mvw3h2e0"></script>
+    <script src="./bundled-recipes.js?v=mvwa18ja"></script>
     <style>
         :root {
             --primary: #E63946;
@@ -120,6 +120,35 @@
             font-size: 0.78rem;
             font-weight: 600;
             cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .sync-pill.syncing {
+            border-color: #BFDBFE;
+            background: #EFF6FF;
+            color: #1D4ED8;
+        }
+
+        .sync-pill.updated {
+            border-color: #6EE7B7;
+            background: #ECFDF5;
+            color: #047857;
+        }
+
+        .sync-pill.offline {
+            border-color: #FDE68A;
+            background: #FFFBEB;
+            color: #92400E;
+        }
+
+        @keyframes spinSyncIcon {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .sync-pill.syncing #sync-status-icon {
+            display: inline-block;
+            animation: spinSyncIcon 1s linear infinite;
         }
 
         /* Category & Status Filter Tabs */
@@ -1429,13 +1458,13 @@
 <div class="container">
     <header>
         <h1>김용훈의 레시피</h1>
-        <p>인분 자동 계산 · 베리에이션 · 스마트 타이머 레시피 북 <span style="display:inline-block; background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE; font-size:0.75rem; font-weight:700; padding:0.1rem 0.5rem; border-radius:50px; vertical-align:middle; margin-left:0.3rem;">v1.2 · 일러스트</span></p>
+        <p>인분 자동 계산 · 베리에이션 · 스마트 타이머 레시피 북 <span style="display:inline-block; background:#ECFDF5; color:#047857; border:1px solid #A7F3D0; font-size:0.75rem; font-weight:700; padding:0.1rem 0.5rem; border-radius:50px; vertical-align:middle; margin-left:0.3rem;">v1.3 · 자동 동기화</span></p>
         <div class="header-bar-actions">
             <a id="apk-download-link" class="apk-download-btn" href="https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk" onclick="this.href='https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk?t='+Date.now()">
                 📲 안드로이드 앱(APK) 다운로드
             </a>
-            <button class="sync-pill" onclick="syncRecipesFromGitHub(true)" title="GitHub에서 최신 레시피 동기화">
-                🔄 <span id="sync-status-label">최신 레시피 동기화</span>
+            <button id="sync-status-btn" class="sync-pill" onclick="syncRecipesFromGitHub(true)" title="웹 최신 레시피 확인 및 동기화">
+                <span id="sync-status-icon">🔄</span> <span id="sync-status-label">최신 레시피 동기화</span>
             </button>
         </div>
     </header>
@@ -1489,18 +1518,21 @@
 
 <!-- Fullscreen Illustration Lightbox -->
 <div id="image-lightbox" class="image-lightbox" onclick="closeImageLightbox()">
-    <img id="image-lightbox-img" src="" alt="">
+    <img id="image-lightbox-img" src="" alt="" onerror="handleRecipeImgError(this, '')">
     <div id="image-lightbox-caption" class="image-lightbox-caption"></div>
 </div>
 
 <script>
     const GITHUB_REPO = 'ddkkinf/cookbook';
     const GITHUB_BRANCH = 'main';
+    const PAGES_BASE_URL = 'https://ddkkinf.github.io/cookbook';
     const LOCAL_STORAGE_KEY = 'cookbook_recipe_states_v1';
-    const CACHED_RECIPES_KEY = 'cookbook_cached_md_v2';
+    const CACHED_RECIPES_KEY = 'cookbook_cached_md_v3';
     const GITHUB_TOKEN_KEY = 'cookbook_github_pat';
     const RECENT_VIEWS_KEY = 'cookbook_recent_views_v1';
     const QUALIFIED_VIEW_MS = 30000; // 최소 30초 이상 조회 시 최근 본 레시피로 인정
+    const SYNC_TIMEOUT_MS = 4500;    // 네트워크 지연 시 빠르게 로컬 보관본으로 폴백
+    const AUTO_SYNC_COOLDOWN_MS = 2500;
 
     let allRecipes = [];
     let currentCategory = 'all';
@@ -1511,6 +1543,14 @@
     let activeVariationMode = 'base';
     let activeAddonIds = new Set();
     let activeViewSession = null; // { recipeId, accumulatedMs, resumedAt, qualified, intervalId }
+    let activeContentHash = '';
+    let activeImageHashes = (window.BUNDLED_IMAGE_HASHES && typeof window.BUNDLED_IMAGE_HASHES === 'object')
+        ? { ...window.BUNDLED_IMAGE_HASHES }
+        : {};
+    let activeSyncCommitSha = '';
+    let activeCommitEtag = '';
+    let isSyncingRecipes = false;
+    let lastAutoSyncMs = 0;
 
     const grid = document.getElementById('recipe-grid');
     const searchInput = document.getElementById('search-input');
@@ -2149,36 +2189,96 @@
     // 3. MARKDOWN PARSER (Ingredients + Smart Roles + Timed Steps + Variations)
     // =========================================================================
 
+    function extractImageRelPath(rawOrResolved) {
+        if (!rawOrResolved) return '';
+        const clean = rawOrResolved.split('?')[0].split('#')[0].trim();
+        const docsIdx = clean.indexOf('docs/images/');
+        if (docsIdx >= 0) return clean.slice(docsIdx + 'docs/'.length);
+        const pagesIdx = clean.indexOf('/cookbook/images/');
+        if (pagesIdx >= 0) return clean.slice(pagesIdx + '/cookbook/'.length);
+        if (clean.startsWith('./images/')) return clean.slice(2);
+        if (clean.startsWith('images/')) return clean;
+        return '';
+    }
+
     function resolveRecipeImageUrl(rawSrc) {
         if (!rawSrc) return '';
         const s = rawSrc.trim();
         if (/^https?:\/\//i.test(s)) return s;
-        // Convert relative markdown paths like ../../docs/images/recipes/foo.jpg -> ./images/recipes/foo.jpg
-        const docsIdx = s.indexOf('docs/images/');
-        if (docsIdx >= 0) {
-            return './' + s.slice(docsIdx + 'docs/'.length);
+
+        const relPath = extractImageRelPath(s);
+        if (!relPath) return s;
+
+        const bundledMap = (window.BUNDLED_IMAGE_HASHES && typeof window.BUNDLED_IMAGE_HASHES === 'object')
+            ? window.BUNDLED_IMAGE_HASHES
+            : {};
+        const bundledHash = bundledMap[relPath];
+        const remoteHash = (activeImageHashes && typeof activeImageHashes === 'object')
+            ? activeImageHashes[relPath]
+            : undefined;
+
+        // 1) If bundled locally inside APK/Web AND unchanged on web -> instant 0ms local asset!
+        if (bundledHash && (!remoteHash || bundledHash === remoteHash)) {
+            return './' + relPath;
         }
-        if (s.startsWith('images/')) return './' + s;
-        return s;
+
+        // 2) New recipe image added on web OR existing image updated on web -> load latest web version!
+        if (activeSyncCommitSha) {
+            return `https://raw.githubusercontent.com/${GITHUB_REPO}/${activeSyncCommitSha}/docs/${relPath}`;
+        }
+        const bust = remoteHash ? `?v=${remoteHash}` : '';
+        return `${PAGES_BASE_URL}/${relPath}${bust}`;
     }
 
     function handleRecipeImgError(imgEl, fallbackEmoji) {
         if (!imgEl) return;
         const currentSrc = imgEl.getAttribute('src') || '';
-        // Online fallback if a new GitHub recipe image isn't bundled locally yet
-        if (!imgEl.dataset.triedRemote && currentSrc.startsWith('./images/')) {
+        const relPath = extractImageRelPath(currentSrc);
+
+        // Fallback A: Local asset missing -> try GitHub Pages online image
+        if (!imgEl.dataset.triedRemote && currentSrc.startsWith('./images/') && relPath) {
             imgEl.dataset.triedRemote = '1';
-            imgEl.src = `https://ddkkinf.github.io/cookbook/${currentSrc.slice(2)}`;
+            const remoteHash = (activeImageHashes && activeImageHashes[relPath]) ? `?v=${activeImageHashes[relPath]}` : '';
+            imgEl.src = `${PAGES_BASE_URL}/${relPath}${remoteHash}`;
             return;
         }
+
+        // Fallback B: Raw GitHub URL failed -> try GitHub Pages CDN
+        if (!imgEl.dataset.triedPages && currentSrc.includes('raw.githubusercontent.com') && relPath) {
+            imgEl.dataset.triedPages = '1';
+            const remoteHash = (activeImageHashes && activeImageHashes[relPath]) ? `?v=${activeImageHashes[relPath]}` : '';
+            imgEl.src = `${PAGES_BASE_URL}/${relPath}${remoteHash}`;
+            return;
+        }
+
+        // Fallback C: Offline so remote URL failed -> fall back to bundled local APK image if present!
+        const bundledMap = window.BUNDLED_IMAGE_HASHES || {};
+        if (!imgEl.dataset.triedLocal && /^https?:\/\//i.test(currentSrc) && relPath && bundledMap[relPath]) {
+            imgEl.dataset.triedLocal = '1';
+            imgEl.src = `./${relPath}`;
+            return;
+        }
+
+        // Final graceful fallback (emoji on card, or hide figure container cleanly)
         if (fallbackEmoji && imgEl.parentElement) {
             imgEl.style.display = 'none';
             const span = document.createElement('span');
             span.textContent = fallbackEmoji;
             imgEl.parentElement.insertBefore(span, imgEl);
+        } else if (imgEl.closest('.step-guide-figure')) {
+            imgEl.closest('.step-guide-figure').style.display = 'none';
+        } else if (imgEl.closest('.modal-hero-banner')) {
+            imgEl.closest('.modal-hero-banner').style.display = 'none';
         } else {
             imgEl.style.display = 'none';
         }
+    }
+
+    function openImageLightboxFromContainer(containerEl, fallbackSrc, caption, event) {
+        if (event) event.stopPropagation();
+        const innerImg = containerEl ? containerEl.querySelector('img') : null;
+        const liveSrc = (innerImg && (innerImg.currentSrc || innerImg.getAttribute('src'))) || fallbackSrc;
+        openImageLightbox(liveSrc, caption, event);
     }
 
     function openImageLightbox(src, caption, event) {
@@ -2187,6 +2287,10 @@
         const img = document.getElementById('image-lightbox-img');
         const cap = document.getElementById('image-lightbox-caption');
         if (!box || !img) return;
+        delete img.dataset.triedRemote;
+        delete img.dataset.triedPages;
+        delete img.dataset.triedLocal;
+        img.style.display = '';
         img.src = src;
         img.alt = caption || '';
         if (cap) cap.textContent = caption ? `🎨 ${caption} (화면을 터치하면 닫힙니다)` : '화면을 터치하면 닫힙니다';
@@ -2462,8 +2566,57 @@
     }
 
     // =========================================================================
-    // 4. HYBRID OFFLINE BUNDLE + GITHUB LIVE SYNC LOADER
+    // 4. HYBRID LOCAL BASELINE + INSTANT WEB DIFF SYNC ENGINE
     // =========================================================================
+
+    // Identical deterministic hash to scripts/bundle-recipes.mjs
+    function computeRecipesHash(items) {
+        if (!Array.isArray(items) || items.length === 0) return '0:0:0000000000000000';
+        const sorted = [...items]
+            .filter(it => it && it.path && typeof it.content === 'string')
+            .sort((a, b) => (a.path < b.path ? -1 : (a.path > b.path ? 1 : 0)));
+        let h1 = 0x811c9dc5;
+        let h2 = 0x01000193;
+        let totalLen = 0;
+        for (let idx = 0; idx < sorted.length; idx++) {
+            const chunk = sorted[idx].path + '\n' + sorted[idx].content.replace(/\r\n/g, '\n');
+            totalLen += chunk.length;
+            for (let i = 0; i < chunk.length; i++) {
+                const c = chunk.charCodeAt(i);
+                h1 ^= c;
+                h1 = Math.imul(h1, 0x01000193);
+                h2 ^= (c + i);
+                h2 = Math.imul(h2, 0x85ebca6b);
+            }
+        }
+        const hex1 = (h1 >>> 0).toString(16).padStart(8, '0');
+        const hex2 = (h2 >>> 0).toString(16).padStart(8, '0');
+        return `${sorted.length}:${totalLen}:${hex1}${hex2}`;
+    }
+
+    function setSyncPillState(mode, text, icon = '🔄') {
+        const btn = document.getElementById('sync-status-btn');
+        const iconEl = document.getElementById('sync-status-icon');
+        const labelEl = document.getElementById('sync-status-label');
+        if (btn) {
+            btn.classList.remove('syncing', 'updated', 'offline');
+            if (mode === 'syncing' || mode === 'updated' || mode === 'offline') {
+                btn.classList.add(mode);
+            }
+        }
+        if (iconEl) iconEl.textContent = icon;
+        if (labelEl) labelEl.textContent = text;
+    }
+
+    async function fetchWithTimeout(url, options = {}, timeoutMs = SYNC_TIMEOUT_MS) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            return await fetch(url, { ...options, signal: controller.signal });
+        } finally {
+            clearTimeout(timer);
+        }
+    }
 
     function applyLocalOverrides(recipes) {
         recipes.forEach(recipe => {
@@ -2480,122 +2633,270 @@
         });
     }
 
-    function loadInitialRecipes() {
-        const mapByPath = new Map();
-        const bundledTime = window.BUNDLED_AT ? Date.parse(window.BUNDLED_AT) : 0;
+    function applyRecipeItemsToUI(items, refreshOpenModalIfChanged = false) {
+        const prevOpenMd = activeRecipeId
+            ? (allRecipes.find(r => r.id === activeRecipeId) || {}).rawMarkdown
+            : null;
 
-        // 1) Bundled offline recipes (always available inside APK & web)
-        if (Array.isArray(window.BUNDLED_RECIPES)) {
-            window.BUNDLED_RECIPES.forEach(item => {
-                if (item && item.path && item.content) {
-                    mapByPath.set(item.path, item.content);
+        const parsed = items.map(item => parseRecipeMarkdown(item.content, item.path));
+        applyLocalOverrides(parsed);
+        allRecipes = parsed;
+        setupFilterTabs();
+        applyFilter();
+
+        if (refreshOpenModalIfChanged && activeRecipeId && modal.classList.contains('active')) {
+            const updatedOpen = allRecipes.find(r => r.id === activeRecipeId);
+            if (updatedOpen && updatedOpen.rawMarkdown !== prevOpenMd) {
+                if (activeVariationMode !== 'base' && !(updatedOpen.modes || []).some(m => m.id === activeVariationMode)) {
+                    activeVariationMode = 'base';
                 }
-            });
+                openRecipe(activeRecipeId, false);
+            }
         }
+    }
 
-        // 2) Cached GitHub recipes ONLY if synced AFTER this bundle was built (prevents stale cache overwriting newer app/web bundle)
+    function loadInitialRecipes() {
+        const bundledItems = Array.isArray(window.BUNDLED_RECIPES)
+            ? window.BUNDLED_RECIPES.filter(it => it && it.path && typeof it.content === 'string')
+            : [];
+        const bundledTime = window.BUNDLED_AT ? Date.parse(window.BUNDLED_AT) : 0;
+        const bundledHash = window.BUNDLED_HASH || computeRecipesHash(bundledItems);
+        const bundledImgHashes = (window.BUNDLED_IMAGE_HASHES && typeof window.BUNDLED_IMAGE_HASHES === 'object')
+            ? { ...window.BUNDLED_IMAGE_HASHES }
+            : {};
+
+        let initialItems = bundledItems;
+        activeContentHash = bundledHash;
+        activeImageHashes = bundledImgHashes;
+        activeSyncCommitSha = '';
+        activeCommitEtag = '';
+
+        // Clean legacy cache keys & load newer synced local copy if available
         try {
             localStorage.removeItem('cookbook_cached_md_v1');
+            localStorage.removeItem('cookbook_cached_md_v2');
             const rawCache = localStorage.getItem(CACHED_RECIPES_KEY);
             if (rawCache) {
                 const cacheObj = JSON.parse(rawCache);
                 const cachedTime = (cacheObj && cacheObj.syncedAt) ? Date.parse(cacheObj.syncedAt) : 0;
-                if (cacheObj && Array.isArray(cacheObj.items) && cachedTime > bundledTime) {
-                    mapByPath.clear();
-                    cacheObj.items.forEach(item => {
-                        if (item && item.path && item.content) {
-                            mapByPath.set(item.path, item.content);
-                        }
-                    });
+                if (cacheObj && Array.isArray(cacheObj.items) && cacheObj.items.length > 0 && cachedTime > bundledTime) {
+                    initialItems = cacheObj.items;
+                    activeContentHash = cacheObj.contentHash || computeRecipesHash(cacheObj.items);
+                    activeImageHashes = (cacheObj.imageHashes && typeof cacheObj.imageHashes === 'object')
+                        ? { ...bundledImgHashes, ...cacheObj.imageHashes }
+                        : bundledImgHashes;
+                    activeSyncCommitSha = cacheObj.commitSha || '';
+                    activeCommitEtag = cacheObj.commitEtag || '';
                 } else {
                     localStorage.removeItem(CACHED_RECIPES_KEY);
                 }
             }
         } catch (_) {}
 
-        if (mapByPath.size > 0) {
-            const parsed = [];
-            for (const [p, content] of mapByPath.entries()) {
-                parsed.push(parseRecipeMarkdown(content, p));
-            }
-            applyLocalOverrides(parsed);
-            allRecipes = parsed;
-            setupFilterTabs();
-            applyFilter();
+        // 1) Instant 0ms local render (never blocks on network; works 100% offline)
+        if (initialItems.length > 0) {
+            applyRecipeItemsToUI(initialItems, false);
         }
 
-        // 3) Sync latest from GitHub in the background
-        syncRecipesFromGitHub(false);
+        // 2) Immediately check web on startup and apply changes if any
+        syncRecipesFromGitHub(false, 'startup');
     }
 
-    async function syncRecipesFromGitHub(manualTrigger = false) {
-        const label = document.getElementById('sync-status-label');
-        if (label) label.textContent = '동기화 중...';
+    async function fetchRemotePayloadViaGitHubApi() {
+        const headers = { 'Accept': 'application/vnd.github.v3+json' };
+        const token = getGitHubToken();
+        if (token) headers['Authorization'] = `token ${token}`;
+        if (activeCommitEtag && activeSyncCommitSha) {
+            headers['If-None-Match'] = activeCommitEtag;
+        }
 
-        try {
-            // Fetch exact latest commit SHA on main so raw.githubusercontent.com bypasses Fastly branch CDN cache
-            let refSha = GITHUB_BRANCH;
-            try {
-                const commitRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/commits/${GITHUB_BRANCH}`, {
-                    cache: 'no-store',
-                    headers: { 'Accept': 'application/vnd.github.v3+json' }
-                });
-                if (commitRes.ok) {
-                    const commitJson = await commitRes.json();
-                    if (commitJson && commitJson.sha) refSha = commitJson.sha;
-                }
-            } catch (_) {}
+        const commitRes = await fetchWithTimeout(
+            `https://api.github.com/repos/${GITHUB_REPO}/commits/${GITHUB_BRANCH}`,
+            { cache: 'no-store', headers }
+        );
 
-            const treeUrl = `https://api.github.com/repos/${GITHUB_REPO}/git/trees/${refSha}?recursive=1`;
-            const treeRes = await fetch(treeUrl, { cache: 'no-store' });
-            if (!treeRes.ok) throw new Error(`HTTP ${treeRes.status}`);
-            const treeData = await treeRes.json();
+        // 304 Not Modified = zero rate-limit cost & guaranteed zero changes on main!
+        if (commitRes.status === 304) {
+            return { notModified: true, commitSha: activeSyncCommitSha, commitEtag: activeCommitEtag };
+        }
+        if (!commitRes.ok) {
+            throw new Error(`GitHub API HTTP ${commitRes.status}`);
+        }
 
-            const recipeFiles = treeData.tree.filter(item =>
-                item.type === 'blob' &&
-                item.path.endsWith('.md') &&
-                (item.path.startsWith('recipe/') || item.path.startsWith('recipes/'))
+        const newEtag = commitRes.headers.get('etag') || '';
+        const commitJson = await commitRes.json();
+        const refSha = (commitJson && commitJson.sha) ? commitJson.sha : '';
+        if (!refSha) throw new Error('Missing commit SHA');
+
+        if (activeSyncCommitSha && refSha === activeSyncCommitSha) {
+            return { notModified: true, commitSha: refSha, commitEtag: newEtag || activeCommitEtag };
+        }
+
+        // Check if head commit edited recipe/*.md directly without regenerating docs/recipes-manifest.json
+        const changedFiles = Array.isArray(commitJson.files) ? commitJson.files : [];
+        const touchedRecipeMd = changedFiles.some(f =>
+            f && f.filename && f.filename.endsWith('.md') &&
+            (f.filename.startsWith('recipe/') || f.filename.startsWith('recipes/'))
+        );
+        const touchedManifest = changedFiles.some(f => f && f.filename === 'docs/recipes-manifest.json');
+
+        // Fast path: 1 single immutable-SHA manifest fetch (no CDN lag, no rate limit)
+        if (!(touchedRecipeMd && !touchedManifest)) {
+            const manifestRes = await fetchWithTimeout(
+                `https://raw.githubusercontent.com/${GITHUB_REPO}/${refSha}/docs/recipes-manifest.json`,
+                { cache: 'no-store' }
             );
-
-            if (recipeFiles.length > 0) {
-                const fetchedRaw = await Promise.all(recipeFiles.map(async file => {
-                    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${refSha}/${file.path}`;
-                    const res = await fetch(rawUrl, { cache: 'no-store' });
-                    if (!res.ok) return null;
-                    const content = await res.text();
-                    return { path: file.path, content };
-                }));
-
-                const validItems = fetchedRaw.filter(Boolean);
-                if (validItems.length > 0) {
-                    try {
-                        localStorage.setItem(CACHED_RECIPES_KEY, JSON.stringify({
-                            syncedAt: new Date().toISOString(),
-                            commitSha: refSha,
-                            items: validItems
-                        }));
-                    } catch (_) {}
-
-                    const parsed = validItems.map(item => parseRecipeMarkdown(item.content, item.path));
-                    applyLocalOverrides(parsed);
-                    allRecipes = parsed;
-                    setupFilterTabs();
-                    applyFilter();
-
-                    if (label) label.textContent = `동기화 완료 (${allRecipes.length}개)`;
-                    if (manualTrigger) showToast(`✅ GitHub에서 최신 레시피 ${allRecipes.length}개를 동기화했습니다!`);
-                    return;
+            if (manifestRes.ok) {
+                const manifest = await manifestRes.json();
+                if (manifest && Array.isArray(manifest.items) && manifest.items.length > 0) {
+                    return {
+                        notModified: false,
+                        commitSha: refSha,
+                        commitEtag: newEtag,
+                        items: manifest.items,
+                        contentHash: manifest.contentHash || computeRecipesHash(manifest.items),
+                        imageHashes: manifest.imageHashes || {}
+                    };
                 }
             }
-            if (label) label.textContent = `내장 레시피 (${allRecipes.length}개)`;
+        }
+
+        // Direct GitHub web-editor path: fetch full tree + raw markdown blobs at exact refSha
+        const treeHeaders = { 'Accept': 'application/vnd.github.v3+json' };
+        if (token) treeHeaders['Authorization'] = `token ${token}`;
+        const treeRes = await fetchWithTimeout(
+            `https://api.github.com/repos/${GITHUB_REPO}/git/trees/${refSha}?recursive=1`,
+            { cache: 'no-store', headers: treeHeaders }
+        );
+        if (!treeRes.ok) throw new Error(`Tree HTTP ${treeRes.status}`);
+        const treeData = await treeRes.json();
+
+        const recipeFiles = (treeData.tree || []).filter(item =>
+            item.type === 'blob' &&
+            item.path.endsWith('.md') &&
+            (item.path.startsWith('recipe/') || item.path.startsWith('recipes/'))
+        );
+        if (recipeFiles.length === 0) throw new Error('No recipe markdown files found');
+
+        const fetchedRaw = await Promise.all(recipeFiles.map(async file => {
+            const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${refSha}/${file.path}`;
+            const res = await fetchWithTimeout(rawUrl, { cache: 'no-store' });
+            if (!res.ok) return null;
+            const content = (await res.text()).replace(/\r\n/g, '\n');
+            return { path: file.path, content };
+        }));
+
+        const validItems = fetchedRaw.filter(Boolean);
+        if (validItems.length === 0) throw new Error('Failed to fetch raw markdown files');
+        validItems.sort((a, b) => a.path.localeCompare(b.path));
+
+        return {
+            notModified: false,
+            commitSha: refSha,
+            commitEtag: newEtag,
+            items: validItems,
+            contentHash: computeRecipesHash(validItems),
+            imageHashes: activeImageHashes
+        };
+    }
+
+    async function fetchRemotePayloadViaPagesManifest() {
+        const res = await fetchWithTimeout(
+            `${PAGES_BASE_URL}/recipes-manifest.json?t=${Date.now()}`,
+            { cache: 'no-store' }
+        );
+        if (!res.ok) throw new Error(`Pages Manifest HTTP ${res.status}`);
+        const manifest = await res.json();
+        if (!manifest || !Array.isArray(manifest.items) || manifest.items.length === 0) {
+            throw new Error('Invalid manifest payload');
+        }
+        return {
+            notModified: false,
+            commitSha: '',
+            commitEtag: '',
+            items: manifest.items,
+            contentHash: manifest.contentHash || computeRecipesHash(manifest.items),
+            imageHashes: manifest.imageHashes || {}
+        };
+    }
+
+    async function syncRecipesFromGitHub(manualTrigger = false, reason = 'manual') {
+        if (isSyncingRecipes) return;
+        const now = Date.now();
+        if (!manualTrigger && (now - lastAutoSyncMs) < AUTO_SYNC_COOLDOWN_MS) {
+            return;
+        }
+        isSyncingRecipes = true;
+        if (!manualTrigger) lastAutoSyncMs = now;
+
+        setSyncPillState('syncing', '웹 변경 확인 중...', '🔄');
+
+        try {
+            let remotePayload = null;
+            try {
+                // Channel 1: Instant Commit-SHA sync (0.1s after push, ETag 0-quota check)
+                remotePayload = await fetchRemotePayloadViaGitHubApi();
+            } catch (_) {
+                // Channel 2: Unlimited GitHub Pages CDN manifest fallback (immune to API rate limits)
+                remotePayload = await fetchRemotePayloadViaPagesManifest();
+            }
+
+            if (remotePayload.notModified) {
+                if (remotePayload.commitSha) activeSyncCommitSha = remotePayload.commitSha;
+                if (remotePayload.commitEtag) activeCommitEtag = remotePayload.commitEtag;
+                setSyncPillState('synced', `최신 상태 (${allRecipes.length}개)`, '✓');
+                if (manualTrigger) {
+                    showToast(`✅ 웹과 동일한 최신 레시피 상태입니다 (${allRecipes.length}개)`);
+                }
+                return;
+            }
+
+            const remoteHash = remotePayload.contentHash || computeRecipesHash(remotePayload.items);
+            const mergedImgHashes = {
+                ...(window.BUNDLED_IMAGE_HASHES || {}),
+                ...(remotePayload.imageHashes || {})
+            };
+            const imagesChanged = JSON.stringify(mergedImgHashes) !== JSON.stringify(activeImageHashes);
+            const recipesChanged = remoteHash !== activeContentHash;
+
+            if (remotePayload.commitSha) activeSyncCommitSha = remotePayload.commitSha;
+            if (remotePayload.commitEtag) activeCommitEtag = remotePayload.commitEtag;
+            activeImageHashes = mergedImgHashes;
+            activeContentHash = remoteHash;
+
+            // Persist latest synced version to localStorage so even future offline launches show this updated version
+            try {
+                localStorage.setItem(CACHED_RECIPES_KEY, JSON.stringify({
+                    syncedAt: new Date().toISOString(),
+                    commitSha: activeSyncCommitSha,
+                    commitEtag: activeCommitEtag,
+                    contentHash: activeContentHash,
+                    imageHashes: activeImageHashes,
+                    items: remotePayload.items
+                }));
+            } catch (_) {}
+
+            if (recipesChanged || imagesChanged) {
+                applyRecipeItemsToUI(remotePayload.items, true);
+                setSyncPillState('updated', `웹 변경 반영됨 (${allRecipes.length}개)`, '🟢');
+                showToast(`🔄 웹에서 변경된 최신 레시피(${allRecipes.length}개)가 반영되었습니다!`);
+            } else {
+                setSyncPillState('synced', `최신 상태 (${allRecipes.length}개)`, '✓');
+                if (manualTrigger) {
+                    showToast(`✅ 이미 최신 레시피 상태입니다 (${allRecipes.length}개)`);
+                }
+            }
         } catch (err) {
-            if (label) label.textContent = `오프라인 모드 (${allRecipes.length}개)`;
+            // Sync failed (offline / timeout / server unreachable) -> keep existing local recipes untouched!
+            setSyncPillState('offline', `로컬 보관본 (${allRecipes.length}개)`, '📦');
             if (manualTrigger) {
-                showToast('오프라인 상태입니다. 내장된 레시피를 표시합니다.');
+                showToast('📦 오프라인 상태입니다. 기기에 저장된 레시피를 표시합니다.');
             }
             if (allRecipes.length === 0) {
                 grid.innerHTML = `<div class="status-message"><p>네트워크 연결을 확인해 주세요.</p></div>`;
             }
+        } finally {
+            isSyncingRecipes = false;
         }
     }
 
@@ -2821,7 +3122,7 @@
                     const safeSrc = img.src.replace(/'/g, "\\'");
                     const safeAlt = (img.alt || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
                     return `
-                        <div class="step-guide-figure" onclick="openImageLightbox('${safeSrc}', '${safeAlt}', event)">
+                        <div class="step-guide-figure" onclick="openImageLightboxFromContainer(this, '${safeSrc}', '${safeAlt}', event)">
                             <img src="${img.src}" alt="${safeAlt}" loading="lazy" onerror="handleRecipeImgError(this, '')">
                             <div class="step-guide-caption">
                                 <span>🎨 조리 포인트 그림 · ${img.alt}</span>
@@ -3028,8 +3329,8 @@
         ` : '';
 
         const heroBannerHtml = recipe.heroImage ? `
-            <div class="modal-hero-banner" onclick="openImageLightbox('${recipe.heroImage.replace(/'/g, "\\'")}', '${(recipe.heroImageAlt || recipe.title).replace(/'/g, "\\'").replace(/"/g, '&quot;')}', event)">
-                <img src="${recipe.heroImage}" alt="${recipe.title.replace(/"/g, '&quot;')}" onerror="this.parentElement.style.display='none'">
+            <div class="modal-hero-banner" onclick="openImageLightboxFromContainer(this, '${recipe.heroImage.replace(/'/g, "\\'")}', '${(recipe.heroImageAlt || recipe.title).replace(/'/g, "\\'").replace(/"/g, '&quot;')}', event)">
+                <img src="${recipe.heroImage}" alt="${recipe.title.replace(/"/g, '&quot;')}" onerror="handleRecipeImgError(this, '')">
             </div>
         ` : '';
 
@@ -3396,7 +3697,7 @@
         }
     });
 
-    // Android Hardware Back Button support via Capacitor App plugin
+    // Android Hardware Back Button & Foreground Resume Auto-Sync via Capacitor App plugin
     if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
         window.Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
             if (modal.classList.contains('active')) {
@@ -3407,9 +3708,27 @@
                 window.Capacitor.Plugins.App.exitApp();
             }
         });
+
+        // 앱을 백그라운드에서 다시 켤 때(기동/전환 시) 웹 변경사항 즉시 체크
+        window.Capacitor.Plugins.App.addListener('appStateChange', ({ isActive }) => {
+            if (isActive) {
+                syncRecipesFromGitHub(false, 'app_resume');
+            }
+        });
     }
 
-    // Initialize app immediately with bundled recipes + background GitHub sync
+    // 브라우저 탭 복귀 및 네트워크 재연결 시에도 자동 동기화
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            syncRecipesFromGitHub(false, 'visibility');
+        }
+    });
+
+    window.addEventListener('online', () => {
+        syncRecipesFromGitHub(false, 'network_online');
+    });
+
+    // Initialize app immediately with local recipes + instant web diff sync
     loadInitialRecipes();
 </script>
 

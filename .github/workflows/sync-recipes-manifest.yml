@@ -1,0 +1,42 @@
+name: Sync Recipe Manifest
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'recipe/**'
+      - 'docs/images/recipes/**'
+
+permissions:
+  contents: write
+
+jobs:
+  sync-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Regenerate recipes-manifest.json & bundled-recipes.js if needed
+        run: |
+          node scripts/bundle-recipes.mjs
+          # Check if actual recipe contentHash or imageHashes changed (ignore timestamp-only diff)
+          if git diff --quiet -I '"generatedAt"' -I 'window.BUNDLED_AT' -- docs/recipes-manifest.json docs/bundled-recipes.js; then
+            git checkout -- docs/recipes-manifest.json docs/bundled-recipes.js
+            echo "Manifest hashes already up to date."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add docs/recipes-manifest.json docs/bundled-recipes.js
+            git commit -m "chore(recipes): auto-sync web manifest for app auto-update"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
