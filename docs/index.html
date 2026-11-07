@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Offline-bundled Marked.js & Bundled Recipes -->
     <script src="./vendor/marked.min.js"></script>
-    <script src="./bundled-recipes.js?v=mw64zayb"></script>
+    <script src="./bundled-recipes.js?v=mw65wsws"></script>
     <style>
         :root {
             --primary: #E63946;
@@ -1035,6 +1035,87 @@
             font-weight: 700;
         }
 
+        .section-serving-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.18rem 0.62rem;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: #FFF1F2;
+            color: var(--primary-dark);
+            border: 1px solid #FECDD3;
+        }
+
+        /* Advance Containers Box (Right under Ingredients) */
+        .prep-containers-card {
+            margin-top: 0.95rem;
+            background: linear-gradient(135deg, #FFFBEB 0%, #FEFCE8 100%);
+            border: 1.5px solid #FDE68A;
+            border-radius: 14px;
+            padding: 0.95rem 1.05rem;
+            box-shadow: 0 2px 6px rgba(180, 83, 9, 0.05);
+        }
+
+        .prep-containers-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 0.65rem;
+        }
+
+        .prep-containers-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #92400E;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.38rem;
+        }
+
+        .prep-containers-sub {
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: #B45309;
+        }
+
+        .prep-containers-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
+            gap: 0.55rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        .prep-container-item {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid #FDE68A;
+            border-radius: 10px;
+            padding: 0.62rem 0.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .prep-container-name {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #78350F;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            flex-wrap: wrap;
+        }
+
+        .prep-container-note {
+            font-size: 0.8rem;
+            color: #57534E;
+            line-height: 1.42;
+        }
+
         /* Steps & Inline Timer Pills */
         .steps-list {
             list-style: none;
@@ -1051,6 +1132,42 @@
             transition: var(--transition);
             cursor: pointer;
             border: 1px solid #F1F5F9;
+        }
+
+        .step-item.prep-step-item {
+            background: linear-gradient(135deg, #FFFDF5 0%, #FFFFFF 65%);
+            border: 1.5px solid #FCD34D;
+            box-shadow: 0 3px 10px rgba(217, 119, 6, 0.07);
+        }
+
+        .prep-step-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.16rem 0.58rem;
+            margin-right: 0.42rem;
+            border-radius: 50px;
+            background: #FEF3C7;
+            color: #92400E;
+            border: 1px solid #F59E0B;
+            font-size: 0.76rem;
+            font-weight: 800;
+            vertical-align: middle;
+        }
+
+        .step-var-val {
+            font-weight: 700;
+            color: #1E293B;
+            background: #F1F5F9;
+            padding: 0.06rem 0.38rem;
+            border-radius: 6px;
+            font-size: 0.94em;
+        }
+
+        .step-var-val.is-scaled {
+            color: #0369A1;
+            background: #E0F2FE;
+            border: 1px solid #BAE6FD;
         }
 
         .step-checkbox {
@@ -2180,7 +2297,7 @@
             .recipe-header h2 { font-size: 1.55rem; }
             .serving-top-row { flex-direction: column; align-items: stretch; }
             .serving-stepper { justify-content: space-between; }
-            .ingredients-list { grid-template-columns: 1fr; }
+            .ingredients-list, .prep-containers-list { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -2523,9 +2640,16 @@
         if (/식용유|포도씨유|카놀라유|올리브유|기름/.test(n) && !/참기름|들기름|고추기름/.test(n)) {
             return 'oil';
         }
-        if (/^(?:물|육수|멸치육수|다시마물)/.test(n) || /물\(또는육수\)|물\(사리용추가\)/.test(n)) {
-            // Check if it's broth-level water (>= 80ml) vs 2~3큰술 splash
-            const mlMatch = amount.match(/(\d+)\s*(?:ml|g|컵)/i);
+        if (/^(?:물|육수|멸치육수|다시마물|면삶는물|해감용물)/.test(n) || /물\(또는육수\)|물\(사리용추가\)|따로덜어둘면수/.test(n)) {
+            const literMatch = amount.match(/(\d+(?:\.\d+)?)\s*L\b/i);
+            if (literMatch && parseFloat(literMatch[1]) * 1000 >= 80) {
+                return 'liquid';
+            }
+            const cupMatch = amount.match(/(\d+(?:\.\d+)?)\s*컵/);
+            if (cupMatch && parseFloat(cupMatch[1]) >= 0.5) {
+                return 'liquid';
+            }
+            const mlMatch = amount.match(/(\d+)\s*(?:ml|g)\b/i);
             if (mlMatch && parseFloat(mlMatch[1]) >= 80) {
                 return 'liquid';
             }
@@ -2533,12 +2657,11 @@
         if (/부침가루|전분|밀가루|튀김가루|녹말/.test(n)) {
             return 'coating';
         }
-        if (/소금|맛소금|꽃소금|천일염|진간장|국간장|간장|고추장|된장|쌈장|굴소스|다시다|치킨스톡|액젓|까나리|멸치액젓|연두|미원|소고기다시다/.test(n)) {
+        if (/소금|맛소금|꽃소금|천일염|진간장|국간장|간장|고추장|된장|쌈장|굴소스|다시다|치킨스톡|액젓|까나리|멸치액젓|참치액|연두|미원|소고기다시다/.test(n)) {
             return 'strong_seasoning';
         }
-        if (/설탕|황설탕|물엿|올리고당|꿀|매실청|고춧가루|맛술|미림|청주|소주|참기름|들기름|버터|케첩|마요네즈|바질페스토|파마산|다진마늘|생강|식초|후추|후춧가루|레몬즙|와사비/.test(n) || /양념|소스/.test(sectionTitle)) {
-            // Avoid misclassifying main items if sectionTitle had 소스
-            if (!/고기|삼겹살|목살|앞다리|갈치|고등어|떡|어묵|라면|파스타|스파게티|새우|베이컨|양송이|토마토|양파|대파|밥|달걀|계란|스팸|참치|김치/.test(n)) {
+        if (/설탕|황설탕|물엿|올리고당|꿀|매실청|고춧가루|맛술|미림|청주|소주|화이트와인|참기름|들기름|버터|케첩|마요네즈|바질페스토|파마산|다진마늘|생강|식초|후추|후춧가루|레몬즙|와사비/.test(n) || /양념|소스/.test(sectionTitle)) {
+            if (!/고기|삼겹살|목살|앞다리|갈치|고등어|오징어|조개|바지락|모시조개|떡|어묵|라면|소면|파스타|스파게티|링귀니|새우|베이컨|양송이|버섯|토마토|양파|양배추|당근|대파|밥|달걀|계란|스팸|참치|김치/.test(n)) {
                 return 'mild_seasoning';
             }
         }
@@ -2595,6 +2718,12 @@
         const u = (unit || '').trim();
         if (val <= 0) return '약간';
 
+        // Liters
+        if (/^L\b/i.test(u)) {
+            const tenth = Math.round(val * 10) / 10;
+            return Number((tenth || 0.1).toFixed(1)).toString();
+        }
+
         // Grams or milliliters
         if (/^(?:g|ml|cc)\b/i.test(u)) {
             if (val >= 100) return String(Math.round(val / 5) * 5);
@@ -2610,8 +2739,8 @@
             return Number(tenth.toFixed(1)).toString();
         }
 
-        // Countable items (개, 장, 쪽, 토막, 대, 꼬집, 캔)
-        if (/꼬집|번/.test(u)) {
+        // Whole discrete countable items (알, 톨, 마리, 꼬집, 번)
+        if (/^(?:알|톨|마리|꼬집|번)/.test(u)) {
             return String(Math.max(1, Math.round(val)));
         }
 
@@ -3386,25 +3515,100 @@
             .replace(/`([^`]+)`/g, '<code>$1</code>');
     }
 
+    function splitMarkdownTableRow(line) {
+        const trimmed = (line || '').trim();
+        if (!trimmed.startsWith('|')) return null;
+        const inner = trimmed.replace(/^\|/, '').replace(/\|$/, '');
+        return inner.split('|').map(c => c.trim());
+    }
+
+    function isTableSeparatorCells(cells) {
+        if (!cells || cells.length === 0) return true;
+        return cells.every(c => !c || /^:?-+:?$/.test(c)) ||
+            (cells[0] && cells[0].includes('---')) ||
+            (cells[1] && cells[1].includes('---'));
+    }
+
     function parseTableRowsIntoIngredients(textBlock, sectionTitle = '') {
         const list = [];
-        const tableRows = textBlock.matchAll(/^\|\s*([^|]+)\|\s*([^|]+)\|(?:\s*([^|]*)\|)?/gm);
-        for (const match of tableRows) {
-            const name = match[1].replace(/\*\*/g, '').trim();
-            const amount = match[2].replace(/\*\*/g, '').trim();
-            const note = (match[3] || '').replace(/\*\*/g, '').replace(/\*/g, '').trim();
-            if (name && !/^(?:재료|양념\s*재료|품목)$/.test(name) && !name.includes('---') && !amount.includes('---')) {
-                const role = classifyIngredientRole(name, amount, sectionTitle);
-                list.push({ name, amount, note, role, group: sectionTitle });
+        for (const line of (textBlock || '').split('\n')) {
+            const cells = splitMarkdownTableRow(line);
+            if (!cells || cells.length < 2 || isTableSeparatorCells(cells)) continue;
+
+            const c0Plain = cells[0].replace(/[*`]/g, '').trim();
+            if (/^(?:변수|재료|양념\s*재료|품목|용기|항목)$/.test(c0Plain)) continue;
+
+            let varKey = '';
+            let name = '';
+            let amount = '';
+            let rawNote = '';
+
+            if (cells.length >= 3 && /^`?[a-zA-Z_][a-zA-Z0-9_]*`?$/.test(cells[0])) {
+                varKey = cells[0].replace(/`/g, '').trim();
+                name = (cells[1] || '').replace(/\*\*/g, '').trim();
+                amount = (cells[2] || '').replace(/\*\*/g, '').trim();
+                rawNote = (cells[3] || '').replace(/\*\*/g, '').replace(/\*/g, '').trim();
+            } else {
+                name = (cells[0] || '').replace(/\*\*/g, '').trim();
+                amount = (cells[1] || '').replace(/\*\*/g, '').trim();
+                rawNote = (cells[2] || '').replace(/\*\*/g, '').replace(/\*/g, '').trim();
             }
+
+            if (name && !/^(?:재료|양념\s*재료|품목|용기|항목)$/.test(name)) {
+                const role = classifyIngredientRole(name, amount, sectionTitle);
+                list.push({
+                    varKey,
+                    name,
+                    amount,
+                    rawNote,
+                    note: rawNote,
+                    role,
+                    group: sectionTitle
+                });
+            }
+        }
+        return list;
+    }
+
+    function parseAuxVariableRows(textBlock) {
+        const list = [];
+        const validRoles = new Set(['oil', 'liquid', 'coating', 'strong_seasoning', 'mild_seasoning', 'main']);
+        for (const line of (textBlock || '').split('\n')) {
+            const cells = splitMarkdownTableRow(line);
+            if (!cells || cells.length < 3 || isTableSeparatorCells(cells)) continue;
+            const c0Plain = cells[0].replace(/[*`]/g, '').trim();
+            if (/^(?:변수|항목|재료)$/.test(c0Plain)) continue;
+
+            const varKey = cells[0].replace(/[`*]/g, '').trim();
+            const name = (cells[1] || '').replace(/\*\*/g, '').trim();
+            const amount = (cells[2] || '').replace(/\*\*/g, '').trim();
+            const rawRole = (cells[3] || '').replace(/[`*]/g, '').trim();
+            if (!varKey || !amount) continue;
+            const role = validRoles.has(rawRole) ? rawRole : classifyIngredientRole(name, amount, '');
+            list.push({ varKey, name, amount, role });
+        }
+        return list;
+    }
+
+    function parseContainerRows(textBlock) {
+        const list = [];
+        for (const line of (textBlock || '').split('\n')) {
+            const cells = splitMarkdownTableRow(line);
+            if (!cells || cells.length < 1 || isTableSeparatorCells(cells)) continue;
+            const name = (cells[0] || '').replace(/\*\*/g, '').trim();
+            if (!name || /^(?:용기|준비\s*용기|조리\s*도구|도구)$/.test(name)) continue;
+            const rawNote = (cells[1] || '').trim();
+            list.push({ name, rawNote });
         }
         return list;
     }
 
     function parseStepBlocks(scopeText, hashes = '###', timerPrefix = 'Step') {
         const parsedSteps = [];
+        if (!scopeText || !scopeText.trim()) return parsedSteps;
         const splitRegex = new RegExp(`(?=^${hashes}\\s+Step\\s*\\d+)`, 'mi');
         const headerRegex = new RegExp(`^${hashes}\\s+(Step\\s*\\d+[^.\\n]*\\.?\\s*[^\\n]+)\\n?([\\s\\S]*)$`, 'i');
+        const prepTagRegex = /^\[(?:재료\s*손질|사전\s*손질|밑준비)\]\s*/;
         let counter = 0;
 
         for (const chunk of scopeText.split(splitRegex)) {
@@ -3412,8 +3616,8 @@
             if (!match) continue;
             counter++;
             const rawStepHeader = match[1].replace(/^Step\s*\d+\s*\.?\s*/i, '').trim();
-            const stepTitle = formatInlineMd(rawStepHeader);
-            // Stop at horizontal rule '---' or next H2 '## ' if present
+            const isPrepStep = prepTagRegex.test(rawStepHeader);
+            const cleanStepHeader = rawStepHeader.replace(prepTagRegex, '').trim();
             const rawBody = match[2].split(/\n---|\n##\s/)[0].trim();
 
             const stepImages = [];
@@ -3424,7 +3628,7 @@
                 const imgMatch = l.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
                 if (imgMatch) {
                     stepImages.push({
-                        alt: imgMatch[1].trim() || `${rawStepHeader} 참고 그림`,
+                        alt: imgMatch[1].trim() || `${cleanStepHeader} 참고 그림`,
                         src: resolveRecipeImageUrl(imgMatch[2])
                     });
                     continue;
@@ -3432,20 +3636,19 @@
                 textOnlyLines.push(l);
             }
 
-            const stepLines = textOnlyLines.map(l => {
-                if (/^[*-]\s+/.test(l)) {
-                    return '&nbsp;&nbsp;• ' + formatInlineMd(l.replace(/^[*-]\s+/, ''));
-                }
-                return formatInlineMd(l);
-            });
-            const stepBodyHtml = stepLines.join('<br>');
-            const plainForTimer = textOnlyLines.join('\n').replace(/[*_`>#]/g, '');
+            const plainForTimer = textOnlyLines
+                .join('\n')
+                .replace(/`?\{\{[^}]+\}\}`?/g, '')
+                .replace(/[*_`>#]/g, '');
             const timers = extractTimersFromStep(`${timerPrefix} ${counter}`, plainForTimer);
 
             parsedSteps.push({
                 index: counter,
-                titleHtml: stepTitle,
-                bodyHtml: stepBodyHtml,
+                isPrepStep,
+                rawTitle: cleanStepHeader,
+                rawLines: textOnlyLines,
+                titleHtml: formatInlineMd(cleanStepHeader),
+                bodyHtml: textOnlyLines.map(l => (/^[*-]\s+/.test(l) ? '&nbsp;&nbsp;• ' + formatInlineMd(l.replace(/^[*-]\s+/, '')) : formatInlineMd(l))).join('<br>'),
                 images: stepImages,
                 timers
             });
@@ -3506,8 +3709,10 @@
         let comment = (commentMatch && commentMatch[1]) ? commentMatch[1].replace(/\*\*/g, '').trim() : '';
         if (comment === '---' || comment === '-') comment = '';
 
-        // Extract base ingredients section (supports BOTH tables AND bullet lists inside ## 🛒 재료)
+        // Extract base ingredients, auxiliary cooking variables, and required advance containers
         const ingredients = [];
+        const auxVariables = [];
+        const containers = [];
         const ingSectionMatch = mdContent.match(/##\s*🛒?\s*재료[^\n]*\n([\s\S]*?)(?=\n##\s|$)/i);
         const ingScope = ingSectionMatch ? ingSectionMatch[1] : '';
 
@@ -3517,7 +3722,16 @@
                 const subHeaderMatch = sub.match(/^###\s+([^\n]+)/);
                 const subTitle = subHeaderMatch ? subHeaderMatch[1].trim() : '';
 
-                // 1) Table rows in this subsection
+                if (/조리\s*내\s*계량\s*변수/.test(subTitle)) {
+                    auxVariables.push(...parseAuxVariableRows(sub));
+                    continue;
+                }
+                if (/미리\s*준비할\s*용기|준비할\s*용기/.test(subTitle)) {
+                    containers.push(...parseContainerRows(sub));
+                    continue;
+                }
+
+                // 1) Table rows in this ingredient subsection
                 ingredients.push(...parseTableRowsIntoIngredients(sub, subTitle));
 
                 // 2) Bullet list items in this subsection (outside blockquotes)
@@ -3529,15 +3743,15 @@
                     if (bulletMatch) {
                         const name = bulletMatch[1].trim();
                         let rawAmt = bulletMatch[2].trim();
-                        let note = '';
+                        let rawNote = '';
                         const noteMatch = rawAmt.match(/(?:—|-|\*?\()([^*)]+)\)?\*?$/);
                         if (noteMatch && rawAmt.indexOf(noteMatch[0]) > 0) {
-                            note = noteMatch[1].replace(/\*/g, '').trim();
+                            rawNote = noteMatch[1].replace(/\*/g, '').trim();
                             rawAmt = rawAmt.slice(0, rawAmt.indexOf(noteMatch[0])).replace(/[—\-\s]+$/, '').trim();
                         }
                         rawAmt = rawAmt.replace(/\*/g, '').trim();
                         const role = classifyIngredientRole(name, rawAmt, subTitle);
-                        ingredients.push({ name, amount: rawAmt, note, role, group: subTitle });
+                        ingredients.push({ varKey: '', name, amount: rawAmt, rawNote, note: rawNote, role, group: subTitle });
                     }
                 }
             }
@@ -3548,16 +3762,20 @@
         const mainStepScope = mainStepMatch ? mainStepMatch[1] : mdContent;
         const steps = parseStepBlocks(mainStepScope, '###', 'Step');
 
-        // Also check if there is an Air Fryer section with timed steps!
+        // Legacy fallback if an Air Fryer H2 section exists outside variations
         const airFryerMatch = mdContent.match(/##\s*🍳?\s*에어프라이어[^\n]*\n([\s\S]*?)(?=\n---|(?:\n##\s)|$)/i);
         if (airFryerMatch) {
             const afBody = airFryerMatch[1].trim();
-            const afLines = afBody.split('\n').map(l => l.trim()).filter(Boolean).map(formatInlineMd);
-            if (afLines.length > 0) {
+            const afRawLines = afBody.split('\n').map(l => l.trim()).filter(Boolean);
+            if (afRawLines.length > 0) {
                 steps.push({
                     index: steps.length + 1,
+                    isPrepStep: false,
+                    rawTitle: '에어프라이어 조리 시 (선택)',
+                    rawLines: afRawLines,
                     titleHtml: '에어프라이어 조리 시 (선택)',
-                    bodyHtml: afLines.join('<br>'),
+                    bodyHtml: afRawLines.map(formatInlineMd).join('<br>'),
+                    images: [],
                     timers: extractTimersFromStep('에어프라이어', afBody.replace(/[*_`>#]/g, ''))
                 });
             }
@@ -3576,34 +3794,58 @@
                 const varTitle = headerMatch[2].trim();
                 const varBody = headerMatch[3].trim();
 
-                // Intro description lines before first table '|' or '#### Step'
-                const descLines = [];
-                for (const line of varBody.split('\n')) {
+                const h4SubParts = varBody.split(/(?=^####\s+)/m);
+                const leadPart = h4SubParts[0] || '';
+
+                const rawDescLines = [];
+                for (const line of leadPart.split('\n')) {
                     const t = line.trim();
                     if (!t || t === '---') continue;
-                    if (t.startsWith('|') || t.startsWith('####')) break;
-                    descLines.push(formatInlineMd(t));
+                    if (t.startsWith('|')) break;
+                    rawDescLines.push(t);
                 }
-                const varDescHtml = descLines.join(' ');
-                const varIngredients = parseTableRowsIntoIngredients(varBody, varTitle);
-                const varSteps = parseStepBlocks(varBody, '####', varTitle.replace(/^[^\w가-힣]+/, '').trim() || 'Step');
+                const rawDescription = rawDescLines.join(' ');
+                const varIngredients = parseTableRowsIntoIngredients(leadPart, varTitle);
+                const varAuxVariables = [];
+                const varContainers = [];
+                const stepChunks = [];
+
+                for (let idx = 1; idx < h4SubParts.length; idx++) {
+                    const sp = h4SubParts[idx];
+                    const h4Match = sp.match(/^####\s+([^\n]+)/);
+                    const h4Title = h4Match ? h4Match[1].trim() : '';
+                    if (/조리\s*내\s*계량\s*변수/.test(h4Title)) {
+                        varAuxVariables.push(...parseAuxVariableRows(sp));
+                    } else if (/미리\s*준비할\s*용기|준비할\s*용기/.test(h4Title)) {
+                        varContainers.push(...parseContainerRows(sp));
+                    } else if (/^Step\s*\d+/i.test(h4Title)) {
+                        stepChunks.push(sp);
+                    } else {
+                        varIngredients.push(...parseTableRowsIntoIngredients(sp, varTitle));
+                    }
+                }
+
+                const varSteps = parseStepBlocks(
+                    stepChunks.join('\n\n'),
+                    '####',
+                    varTitle.replace(/^[^\w가-힣]+/, '').trim() || 'Step'
+                );
+
+                const variationItem = {
+                    id: varType === '모드' ? `mode_${modes.length}` : `addon_${addons.length}`,
+                    title: varTitle,
+                    rawDescription,
+                    descriptionHtml: formatInlineMd(rawDescription),
+                    ingredients: varIngredients,
+                    auxVariables: varAuxVariables,
+                    containers: varContainers,
+                    steps: varSteps
+                };
 
                 if (varType === '모드') {
-                    modes.push({
-                        id: `mode_${modes.length}`,
-                        title: varTitle,
-                        descriptionHtml: varDescHtml,
-                        ingredients: varIngredients,
-                        steps: varSteps
-                    });
+                    modes.push(variationItem);
                 } else {
-                    addons.push({
-                        id: `addon_${addons.length}`,
-                        title: varTitle,
-                        descriptionHtml: varDescHtml,
-                        ingredients: varIngredients,
-                        steps: varSteps
-                    });
+                    addons.push(variationItem);
                 }
             }
         }
@@ -3621,6 +3863,8 @@
             difficulty,
             category,
             ingredients,
+            auxVariables,
+            containers,
             steps,
             modes,
             addons,
@@ -4215,13 +4459,11 @@
             btn.classList.toggle('active', Math.abs(pVal - clamped) < 0.01);
         });
 
-        // If a recipe modal is currently open, refresh its ingredients & steps live!
+        // If a recipe modal is currently open, refresh all N-serving sections live!
         if (activeRecipeId && modal.classList.contains('active')) {
             const recipe = allRecipes.find(r => r.id === activeRecipeId);
             if (recipe) {
                 updateServingPortion(currentServings);
-                const stepsListEl = document.getElementById('modal-steps-list');
-                if (stepsListEl) stepsListEl.innerHTML = renderStepsHtml(recipe);
             }
         }
 
@@ -4528,31 +4770,158 @@
         }).join('');
     }
 
-    function getEffectiveRecipeView(recipe) {
+    // =========================================================================
+    // CENTRALIZED SINGLE-SOURCE-OF-TRUTH N-SERVINGS VARIABLE ENGINE
+    // =========================================================================
+
+    function computeScaledEntry(entry, rawRatio, smartEnabled, gRatio = appSettings.gochujangRatio) {
+        const { factor, reason } = getSmartScaleFactor(entry.role || 'main', rawRatio, smartEnabled);
+        const isGochujang = isGochujangIngredient(entry.name || '');
+        const finalFactor = isGochujang ? (factor * gRatio) : factor;
+        const scaledAmt = scaleAmountText(entry.amount || '', finalFactor);
+        const mainAmt = (scaledAmt.split(/\s*\(/)[0] || '').trim() || scaledAmt;
+        const isNonLinearAdjusted = Boolean(
+            reason &&
+            Math.abs(factor - rawRatio) / Math.max(0.1, rawRatio) >= 0.05 &&
+            /\d/.test(entry.amount || '')
+        );
+        const isScaled = Math.abs(finalFactor - 1) >= 0.01 && /\d/.test(entry.amount || '');
+        return {
+            scaledAmt,
+            mainAmt,
+            factor,
+            finalFactor,
+            reason,
+            isGochujang,
+            isNonLinearAdjusted,
+            isScaled
+        };
+    }
+
+    function buildVariableContext(recipe, targetServings = currentServings, smartEnabled = smartScaleEnabled) {
+        const baseServ = (recipe && recipe.baseServings) ? recipe.baseServings : 1;
+        const rawRatio = targetServings / baseServ;
+        const gRatio = appSettings.gochujangRatio;
+        const varMap = new Map();
+
+        const registerList = (list) => {
+            if (!Array.isArray(list)) return;
+            for (const item of list) {
+                if (!item || !item.varKey) continue;
+                varMap.set(item.varKey, computeScaledEntry(item, rawRatio, smartEnabled, gRatio));
+            }
+        };
+
+        // 1) Base ingredients + auxiliary cooking variables
+        registerList(recipe.ingredients);
+        registerList(recipe.auxVariables);
+
+        // 2) All modes & addons (so full collapsible markdown also resolves every section's variables)
+        for (const m of (recipe.modes || [])) {
+            registerList(m.ingredients);
+            registerList(m.auxVariables);
+        }
+        for (const a of (recipe.addons || [])) {
+            registerList(a.ingredients);
+            registerList(a.auxVariables);
+        }
+
+        // 3) Active mode / active addons take top priority if any key overlaps
+        if (activeVariationMode !== 'base') {
+            const activeMode = (recipe.modes || []).find(m => m.id === activeVariationMode);
+            if (activeMode) {
+                registerList(activeMode.ingredients);
+                registerList(activeMode.auxVariables);
+            }
+        } else {
+            for (const a of (recipe.addons || [])) {
+                if (activeAddonIds.has(a.id)) {
+                    registerList(a.ingredients);
+                    registerList(a.auxVariables);
+                }
+            }
+        }
+
+        // 4) Built-in serving tokens
+        const isServingChanged = Math.abs(rawRatio - 1) >= 0.01;
+        const servText = `${targetServings}인분`;
+        varMap.set('servings', { scaledAmt: servText, mainAmt: servText, isScaled: isServingChanged });
+        varMap.set('인분', { scaledAmt: servText, mainAmt: servText, isScaled: isServingChanged });
+        varMap.set('servings_num', { scaledAmt: String(targetServings), mainAmt: String(targetServings), isScaled: isServingChanged });
+
+        return { varMap, rawRatio };
+    }
+
+    function resolveTokensPlain(rawText, varMap) {
+        if (!rawText) return '';
+        return rawText.replace(
+            /`\{\{\s*([a-zA-Z0-9_가-힣]+)(?::(main|full))?\s*\}\}`|\{\{\s*([a-zA-Z0-9_가-힣]+)(?::(main|full))?\s*\}\}/g,
+            (full, k1, m1, k2, m2) => {
+                const key = k1 || k2;
+                const modifier = m1 || m2 || 'full';
+                const resolved = varMap ? varMap.get(key) : null;
+                if (!resolved) return full;
+                return modifier === 'main' ? resolved.mainAmt : resolved.scaledAmt;
+            }
+        );
+    }
+
+    function formatInlineMdWithVars(rawText, varMap) {
+        if (!rawText) return '';
+        const formatted = formatInlineMd(rawText);
+        return formatted.replace(
+            /(?:<code>)?\{\{\s*([a-zA-Z0-9_가-힣]+)(?::(main|full))?\s*\}\}(?:<\/code>)?/g,
+            (full, key, modifier) => {
+                const resolved = varMap ? varMap.get(key) : null;
+                if (!resolved) return full;
+                const val = modifier === 'main' ? resolved.mainAmt : resolved.scaledAmt;
+                return `<span class="step-var-val${resolved.isScaled ? ' is-scaled' : ''}">${val}</span>`;
+            }
+        );
+    }
+
+    function getEffectiveRecipeView(recipe, varMap = null) {
         if (activeVariationMode !== 'base') {
             const mode = (recipe.modes || []).find(m => m.id === activeVariationMode);
             if (mode) {
+                const descHtml = mode.rawDescription
+                    ? formatInlineMdWithVars(mode.rawDescription, varMap)
+                    : (mode.descriptionHtml || '');
                 return {
                     ingredients: mode.ingredients.length > 0 ? mode.ingredients : recipe.ingredients,
+                    containers: (mode.containers && mode.containers.length > 0) ? mode.containers : (recipe.containers || []),
                     steps: mode.steps.length > 0 ? mode.steps : recipe.steps,
-                    notesHtml: mode.descriptionHtml ? `<strong>${mode.title}:</strong> ${mode.descriptionHtml}` : ''
+                    notesHtml: descHtml ? `<strong>${mode.title}:</strong> ${descHtml}` : ''
                 };
             }
         }
 
         const mergedIngredients = [...recipe.ingredients];
+        const mergedContainers = [...(recipe.containers || [])];
         const mergedSteps = recipe.steps.map(s => ({ ...s }));
         const selectedNotes = [];
 
         for (const addon of (recipe.addons || [])) {
             if (!activeAddonIds.has(addon.id)) continue;
-            if (addon.descriptionHtml) {
-                selectedNotes.push(`<strong>➕ ${addon.title}:</strong> ${addon.descriptionHtml}`);
+            const addonDescHtml = addon.rawDescription
+                ? formatInlineMdWithVars(addon.rawDescription, varMap)
+                : (addon.descriptionHtml || '');
+            if (addonDescHtml) {
+                selectedNotes.push(`<strong>➕ ${addon.title}:</strong> ${addonDescHtml}`);
             }
             for (const ing of addon.ingredients) {
                 mergedIngredients.push({
                     ...ing,
                     isAddon: true,
+                    addonId: addon.id,
+                    addonTitle: addon.title
+                });
+            }
+            for (const ct of (addon.containers || [])) {
+                mergedContainers.push({
+                    ...ct,
+                    isAddon: true,
+                    addonId: addon.id,
                     addonTitle: addon.title
                 });
             }
@@ -4561,6 +4930,7 @@
                     ...st,
                     index: mergedSteps.length + 1,
                     isAddon: true,
+                    addonId: addon.id,
                     addonTitle: addon.title
                 });
             }
@@ -4568,24 +4938,25 @@
 
         return {
             ingredients: mergedIngredients,
+            containers: mergedContainers,
             steps: mergedSteps,
             notesHtml: selectedNotes.join('<br style="margin-bottom:0.35rem;">')
         };
     }
 
-    function renderIngredientsHtml(recipe, targetServings, smartEnabled) {
-        const rawRatio = targetServings / (recipe.baseServings || 1);
+    function renderIngredientsHtml(recipe, targetServings, smartEnabled, varContext = null) {
+        const ctx = varContext || buildVariableContext(recipe, targetServings, smartEnabled);
+        const { varMap, rawRatio } = ctx;
         let anySmartAdjusted = false;
-        const { ingredients: effectiveIngredients } = getEffectiveRecipeView(recipe);
+        const { ingredients: effectiveIngredients } = getEffectiveRecipeView(recipe, varMap);
         const gRatio = appSettings.gochujangRatio;
         const isGochujangCustom = Math.abs(gRatio - 1) >= 0.01;
 
         const itemsHtml = effectiveIngredients.map(ing => {
-            const { factor, reason } = getSmartScaleFactor(ing.role, rawRatio, smartEnabled);
-            const isGochujang = isGochujangIngredient(ing.name);
-            const finalFactor = isGochujang ? (factor * gRatio) : factor;
-            const scaledAmt = scaleAmountText(ing.amount, finalFactor);
-            const isNonLinearAdjusted = reason && Math.abs(factor - rawRatio) / Math.max(0.1, rawRatio) >= 0.05 && /\d/.test(ing.amount);
+            const computed = (ing.varKey && varMap.has(ing.varKey))
+                ? varMap.get(ing.varKey)
+                : computeScaledEntry(ing, rawRatio, smartEnabled, gRatio);
+            const { scaledAmt, factor, reason, isGochujang, isNonLinearAdjusted } = computed;
             if (isNonLinearAdjusted) anySmartAdjusted = true;
 
             const ratioDiffText = isNonLinearAdjusted
@@ -4600,7 +4971,8 @@
                 ? `<span class="addon-ing-badge">➕ 옵션 추가</span>`
                 : '';
 
-            const noteHtml = ing.note ? `<span>${ing.note}</span>` : '<span></span>';
+            const resolvedNote = resolveTokensPlain(ing.rawNote || ing.note || '', varMap);
+            const noteHtml = resolvedNote ? `<span>${resolvedNote}</span>` : '<span></span>';
             const rightBadges = [addonBadgeHtml, gochujangBadgeHtml, ratioDiffText].filter(Boolean).join(' ');
 
             return `
@@ -4609,7 +4981,7 @@
                         <span class="ing-name">${ing.name}</span>
                         <span class="ing-amount">${scaledAmt}</span>
                     </div>
-                    ${(ing.note || rightBadges) ? `
+                    ${(resolvedNote || rightBadges) ? `
                     <div class="ing-meta-row">
                         ${noteHtml}
                         <span>${rightBadges}</span>
@@ -4618,28 +4990,77 @@
             `;
         }).join('');
 
-        return { itemsHtml, anySmartAdjusted, rawRatio };
+        return { itemsHtml, anySmartAdjusted, rawRatio, varMap };
     }
 
-    function renderStepsHtml(recipe) {
-        const { steps: effectiveSteps, ingredients: effectiveIngredients } = getEffectiveRecipeView(recipe);
+    function renderContainersHtml(recipe, varMap) {
+        const { containers } = getEffectiveRecipeView(recipe, varMap);
+        if (!containers || containers.length === 0) return '';
+
+        const listHtml = containers.map(ct => {
+            const addonBadge = ct.isAddon
+                ? `<span class="addon-ing-badge">➕ 옵션 용기</span>`
+                : '';
+            const noteHtml = formatInlineMdWithVars(ct.rawNote || '', varMap);
+            return `
+                <li class="prep-container-item">
+                    <span class="prep-container-name">🥣 ${ct.name} ${addonBadge}</span>
+                    ${noteHtml ? `<span class="prep-container-note">${noteHtml}</span>` : ''}
+                </li>
+            `;
+        }).join('');
+
+        return `
+            <div class="prep-containers-card">
+                <div class="prep-containers-header">
+                    <span class="prep-containers-title">🥣 미리 준비할 용기 · 조리도구</span>
+                    <span class="prep-containers-sub">재료와 함께 미리 꺼내두면 조리가 훨씬 수월해요</span>
+                </div>
+                <ul class="prep-containers-list">
+                    ${listHtml}
+                </ul>
+            </div>
+        `;
+    }
+
+    function renderStepsHtml(recipe, varMap = null) {
+        const ctxMap = varMap || buildVariableContext(recipe, currentServings, smartScaleEnabled).varMap;
+        const { steps: effectiveSteps, ingredients: effectiveIngredients } = getEffectiveRecipeView(recipe, ctxMap);
         const gRatio = appSettings.gochujangRatio;
         const isGochujangCustom = Math.abs(gRatio - 1) >= 0.01;
         const gochujangIng = effectiveIngredients.find(i => isGochujangIngredient(i.name));
 
         return effectiveSteps.map(step => {
+            const stepKey = `${activeVariationMode}_${step.isAddon ? ('addon_' + (step.addonId || '') + '_') : ''}${step.index}`;
             const addonPrefix = step.isAddon
                 ? `<span class="addon-ing-badge" style="margin-right:0.35rem; vertical-align:middle;">➕ ${step.addonTitle}</span>`
                 : '';
-            const stepMentionsGochujang = isGochujangCustom && /고추장/.test(step.bodyHtml || '');
+            const prepBadgeHtml = (step.isPrepStep && !step.isAddon)
+                ? `<span class="prep-step-badge">🔪 ${step.index}단계 · 사전 재료 손질</span>`
+                : '';
+
+            const stepTitleHtml = step.rawTitle
+                ? formatInlineMdWithVars(step.rawTitle, ctxMap)
+                : step.titleHtml;
+
+            const stepBodyHtml = Array.isArray(step.rawLines)
+                ? step.rawLines.map(l => {
+                    if (/^[*-]\s+/.test(l)) {
+                        return '&nbsp;&nbsp;• ' + formatInlineMdWithVars(l.replace(/^[*-]\s+/, ''), ctxMap);
+                    }
+                    return formatInlineMdWithVars(l, ctxMap);
+                }).join('<br>')
+                : step.bodyHtml;
+
+            const stepMentionsGochujang = isGochujangCustom && /고추장/.test(stepBodyHtml || '');
             let gochujangStepNoteHtml = '';
             if (stepMentionsGochujang && gochujangIng) {
-                const rawRatio = currentServings / (recipe.baseServings || 1);
-                const { factor } = getSmartScaleFactor(gochujangIng.role, rawRatio, smartScaleEnabled);
-                const curGochujangAmt = scaleAmountText(gochujangIng.amount, factor * gRatio);
+                const gComp = (gochujangIng.varKey && ctxMap.has(gochujangIng.varKey))
+                    ? ctxMap.get(gochujangIng.varKey)
+                    : computeScaledEntry(gochujangIng, currentServings / (recipe.baseServings || 1), smartScaleEnabled, gRatio);
                 gochujangStepNoteHtml = `
                     <div class="step-gochujang-note">
-                        🌶️ 고추장 ${Math.round(gRatio * 100)}% 설정 적용 중 → 고추장은 <strong>${curGochujangAmt}</strong> 넣어주세요!
+                        🌶️ 고추장 ${Math.round(gRatio * 100)}% 설정 반영됨 (${currentServings}인분 기준 <strong>${gComp.scaledAmt}</strong>)
                     </div>
                 `;
             }
@@ -4660,13 +5081,19 @@
                 }).join('')
                 : '';
 
+            const itemClasses = [
+                'step-item',
+                step.isAddon ? 'addon-step-item' : '',
+                (step.isPrepStep && !step.isAddon) ? 'prep-step-item' : ''
+            ].filter(Boolean).join(' ');
+
             return `
-                <div class="step-item ${step.isAddon ? 'addon-step-item' : ''}" onclick="toggleStep(this)">
+                <div class="${itemClasses}" data-step-key="${stepKey}" onclick="toggleStep(this)">
                     <div class="step-checkbox">✓</div>
                     <div class="step-content-col">
                         <div class="step-text">
-                            ${addonPrefix}<strong>Step ${step.index}. ${step.titleHtml}</strong><br>
-                            ${step.bodyHtml}
+                            ${addonPrefix}${prepBadgeHtml}<strong>Step ${step.index}. ${stepTitleHtml}</strong><br>
+                            ${stepBodyHtml}
                         </div>
                         ${gochujangStepNoteHtml}
                         ${stepImagesHtml}
@@ -4682,6 +5109,80 @@
                 </div>
             `;
         }).join('');
+    }
+
+    function reRenderStepsPreservingChecks(recipe, varMap) {
+        const stepsListEl = document.getElementById('modal-steps-list');
+        if (!stepsListEl) return;
+        const completedKeys = new Set();
+        stepsListEl.querySelectorAll('.step-item.completed[data-step-key]').forEach(el => {
+            completedKeys.add(el.getAttribute('data-step-key'));
+        });
+        stepsListEl.innerHTML = renderStepsHtml(recipe, varMap);
+        if (completedKeys.size > 0) {
+            stepsListEl.querySelectorAll('.step-item[data-step-key]').forEach(el => {
+                if (completedKeys.has(el.getAttribute('data-step-key'))) {
+                    el.classList.add('completed');
+                }
+            });
+        }
+    }
+
+    function renderFullMarkdownForServings(recipe, targetServings, varMap) {
+        let md = recipe.rawMarkdown
+            .replace(/^\*\s+\*\*검증\s*상태:\*\*[^\r\n]*\r?\n/gm, '')
+            .replace(/\n###+\s*📌?\s*조리\s*내\s*계량\s*변수[\s\S]*?(?=\n###|\n---|\n##\s|$)/g, '\n');
+
+        // Update overview & ingredients headings to reflect targetServings
+        const servNote = Math.abs(targetServings - (recipe.baseServings || 1)) >= 0.01
+            ? `${targetServings}인분 기준 *(기본 ${recipe.baseServings}인분에서 자동 환산)*`
+            : `${targetServings}인분 기준`;
+        md = md.replace(/^([*-]\s+\*\*(?:조리\s*분량|분량):\*\*)\s*[^\r\n]+/m, `$1 ${servNote}`);
+        md = md.replace(/^(##\s*🛒?\s*재료)[^\r\n]*/m, `$1 (${targetServings}인분 기준)`);
+        md = md.replace(/^(###+\s+Step\s*\d+\.\s*)\[(?:재료\s*손질|사전\s*손질|밑준비)\]\s*/gim, '$1🔪 [사전 재료 손질] ');
+
+        // Strip internal '변수' column from 4-column ingredient tables and inject scaled quantities
+        let inVarTable = false;
+        const transformedLines = md.split('\n').map(line => {
+            const cells = splitMarkdownTableRow(line);
+            if (!cells) {
+                if (line.trim() !== '') inVarTable = false;
+                return line;
+            }
+            const c0Plain = (cells[0] || '').replace(/[*`]/g, '').trim();
+            if (c0Plain === '변수' && cells.length >= 3) {
+                inVarTable = true;
+                const restHeader = cells.slice(1).map((c, idx) => (idx === 1 ? `수량 / 분량 (${targetServings}인분)` : c));
+                return '| ' + restHeader.join(' | ') + ' |';
+            }
+            if (inVarTable && isTableSeparatorCells(cells) && cells.length >= 3) {
+                return '| ' + cells.slice(1).join(' | ') + ' |';
+            }
+            if (inVarTable && cells.length >= 3 && /^`?[a-zA-Z_][a-zA-Z0-9_]*`?$/.test(cells[0])) {
+                const key = cells[0].replace(/`/g, '').trim();
+                const entry = varMap ? varMap.get(key) : null;
+                const rest = cells.slice(1);
+                if (entry) rest[1] = entry.scaledAmt;
+                return '| ' + rest.join(' | ') + ' |';
+            }
+            return line;
+        });
+
+        const cleanedMd = resolveTokensPlain(transformedLines.join('\n'), varMap)
+            .replace(/^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*$/gm, (_, type) => {
+                const labelMap = { NOTE: '📌 참고', TIP: '💡 팁', IMPORTANT: '⭐ 핵심 체크', WARNING: '⚠️ 주의', CAUTION: '🚨 주의' };
+                return `> **${labelMap[type] || type}**`;
+            })
+            .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => `![${alt}](${resolveRecipeImageUrl(url)})`);
+
+        return typeof marked !== 'undefined' ? marked.parse(cleanedMd, { breaks: true }) : '';
+    }
+
+    function formatServingsMetaBadgeHtml(recipe, targetServings) {
+        if (Math.abs(targetServings - (recipe.baseServings || 1)) < 0.01) {
+            return `👥 <strong>조리 분량:</strong> ${targetServings}인분 기준`;
+        }
+        return `👥 <strong>현재 분량:</strong> <strong style="color:var(--primary-dark);">${targetServings}인분</strong> <span style="font-size:0.82em; opacity:0.75;">(기본 ${recipe.baseServings}인분)</span>`;
     }
 
     function refreshModalVariationSections() {
@@ -4706,27 +5207,8 @@
             if (iconSpan) iconSpan.textContent = isActive ? '✓' : '+';
         });
 
-        // Update description box
-        const { notesHtml } = getEffectiveRecipeView(recipe);
-        const descBox = document.getElementById('variation-desc-box');
-        if (descBox) {
-            if (notesHtml) {
-                descBox.innerHTML = notesHtml;
-                descBox.classList.add('visible');
-            } else {
-                descBox.innerHTML = '';
-                descBox.classList.remove('visible');
-            }
-        }
-
-        // Re-render scaled ingredients & banner
+        // Re-render everything (ingredients, containers, steps, notes, headers, full markdown) via single pipeline
         updateServingPortion(currentServings);
-
-        // Re-render steps list + timers
-        const stepsListEl = document.getElementById('modal-steps-list');
-        if (stepsListEl) {
-            stepsListEl.innerHTML = renderStepsHtml(recipe);
-        }
     }
 
     function selectVariationMode(modeId) {
@@ -4764,19 +5246,63 @@
             chip.classList.toggle('active', Math.abs(val - currentServings) < 0.01);
         });
 
-        // Re-render ingredients list & smart banner
-        const { itemsHtml, anySmartAdjusted, rawRatio } = renderIngredientsHtml(recipe, currentServings, smartScaleEnabled);
+        // Single-source-of-truth variable context for current N servings
+        const varContext = buildVariableContext(recipe, currentServings, smartScaleEnabled);
+        const { itemsHtml, anySmartAdjusted, rawRatio, varMap } = renderIngredientsHtml(recipe, currentServings, smartScaleEnabled, varContext);
+
+        // 1) Top meta badge & section headers
+        const servMetaEl = document.getElementById('modal-servings-meta');
+        if (servMetaEl) servMetaEl.innerHTML = formatServingsMetaBadgeHtml(recipe, currentServings);
+
+        const ingHeadingEl = document.getElementById('modal-ingredients-heading');
+        if (ingHeadingEl) {
+            ingHeadingEl.innerHTML = `🛒 필요 재료 <span class="section-serving-pill">${currentServings}인분 기준</span>`;
+        }
+        const stepsHeadingEl = document.getElementById('modal-steps-heading');
+        if (stepsHeadingEl) {
+            stepsHeadingEl.innerHTML = `🔥 조리 순서 & 타이머 <span class="section-serving-pill">${currentServings}인분 기준</span>`;
+        }
+
+        // 2) Variation description box (resolved with N-serving variables)
+        const { notesHtml } = getEffectiveRecipeView(recipe, varMap);
+        const descBox = document.getElementById('variation-desc-box');
+        if (descBox) {
+            if (notesHtml) {
+                descBox.innerHTML = notesHtml;
+                descBox.classList.add('visible');
+            } else {
+                descBox.innerHTML = '';
+                descBox.classList.remove('visible');
+            }
+        }
+
+        // 3) Ingredients list + Advance containers box right underneath
         const listEl = document.getElementById('scaled-ingredients-list');
         if (listEl) listEl.innerHTML = itemsHtml;
 
+        const containersBoxEl = document.getElementById('modal-containers-box');
+        if (containersBoxEl) {
+            containersBoxEl.innerHTML = renderContainersHtml(recipe, varMap);
+        }
+
+        // 4) Smart scale banner
         const bannerEl = document.getElementById('smart-scale-banner');
         if (bannerEl) {
             if (anySmartAdjusted && smartScaleEnabled) {
                 bannerEl.classList.add('visible');
-                bannerEl.innerHTML = `💡 <strong>스마트 양념 보정 적용 중 (${recipe.baseServings}인분 → ${currentServings}인분):</strong> 주재료는 정확히 <strong>${Number(rawRatio.toFixed(2))}배</strong>로 변경하고, 짜지거나 기름지지 않도록 <strong>소금·간장·고추장(염도), 팬 코팅 식용유, 국물 증발량</strong>은 요리 비율에 맞춰 자동 보정했습니다.`;
+                bannerEl.innerHTML = `💡 <strong>스마트 양념 보정 적용 중 (${recipe.baseServings}인분 → ${currentServings}인분):</strong> 재료와 조리 순서 전체가 <strong>${currentServings}인분</strong>으로 연동되었으며, 주재료는 <strong>${Number(rawRatio.toFixed(2))}배</strong>·소금·간장·고추장·식용유·육수는 짜지 않게 요리 비율로 자동 보정했습니다.`;
             } else {
                 bannerEl.classList.remove('visible');
             }
+        }
+
+        // 5) Cooking steps (preserving completed checkmarks)
+        reRenderStepsPreservingChecks(recipe, varMap);
+
+        // 6) Collapsible full markdown view
+        const fullMdEl = document.getElementById('modal-rendered-markdown');
+        if (fullMdEl) {
+            fullMdEl.innerHTML = renderFullMarkdownForServings(recipe, currentServings, varMap);
         }
     }
 
@@ -4807,16 +5333,11 @@
             startRecipeViewTracker(id);
         }
 
-        const cleanedMd = recipe.rawMarkdown
-            .replace(/^\*\s+\*\*검증\s*상태:\*\*[^\r\n]*\r?\n/gm, '')
-            .replace(/^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*$/gm, (_, type) => {
-                const labelMap = { NOTE: '📌 참고', TIP: '💡 팁', IMPORTANT: '⭐ 핵심 체크', WARNING: '⚠️ 주의', CAUTION: '🚨 주의' };
-                return `> **${labelMap[type] || type}**`;
-            })
-            .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => `![${alt}](${resolveRecipeImageUrl(url)})`);
-        const renderedMarkdown = typeof marked !== 'undefined' ? marked.parse(cleanedMd, { breaks: true }) : '';
-        const { itemsHtml } = renderIngredientsHtml(recipe, currentServings, smartScaleEnabled);
-        const stepsHtml = renderStepsHtml(recipe);
+        const varContext = buildVariableContext(recipe, currentServings, smartScaleEnabled);
+        const { itemsHtml, varMap } = renderIngredientsHtml(recipe, currentServings, smartScaleEnabled, varContext);
+        const containersHtml = renderContainersHtml(recipe, varMap);
+        const stepsHtml = renderStepsHtml(recipe, varMap);
+        const renderedMarkdown = renderFullMarkdownForServings(recipe, currentServings, varMap);
         const hasModes = recipe.modes && recipe.modes.length > 0;
         const hasAddons = recipe.addons && recipe.addons.length > 0;
         const hasVariations = hasModes || hasAddons;
@@ -4826,7 +5347,7 @@
             <div class="variation-selector-card">
                 <div class="variation-header">
                     <h4>🎛️ 베리에이션 & 조리 방식 선택</h4>
-                    <span class="variation-subhint">선택에 맞춰 재료·인분·조리 순서가 자동 반영됩니다</span>
+                    <span class="variation-subhint">선택에 맞춰 재료·준비 용기·조리 순서가 자동 반영됩니다</span>
                 </div>
                 ${hasModes ? `
                 <div class="variation-mode-tabs">
@@ -4872,7 +5393,7 @@
             ${heroBannerHtml}
 
             <div class="recipe-meta">
-                <span>👥 <strong>기본 분량:</strong> ${recipe.servings}</span>
+                <span id="modal-servings-meta">${formatServingsMetaBadgeHtml(recipe, currentServings)}</span>
                 <span>🕒 <strong>소요시간:</strong> ${recipe.time}</span>
                 <span>📊 <strong>난이도:</strong> ${recipe.difficulty}</span>
                 <span>🍽️ <strong>분류:</strong> ${recipe.category}</span>
@@ -4885,8 +5406,8 @@
             <div class="serving-calculator-card">
                 <div class="serving-top-row">
                     <div class="serving-title-group">
-                        <h4>⚖️ 인분 조절 & 재료 자동 계량</h4>
-                        <span class="serving-base-hint">레시피 기준: ${recipe.baseServings}인분 · 인분을 바꾸면 양념 비율이 알맞게 자동 조정됩니다</span>
+                        <h4>⚖️ 인분 조절 & 전 구간 자동 계량</h4>
+                        <span class="serving-base-hint">기준 ${recipe.baseServings}인분 · 변경 시 재료·용기·조리 순서 모든 분량이 함께 바뀝니다</span>
                     </div>
                     <div class="serving-stepper">
                         <button id="serving-minus-btn" class="stepper-btn" onclick="changeServingDelta(-1)" ${currentServings <= 0.5 ? 'disabled' : ''}>−</button>
@@ -4927,17 +5448,20 @@
 
             <div class="recipe-section">
                 <div class="recipe-section-header">
-                    <h4>🛒 필요 재료</h4>
+                    <h4 id="modal-ingredients-heading">🛒 필요 재료 <span class="section-serving-pill">${currentServings}인분 기준</span></h4>
                 </div>
                 <ul id="scaled-ingredients-list" class="ingredients-list">
                     ${itemsHtml}
                 </ul>
+                <div id="modal-containers-box">
+                    ${containersHtml}
+                </div>
             </div>` : ''}
 
             ${(recipe.steps.length > 0 || hasVariations) ? `
             <div class="recipe-section">
                 <div class="recipe-section-header">
-                    <h4>🔥 조리 순서 & 타이머</h4>
+                    <h4 id="modal-steps-heading">🔥 조리 순서 & 타이머 <span class="section-serving-pill">${currentServings}인분 기준</span></h4>
                     <button class="custom-timer-trigger" onclick="openCustomTimerPrompt()">⏱️ + 직접 타이머 설정</button>
                 </div>
                 <div id="modal-steps-list" class="steps-list">
@@ -4977,7 +5501,7 @@
             <div class="recipe-section">
                 <details class="raw-md-details">
                     <summary>📖 레시피 원문 및 꿀팁 전체 보기 <span>▾</span></summary>
-                    <div class="recipe-rendered-body">
+                    <div id="modal-rendered-markdown" class="recipe-rendered-body">
                         ${renderedMarkdown}
                     </div>
                 </details>
@@ -4989,6 +5513,9 @@
                 </a>
             </div>
         `;
+
+        // Sync smart banner & variation description box if re-opened with non-default state
+        updateServingPortion(currentServings);
 
         modal.classList.add('active');
         document.body.classList.add('modal-open');
