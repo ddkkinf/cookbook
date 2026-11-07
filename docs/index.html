@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Offline-bundled Marked.js & Bundled Recipes -->
     <script src="./vendor/marked.min.js"></script>
-    <script src="./bundled-recipes.js?v=mw65wsws"></script>
+    <script src="./bundled-recipes.js?v=mw66fb3b"></script>
     <style>
         :root {
             --primary: #E63946;
@@ -972,21 +972,33 @@
 
         .ingredients-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
-            gap: 0.7rem;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: start;
+            gap: 0.45rem;
             list-style: none;
         }
 
         .ingredients-list li {
             background: white;
-            padding: 0.85rem 1rem;
-            border-radius: 12px;
+            padding: 0.52rem 0.68rem;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
-            gap: 0.28rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-            border: 1px solid #F1F5F9;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+            border: 1px solid #E2E8F0;
             transition: var(--transition);
+            min-width: 0;
+        }
+
+        .ingredients-list li.has-info,
+        .prep-container-item.has-info {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .ingredients-list li.has-info:active,
+        .prep-container-item.has-info:active {
+            transform: scale(0.985);
         }
 
         .ingredients-list li.scaled-highlight {
@@ -994,33 +1006,147 @@
             background: #F8FDFF;
         }
 
+        .ingredients-list li.info-open {
+            border-color: #93C5FD;
+            background: #F8FAFC;
+            box-shadow: 0 3px 10px rgba(37, 99, 235, 0.08);
+        }
+
         .ing-row-main {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            gap: 0.6rem;
+            align-items: center;
+            gap: 0.35rem;
+            min-width: 0;
         }
 
         .ing-name {
             font-weight: 600;
             color: var(--text-main);
-            font-size: 0.95rem;
+            font-size: 0.86rem;
+            line-height: 1.28;
+            min-width: 0;
+            word-break: keep-all;
+            overflow-wrap: anywhere;
+        }
+
+        .ing-role-tag {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #475569;
+            background: #F1F5F9;
+            border: 1px solid #E2E8F0;
+            padding: 0.02rem 0.32rem;
+            border-radius: 4px;
+            margin-left: 0.2rem;
+            vertical-align: middle;
+        }
+
+        .ing-addon-dot {
+            display: inline-block;
+            font-size: 0.67rem;
+            font-weight: 800;
+            color: #B45309;
+            background: #FEF3C7;
+            border: 1px solid #FDE68A;
+            padding: 0.02rem 0.28rem;
+            border-radius: 4px;
+            margin-right: 0.2rem;
+            vertical-align: middle;
+        }
+
+        .ing-right-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.28rem;
+            flex-shrink: 0;
         }
 
         .ing-amount {
             font-weight: 700;
             color: var(--primary);
-            font-size: 0.95rem;
+            font-size: 0.84rem;
             text-align: right;
+            white-space: nowrap;
         }
 
-        .ing-meta-row {
-            display: flex;
-            justify-content: space-between;
+        .ing-info-btn {
+            width: 17px;
+            height: 17px;
+            border-radius: 50%;
+            background: #EFF6FF;
+            color: #2563EB;
+            border: 1px solid #BFDBFE;
+            font-size: 0.68rem;
+            font-weight: 800;
+            font-style: italic;
+            font-family: Georgia, ui-serif, serif;
+            line-height: 1;
+            display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+
+        .ingredients-list li.info-open .ing-info-btn,
+        .prep-container-item.info-open .ing-info-btn {
+            background: #2563EB;
+            color: white;
+            border-color: #2563EB;
+        }
+
+        .ing-info-drawer {
+            display: none;
+            flex-direction: column;
+            gap: 0.22rem;
+            margin-top: 0.38rem;
+            padding-top: 0.38rem;
+            border-top: 1px dashed #CBD5E1;
+            font-size: 0.74rem;
+            color: #475569;
+            line-height: 1.38;
+        }
+
+        .ingredients-list li.info-open .ing-info-drawer,
+        .prep-container-item.info-open .ing-info-drawer {
+            display: flex;
+        }
+
+        .ing-info-line {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.26rem;
+            word-break: keep-all;
+        }
+
+        .ing-info-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-top: 0.08rem;
+        }
+
+        .ing-all-info-toggle {
+            padding: 0.28rem 0.68rem;
+            border-radius: 50px;
+            border: 1px solid #BFDBFE;
+            background: #EFF6FF;
+            color: #1D4ED8;
             font-size: 0.76rem;
-            color: #64748B;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.28rem;
+            transition: var(--transition);
+        }
+
+        .ing-all-info-toggle.active {
+            background: #2563EB;
+            border-color: #2563EB;
+            color: white;
         }
 
         .smart-adj-badge {
@@ -1031,7 +1157,7 @@
             color: #0369A1;
             padding: 0.12rem 0.5rem;
             border-radius: 50px;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             font-weight: 700;
         }
 
@@ -1049,11 +1175,11 @@
 
         /* Advance Containers Box (Right under Ingredients) */
         .prep-containers-card {
-            margin-top: 0.95rem;
+            margin-top: 0.75rem;
             background: linear-gradient(135deg, #FFFBEB 0%, #FEFCE8 100%);
             border: 1.5px solid #FDE68A;
-            border-radius: 14px;
-            padding: 0.95rem 1.05rem;
+            border-radius: 13px;
+            padding: 0.75rem 0.85rem;
             box-shadow: 0 2px 6px rgba(180, 83, 9, 0.05);
         }
 
@@ -1062,21 +1188,21 @@
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 0.4rem;
-            margin-bottom: 0.65rem;
+            gap: 0.35rem;
+            margin-bottom: 0.5rem;
         }
 
         .prep-containers-title {
-            font-size: 0.95rem;
+            font-size: 0.88rem;
             font-weight: 800;
             color: #92400E;
             display: inline-flex;
             align-items: center;
-            gap: 0.38rem;
+            gap: 0.32rem;
         }
 
         .prep-containers-sub {
-            font-size: 0.76rem;
+            font-size: 0.72rem;
             font-weight: 600;
             color: #B45309;
         }
@@ -1084,8 +1210,9 @@
         .prep-containers-list {
             list-style: none;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
-            gap: 0.55rem;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: start;
+            gap: 0.42rem;
             margin: 0;
             padding: 0;
         }
@@ -1093,27 +1220,27 @@
         .prep-container-item {
             background: rgba(255, 255, 255, 0.92);
             border: 1px solid #FDE68A;
-            border-radius: 10px;
-            padding: 0.62rem 0.8rem;
+            border-radius: 9px;
+            padding: 0.48rem 0.62rem;
             display: flex;
             flex-direction: column;
-            gap: 0.2rem;
+            min-width: 0;
+            transition: var(--transition);
+        }
+
+        .prep-container-item.info-open {
+            border-color: #F59E0B;
+            background: #FFFFFF;
         }
 
         .prep-container-name {
-            font-size: 0.88rem;
+            font-size: 0.82rem;
             font-weight: 700;
             color: #78350F;
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
-            flex-wrap: wrap;
-        }
-
-        .prep-container-note {
-            font-size: 0.8rem;
-            color: #57534E;
-            line-height: 1.42;
+            line-height: 1.28;
+            min-width: 0;
+            word-break: keep-all;
+            overflow-wrap: anywhere;
         }
 
         /* Steps & Inline Timer Pills */
@@ -2297,7 +2424,11 @@
             .recipe-header h2 { font-size: 1.55rem; }
             .serving-top-row { flex-direction: column; align-items: stretch; }
             .serving-stepper { justify-content: space-between; }
-            .ingredients-list, .prep-containers-list { grid-template-columns: 1fr; }
+            .ingredients-list, .prep-containers-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.38rem; }
+            .ingredients-list li, .prep-container-item { padding: 0.46rem 0.54rem; }
+            .ing-name { font-size: 0.82rem; }
+            .ing-amount { font-size: 0.81rem; }
+            .prep-container-name { font-size: 0.79rem; }
         }
     </style>
 </head>
@@ -4944,6 +5075,54 @@
         };
     }
 
+    function splitParentheticalLabel(str) {
+        const s = (str || '').trim();
+        const m = s.match(/^([^(]+?)\s*\(([^)]+)\)\s*$/);
+        if (!m) return { primary: s, sub: '' };
+        return { primary: m[1].trim(), sub: m[2].trim() };
+    }
+
+    function shortenDuplicateRoleHint(sub) {
+        if (!sub) return '';
+        return sub
+            .replace(/^미림\s*·\s*/g, '')
+            .replace(/\s*(?:배합용|추출용|에\s*투입|에\s*먼저\s*투입|사용\s*시)/g, (m) => m.includes('용') ? '용' : '')
+            .replace(/양념장에\s*갈거나\s*다져\s*넣음/g, '양념장용')
+            .replace(/나중에\s*볶을\s*때\s*투입/g, '볶음용')
+            .replace(/팬\s*가장자리\s*불향용/g, '불향용')
+            .replace(/팬\s*가장자리에/g, '불향용')
+            .replace(/고기용\s*추가/g, '고기추가')
+            .trim();
+    }
+
+    function toggleInfoCard(el) {
+        if (!el) return;
+        el.classList.toggle('info-open');
+        syncAllInfoToggleButton();
+    }
+
+    function syncAllInfoToggleButton() {
+        const btn = document.getElementById('ing-all-info-btn');
+        if (!btn) return;
+        const cards = Array.from(document.querySelectorAll('#scaled-ingredients-list li.has-info, #modal-containers-box .prep-container-item.has-info'));
+        if (cards.length === 0) {
+            btn.style.display = 'none';
+            return;
+        }
+        btn.style.display = 'inline-flex';
+        const allOpen = cards.every(c => c.classList.contains('info-open'));
+        btn.classList.toggle('active', allOpen);
+        btn.innerHTML = allOpen ? '✕ 상세 설명 접기' : 'ⓘ 상세 설명 모두 보기';
+    }
+
+    function toggleAllIngredientInfos() {
+        const cards = Array.from(document.querySelectorAll('#scaled-ingredients-list li.has-info, #modal-containers-box .prep-container-item.has-info'));
+        if (cards.length === 0) return;
+        const shouldOpen = !cards.every(c => c.classList.contains('info-open'));
+        cards.forEach(c => c.classList.toggle('info-open', shouldOpen));
+        syncAllInfoToggleButton();
+    }
+
     function renderIngredientsHtml(recipe, targetServings, smartEnabled, varContext = null) {
         const ctx = varContext || buildVariableContext(recipe, targetServings, smartEnabled);
         const { varMap, rawRatio } = ctx;
@@ -4952,40 +5131,76 @@
         const gRatio = appSettings.gochujangRatio;
         const isGochujangCustom = Math.abs(gRatio - 1) >= 0.01;
 
-        const itemsHtml = effectiveIngredients.map(ing => {
+        // Count duplicate primary names in current view so same-name items (e.g. 고춧가루 2종) stay distinguishable
+        const baseCounts = new Map();
+        for (const ing of effectiveIngredients) {
+            const { primary } = splitParentheticalLabel(ing.name);
+            baseCounts.set(primary, (baseCounts.get(primary) || 0) + 1);
+        }
+
+        const itemsHtml = effectiveIngredients.map((ing, idx) => {
             const computed = (ing.varKey && varMap.has(ing.varKey))
                 ? varMap.get(ing.varKey)
                 : computeScaledEntry(ing, rawRatio, smartEnabled, gRatio);
             const { scaledAmt, factor, reason, isGochujang, isNonLinearAdjusted } = computed;
             if (isNonLinearAdjusted) anySmartAdjusted = true;
 
+            const { primary: baseName, sub: nameSub } = splitParentheticalLabel(ing.name);
+            const { primary: shortAmt, sub: amtSub } = splitParentheticalLabel(scaledAmt);
+            const isDupBase = (baseCounts.get(baseName) || 0) > 1;
+            const dupRoleTagHtml = (isDupBase && nameSub)
+                ? `<span class="ing-role-tag">${shortenDuplicateRoleHint(nameSub)}</span>`
+                : '';
+            const addonDotHtml = ing.isAddon
+                ? `<span class="ing-addon-dot">+옵션</span>`
+                : '';
+
             const ratioDiffText = isNonLinearAdjusted
                 ? `<span class="smart-adj-badge">${reason} (${rawRatio.toFixed(1).replace(/\.0$/, '')}배 → ${factor.toFixed(2).replace(/0$/, '').replace(/\.$/, '')}배)</span>`
                 : '';
 
             const gochujangBadgeHtml = (isGochujang && isGochujangCustom)
-                ? `<span class="gochujang-adj-badge">🌶️ 고추장 ${Math.round(gRatio * 100)}% 설정</span>`
+                ? `<span class="gochujang-adj-badge">🌶️ 고추장 ${Math.round(gRatio * 100)}%</span>`
                 : '';
 
             const addonBadgeHtml = ing.isAddon
-                ? `<span class="addon-ing-badge">➕ 옵션 추가</span>`
+                ? `<span class="addon-ing-badge">➕ ${ing.addonTitle || '옵션 추가'}</span>`
                 : '';
 
             const resolvedNote = resolveTokensPlain(ing.rawNote || ing.note || '', varMap);
-            const noteHtml = resolvedNote ? `<span>${resolvedNote}</span>` : '<span></span>';
             const rightBadges = [addonBadgeHtml, gochujangBadgeHtml, ratioDiffText].filter(Boolean).join(' ');
 
+            const infoLines = [];
+            if (nameSub) {
+                infoLines.push(`<div class="ing-info-line"><span>🏷️</span><span>${nameSub}</span></div>`);
+            }
+            if (amtSub) {
+                infoLines.push(`<div class="ing-info-line"><span>⚖️</span><span>정밀 계량: <strong>${scaledAmt}</strong></span></div>`);
+            }
+            if (resolvedNote) {
+                infoLines.push(`<div class="ing-info-line"><span>🔪</span><span>${resolvedNote}</span></div>`);
+            }
+            if (rightBadges) {
+                infoLines.push(`<div class="ing-info-badges">${rightBadges}</div>`);
+            }
+
+            const hasInfo = infoLines.length > 0;
+            const ingKey = ing.varKey || `ing_${idx}`;
+            const liClasses = [
+                ing.isAddon ? 'addon-ing-item' : ((isNonLinearAdjusted || (isGochujang && isGochujangCustom)) ? 'scaled-highlight' : ''),
+                hasInfo ? 'has-info' : ''
+            ].filter(Boolean).join(' ');
+
             return `
-                <li class="${ing.isAddon ? 'addon-ing-item' : ((isNonLinearAdjusted || (isGochujang && isGochujangCustom)) ? 'scaled-highlight' : '')}">
+                <li class="${liClasses}" data-ing-key="${ingKey}" ${hasInfo ? 'onclick="toggleInfoCard(this)"' : ''}>
                     <div class="ing-row-main">
-                        <span class="ing-name">${ing.name}</span>
-                        <span class="ing-amount">${scaledAmt}</span>
+                        <span class="ing-name">${addonDotHtml}${baseName}${dupRoleTagHtml}</span>
+                        <span class="ing-right-group">
+                            <span class="ing-amount">${shortAmt}</span>
+                            ${hasInfo ? '<span class="ing-info-btn" aria-label="상세 정보">i</span>' : ''}
+                        </span>
                     </div>
-                    ${(resolvedNote || rightBadges) ? `
-                    <div class="ing-meta-row">
-                        ${noteHtml}
-                        <span>${rightBadges}</span>
-                    </div>` : ''}
+                    ${hasInfo ? `<div class="ing-info-drawer">${infoLines.join('')}</div>` : ''}
                 </li>
             `;
         }).join('');
@@ -4997,15 +5212,23 @@
         const { containers } = getEffectiveRecipeView(recipe, varMap);
         if (!containers || containers.length === 0) return '';
 
-        const listHtml = containers.map(ct => {
-            const addonBadge = ct.isAddon
-                ? `<span class="addon-ing-badge">➕ 옵션 용기</span>`
-                : '';
+        const listHtml = containers.map((ct, idx) => {
+            const { primary: ctName, sub: ctSub } = splitParentheticalLabel(ct.name);
+            const addonDot = ct.isAddon ? `<span class="ing-addon-dot">+옵션</span>` : '';
             const noteHtml = formatInlineMdWithVars(ct.rawNote || '', varMap);
+            const infoLines = [];
+            if (ctSub) infoLines.push(`<div class="ing-info-line"><span>🏷️</span><span>${ctSub}</span></div>`);
+            if (noteHtml) infoLines.push(`<div class="ing-info-line"><span>💡</span><span>${noteHtml}</span></div>`);
+            const hasInfo = infoLines.length > 0;
+            const ctKey = `ct_${ct.isAddon ? (ct.addonId + '_') : ''}${idx}`;
+
             return `
-                <li class="prep-container-item">
-                    <span class="prep-container-name">🥣 ${ct.name} ${addonBadge}</span>
-                    ${noteHtml ? `<span class="prep-container-note">${noteHtml}</span>` : ''}
+                <li class="prep-container-item ${hasInfo ? 'has-info' : ''}" data-ct-key="${ctKey}" ${hasInfo ? 'onclick="toggleInfoCard(this)"' : ''}>
+                    <div class="ing-row-main">
+                        <span class="prep-container-name">🥣 ${addonDot}${ctName}</span>
+                        ${hasInfo ? '<span class="ing-right-group"><span class="ing-info-btn" aria-label="용기 용도 보기">i</span></span>' : ''}
+                    </div>
+                    ${hasInfo ? `<div class="ing-info-drawer">${infoLines.join('')}</div>` : ''}
                 </li>
             `;
         }).join('');
@@ -5014,7 +5237,7 @@
             <div class="prep-containers-card">
                 <div class="prep-containers-header">
                     <span class="prep-containers-title">🥣 미리 준비할 용기 · 조리도구</span>
-                    <span class="prep-containers-sub">재료와 함께 미리 꺼내두면 조리가 훨씬 수월해요</span>
+                    <span class="prep-containers-sub">항목을 누르면 용도가 펼쳐져요</span>
                 </div>
                 <ul class="prep-containers-list">
                     ${listHtml}
@@ -5276,14 +5499,31 @@
             }
         }
 
-        // 3) Ingredients list + Advance containers box right underneath
+        // 3) Ingredients list + Advance containers box right underneath (preserving any opened ⓘ drawers)
         const listEl = document.getElementById('scaled-ingredients-list');
-        if (listEl) listEl.innerHTML = itemsHtml;
+        if (listEl) {
+            const openIngKeys = new Set();
+            listEl.querySelectorAll('li.info-open[data-ing-key]').forEach(el => openIngKeys.add(el.getAttribute('data-ing-key')));
+            listEl.innerHTML = itemsHtml;
+            if (openIngKeys.size > 0) {
+                listEl.querySelectorAll('li[data-ing-key]').forEach(el => {
+                    if (openIngKeys.has(el.getAttribute('data-ing-key'))) el.classList.add('info-open');
+                });
+            }
+        }
 
         const containersBoxEl = document.getElementById('modal-containers-box');
         if (containersBoxEl) {
+            const openCtKeys = new Set();
+            containersBoxEl.querySelectorAll('.prep-container-item.info-open[data-ct-key]').forEach(el => openCtKeys.add(el.getAttribute('data-ct-key')));
             containersBoxEl.innerHTML = renderContainersHtml(recipe, varMap);
+            if (openCtKeys.size > 0) {
+                containersBoxEl.querySelectorAll('.prep-container-item[data-ct-key]').forEach(el => {
+                    if (openCtKeys.has(el.getAttribute('data-ct-key'))) el.classList.add('info-open');
+                });
+            }
         }
+        syncAllInfoToggleButton();
 
         // 4) Smart scale banner
         const bannerEl = document.getElementById('smart-scale-banner');
@@ -5449,6 +5689,7 @@
             <div class="recipe-section">
                 <div class="recipe-section-header">
                     <h4 id="modal-ingredients-heading">🛒 필요 재료 <span class="section-serving-pill">${currentServings}인분 기준</span></h4>
+                    <button id="ing-all-info-btn" class="ing-all-info-toggle" onclick="toggleAllIngredientInfos()">ⓘ 상세 설명 모두 보기</button>
                 </div>
                 <ul id="scaled-ingredients-list" class="ingredients-list">
                     ${itemsHtml}
