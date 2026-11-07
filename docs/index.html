@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Offline-bundled Marked.js & Bundled Recipes -->
     <script src="./vendor/marked.min.js"></script>
-    <script src="./bundled-recipes.js?v=mvwd9mbp"></script>
+    <script src="./bundled-recipes.js?v=mw5tp0g6"></script>
     <style>
         :root {
             --primary: #E63946;
@@ -186,23 +186,23 @@
             animation: spinSyncIcon 1s linear infinite;
         }
 
-        /* Category & Status Filter Tabs */
+        /* Category & Sort Filter Tabs */
         .filter-controls {
             display: flex;
             flex-direction: column;
-            gap: 0.8rem;
+            gap: 0.75rem;
             align-items: center;
             margin-bottom: 1.6rem;
         }
 
-        .category-tabs, .status-tabs {
+        .category-tabs, .sort-tabs {
             display: flex;
             justify-content: center;
             gap: 0.5rem;
             flex-wrap: wrap;
         }
 
-        .category-tab, .status-tab {
+        .category-tab, .sort-tab {
             padding: 0.48rem 1.05rem;
             border-radius: 50px;
             background: white;
@@ -222,40 +222,88 @@
             box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
         }
 
-        .status-tab.active {
+        .sort-tab {
+            font-size: 0.83rem;
+            padding: 0.42rem 0.92rem;
+            color: #475569;
+            border-color: #E2E8F0;
+        }
+
+        .sort-tab.active {
             background: var(--text-main);
             color: white;
             border-color: var(--text-main);
+            box-shadow: 0 3px 10px rgba(29, 53, 87, 0.22);
         }
 
-        .status-tab.active[data-status="verified"] {
-            background: var(--teal);
-            border-color: var(--teal);
+        .home-sort-tabs {
+            display: flex;
+            gap: 0.42rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
         }
 
-        .status-tab.active[data-status="needs_fix"] {
-            background: var(--amber);
-            border-color: var(--amber);
-        }
-
-        /* Status Badges on Cards */
-        .card-status-badge {
-            position: absolute;
-            top: 0.9rem;
-            left: 0.9rem;
-            padding: 0.28rem 0.7rem;
+        .home-sort-tab {
+            padding: 0.38rem 0.82rem;
             border-radius: 50px;
-            font-size: 0.75rem;
+            background: white;
+            border: 1.5px solid #E2E8F0;
+            color: #475569;
+            font-size: 0.8rem;
             font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
             display: inline-flex;
             align-items: center;
-            gap: 0.3rem;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            gap: 0.28rem;
         }
 
-        .status-verified { background: rgba(42, 157, 143, 0.95); color: white; }
-        .status-needs_fix { background: rgba(231, 111, 81, 0.95); color: white; }
-        .status-unverified { background: rgba(108, 117, 125, 0.85); color: white; }
+        .home-sort-tab.active {
+            background: var(--text-main);
+            border-color: var(--text-main);
+            color: white;
+            box-shadow: 0 3px 8px rgba(29, 53, 87, 0.2);
+        }
+
+        .home-sort-hint {
+            font-size: 0.78rem;
+            color: #64748B;
+            background: #F8FAFC;
+            border: 1px dashed #CBD5E1;
+            border-radius: 10px;
+            padding: 0.45rem 0.75rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .home-recent-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.14rem 0.5rem;
+            border-radius: 50px;
+            font-size: 0.71rem;
+            font-weight: 700;
+            background: #F1F5F9;
+            color: #334155;
+            white-space: nowrap;
+        }
+
+        .home-recent-badge.badge-new {
+            background: #ECFDF5;
+            color: #047857;
+            border: 1px solid #A7F3D0;
+        }
+
+        .home-recent-badge.badge-hot {
+            background: #FFF7ED;
+            color: #C2410C;
+            border: 1px solid #FED7AA;
+        }
+
+        .home-recent-badge.badge-recent {
+            background: #EFF6FF;
+            color: #1D4ED8;
+            border: 1px solid #BFDBFE;
+        }
 
         /* Recipe Comment Note */
         .recipe-comment-box {
@@ -449,6 +497,18 @@
             background: #EFF6FF;
             color: #1D4ED8;
             border: 1px solid #BFDBFE;
+        }
+
+        .pill-new {
+            background: #ECFDF5;
+            color: #047857;
+            border: 1px solid #A7F3D0;
+        }
+
+        .pill-views {
+            background: #FFF7ED;
+            color: #C2410C;
+            border: 1px solid #FED7AA;
         }
 
         .pill-variation {
@@ -1315,35 +1375,6 @@
             gap: 0.4rem;
         }
 
-        .status-button-group {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-bottom: 0.9rem;
-        }
-
-        .status-btn {
-            flex: 1;
-            min-width: 95px;
-            padding: 0.6rem 0.75rem;
-            border-radius: 11px;
-            border: 2px solid #E5E7EB;
-            background: #F9FAFB;
-            color: #4B5563;
-            font-size: 0.86rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.3rem;
-            transition: var(--transition);
-        }
-
-        .status-btn.selected-verified { border-color: var(--teal); background: #E8F6F4; color: var(--teal); }
-        .status-btn.selected-needs_fix { border-color: var(--amber); background: #FDF1EE; color: var(--amber); }
-        .status-btn.selected-unverified { border-color: #6C757D; background: #F1F3F5; color: #495057; }
-
         .comment-editor-wrapper {
             display: flex;
             gap: 0.5rem;
@@ -2165,7 +2196,7 @@
                 <img class="home-hero-icon" src="./images/app-icon-192.png" alt="Developer's Recipe Icon">
                 <div class="home-hero-titles">
                     <h1>개발자의레시피</h1>
-                    <span class="en-sub">&lt;/&gt; Developer's Recipe · v1.4</span>
+                    <span class="en-sub">&lt;/&gt; Developer's Recipe · v1.5</span>
                 </div>
             </div>
             <p class="home-hero-desc">인분·양념 스마트 계량과 멀티 타이머를 지원하는 나만의 요리 북</p>
@@ -2184,14 +2215,14 @@
                 <h2>🧭 메인 메뉴</h2>
             </div>
             <div class="home-menu-grid">
-                <button class="home-menu-card primary-menu" onclick="openRecipesMenu({ category: 'all', status: 'all', mealPrepOnly: false })">
+                <button class="home-menu-card primary-menu" onclick="openRecipesMenu({ category: 'all', mealPrepOnly: false })">
                     <span class="home-menu-icon">📖</span>
                     <div>
                         <div class="home-menu-title">전체 레시피 보기 <span>›</span></div>
                         <div class="home-menu-sub" id="home-total-recipes-sub">등록된 모든 요리 둘러보기</div>
                     </div>
                 </button>
-                <button class="home-menu-card" onclick="openRecipesMenu({ category: 'all', status: 'all', mealPrepOnly: true })">
+                <button class="home-menu-card" onclick="openRecipesMenu({ category: 'all', mealPrepOnly: true })">
                     <span class="home-menu-icon">🫙</span>
                     <div>
                         <div class="home-menu-title">밀프렙 · 양념 모드 <span>›</span></div>
@@ -2224,9 +2255,15 @@
 
         <div class="home-section-block">
             <div class="home-section-header">
-                <h2 id="home-recent-heading">🕘 최근 살펴본 요리</h2>
-                <button class="home-more-link" onclick="openRecipesMenu({ category: 'all', status: 'all', mealPrepOnly: false })">전체 목록 보기 →</button>
+                <h2 id="home-recent-heading">🕘 최근에 본 요리</h2>
+                <button class="home-more-link" onclick="openRecipesMenu({ category: 'all', mealPrepOnly: false, sortMode: currentSortMode })">전체 목록 보기 →</button>
             </div>
+            <div class="home-sort-tabs" id="home-sort-tabs">
+                <button class="home-sort-tab active" data-sort="recent_viewed" onclick="setSortMode('recent_viewed')">🕘 최근에 본 (30초+)</button>
+                <button class="home-sort-tab" data-sort="newly_added" onclick="setSortMode('newly_added')">🆕 최근 추가된</button>
+                <button class="home-sort-tab" data-sort="most_viewed" onclick="setSortMode('most_viewed')">🔥 많이 본</button>
+            </div>
+            <div id="home-sort-hint" class="home-sort-hint" style="display:none;"></div>
             <div id="home-recent-list" class="home-recent-list"></div>
         </div>
     </section>
@@ -2245,15 +2282,15 @@
             </button>
         </div>
 
-        <!-- Filter Controls -->
+        <!-- Filter & Sort Controls -->
         <div class="filter-controls">
             <div class="category-tabs" id="category-tabs">
                 <button class="category-tab active" onclick="filterByCategory('all')">전체 보기</button>
             </div>
-            <div class="status-tabs" id="status-tabs">
-                <button class="status-tab active" data-status="all" onclick="filterByStatus('all')">전체 상태</button>
-                <button class="status-tab" data-status="verified" onclick="filterByStatus('verified')">✅ 검증 완료</button>
-                <button class="status-tab" data-status="needs_fix" onclick="filterByStatus('needs_fix')">⚠️ 수정 필요</button>
+            <div class="sort-tabs" id="sort-tabs">
+                <button class="sort-tab active" data-sort="recent_viewed" onclick="setSortMode('recent_viewed')">🕘 최근에 본 (30초+)</button>
+                <button class="sort-tab" data-sort="newly_added" onclick="setSortMode('newly_added')">🆕 최근 추가된</button>
+                <button class="sort-tab" data-sort="most_viewed" onclick="setSortMode('most_viewed')">🔥 많이 본</button>
             </div>
         </div>
 
@@ -2335,11 +2372,13 @@
     const GITHUB_BRANCH = 'main';
     const PAGES_BASE_URL = 'https://ddkkinf.github.io/cookbook';
     const LOCAL_STORAGE_KEY = 'cookbook_recipe_states_v1';
-    const CACHED_RECIPES_KEY = 'cookbook_cached_md_v3';
+    const CACHED_RECIPES_KEY = 'cookbook_cached_md_v4';
     const GITHUB_TOKEN_KEY = 'cookbook_github_pat';
     const RECENT_VIEWS_KEY = 'cookbook_recent_views_v1';
+    const VIEW_COUNTS_KEY = 'cookbook_view_counts_v1';
+    const SORT_MODE_KEY = 'cookbook_sort_mode_v1';
     const APP_SETTINGS_KEY = 'cookbook_app_settings_v1';
-    const QUALIFIED_VIEW_MS = 30000; // 최소 30초 이상 조회 시 최근 본 레시피로 인정
+    const QUALIFIED_VIEW_MS = 30000; // 최소 30초 이상 조회 시 최근 본 레시피 및 조회수 반영
     const SYNC_TIMEOUT_MS = 4500;    // 네트워크 지연 시 빠르게 로컬 보관본으로 폴백
     const AUTO_SYNC_COOLDOWN_MS = 2500;
 
@@ -2370,19 +2409,27 @@
         }
     }
 
+    function loadSavedSortMode() {
+        try {
+            const v = localStorage.getItem(SORT_MODE_KEY);
+            if (v === 'recent_viewed' || v === 'newly_added' || v === 'most_viewed') return v;
+        } catch (_) {}
+        return 'recent_viewed';
+    }
+
     let appSettings = loadAppSettings();
     let currentTab = 'home';        // 'home' | 'recipes' | 'settings'
     let mealPrepOnlyFilter = false; // 밀프렙(양념육·만능소스) 레시피 모아보기 필터
 
     let allRecipes = [];
     let currentCategory = 'all';
-    let currentStatus = 'all';
+    let currentSortMode = loadSavedSortMode(); // 'recent_viewed' | 'newly_added' | 'most_viewed'
     let activeRecipeId = null;
     let currentServings = 1;
     let smartScaleEnabled = appSettings.defaultSmartScale;
     let activeVariationMode = 'base';
     let activeAddonIds = new Set();
-    let activeViewSession = null; // { recipeId, accumulatedMs, resumedAt, qualified, intervalId }
+    let activeViewSession = null; // { recipeId, accumulatedMs, resumedAt, qualified, counted, intervalId }
     let activeContentHash = '';
     let activeImageHashes = (window.BUNDLED_IMAGE_HASHES && typeof window.BUNDLED_IMAGE_HASHES === 'object')
         ? { ...window.BUNDLED_IMAGE_HASHES }
@@ -2395,7 +2442,7 @@
     const grid = document.getElementById('recipe-grid');
     const searchInput = document.getElementById('search-input');
     const categoryTabsContainer = document.getElementById('category-tabs');
-    const statusTabsContainer = document.getElementById('status-tabs');
+    const sortTabsContainer = document.getElementById('sort-tabs');
     const modal = document.getElementById('recipe-modal');
     const modalBody = document.getElementById('modal-body');
     const isNativeApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
@@ -2969,7 +3016,7 @@
     }
 
     // =========================================================================
-    // 2.5. 30-SECOND QUALIFIED RECENT VIEW TRACKER (30초 이상 조회 시 최상단 정렬)
+    // 2.5. 30-SECOND QUALIFIED VIEW & COUNT TRACKER (최근에 본 · 최근 추가 · 많이 본)
     // =========================================================================
 
     function getRecentViewsMap() {
@@ -2981,12 +3028,88 @@
         }
     }
 
-    function recordQualifiedRecentView(recipeId, timestampMs = Date.now()) {
+    function getViewCountsMap() {
+        try {
+            const raw = localStorage.getItem(VIEW_COUNTS_KEY);
+            return raw ? (JSON.parse(raw) || {}) : {};
+        } catch (_) {
+            return {};
+        }
+    }
+
+    function getEffectiveViewCount(recipeId, recentViews = null, viewCounts = null) {
+        const counts = viewCounts || getViewCountsMap();
+        const stored = Number(counts[recipeId] || 0);
+        if (stored > 0) return stored;
+        const recents = recentViews || getRecentViewsMap();
+        return recents[recipeId] ? 1 : 0;
+    }
+
+    function formatAddedDateLabel(addedAtMs) {
+        if (!addedAtMs) return '';
+        const diffDays = Math.floor(Math.max(0, Date.now() - addedAtMs) / 86400000);
+        if (diffDays === 0) return '오늘 추가';
+        if (diffDays <= 6) return `${diffDays}일 전 추가`;
+        const d = new Date(addedAtMs);
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${mm}.${dd} 추가`;
+    }
+
+    function formatRelativeTimeLabel(tsMs) {
+        if (!tsMs) return '';
+        const diffSec = Math.max(0, Math.floor((Date.now() - tsMs) / 1000));
+        if (diffSec < 60) return '방금 조회';
+        if (diffSec < 3600) return `${Math.floor(diffSec / 60)}분 전 조회`;
+        if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}시간 전 조회`;
+        const d = new Date(tsMs);
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${mm}.${dd} 조회`;
+    }
+
+    function sortRecipeList(list, sortMode = currentSortMode, recentViews = getRecentViewsMap(), viewCounts = getViewCountsMap()) {
+        const copy = [...list];
+        if (sortMode === 'newly_added') {
+            copy.sort((a, b) => (b.addedAtMs || 0) - (a.addedAtMs || 0));
+            return copy;
+        }
+        if (sortMode === 'most_viewed') {
+            copy.sort((a, b) => {
+                const ca = getEffectiveViewCount(a.id, recentViews, viewCounts);
+                const cb = getEffectiveViewCount(b.id, recentViews, viewCounts);
+                if (cb !== ca) return cb - ca;
+                const ta = recentViews[a.id] || 0;
+                const tb = recentViews[b.id] || 0;
+                if (tb !== ta) return tb - ta;
+                return (b.addedAtMs || 0) - (a.addedAtMs || 0);
+            });
+            return copy;
+        }
+        // Default: 'recent_viewed' (30초 이상 본 요리 최상단, 미조회 요리는 새로 추가된 순)
+        copy.sort((a, b) => {
+            const ta = recentViews[a.id] || 0;
+            const tb = recentViews[b.id] || 0;
+            if (tb !== ta) return tb - ta;
+            return (b.addedAtMs || 0) - (a.addedAtMs || 0);
+        });
+        return copy;
+    }
+
+    function recordQualifiedRecentView(recipeId, timestampMs = Date.now(), incrementCount = false) {
         if (!recipeId) return;
         try {
-            const map = getRecentViewsMap();
-            map[recipeId] = timestampMs;
-            localStorage.setItem(RECENT_VIEWS_KEY, JSON.stringify(map));
+            const recentMap = getRecentViewsMap();
+            const hadPreviousRecent = !!recentMap[recipeId];
+            recentMap[recipeId] = timestampMs;
+            localStorage.setItem(RECENT_VIEWS_KEY, JSON.stringify(recentMap));
+
+            if (incrementCount) {
+                const countsMap = getViewCountsMap();
+                const prevCount = Number(countsMap[recipeId] || (hadPreviousRecent ? 1 : 0));
+                countsMap[recipeId] = prevCount + 1;
+                localStorage.setItem(VIEW_COUNTS_KEY, JSON.stringify(countsMap));
+            }
         } catch (_) {}
         renderHomeDashboard();
     }
@@ -3005,6 +3128,7 @@
             accumulatedMs: 0,
             resumedAt: isVisible ? Date.now() : null,
             qualified: false,
+            counted: false,
             intervalId: null
         };
         session.intervalId = setInterval(() => {
@@ -3012,7 +3136,8 @@
             const elapsed = getCurrentSessionVisibleMs(session);
             if (!session.qualified && elapsed >= QUALIFIED_VIEW_MS) {
                 session.qualified = true;
-                recordQualifiedRecentView(session.recipeId, Date.now());
+                session.counted = true;
+                recordQualifiedRecentView(session.recipeId, Date.now(), true);
                 applyFilter();
             }
         }, 1000);
@@ -3026,7 +3151,9 @@
         if (session.intervalId) clearInterval(session.intervalId);
         const elapsed = getCurrentSessionVisibleMs(session);
         if (session.qualified || elapsed >= QUALIFIED_VIEW_MS) {
-            recordQualifiedRecentView(session.recipeId, Date.now());
+            const shouldIncrement = !session.counted;
+            session.counted = true;
+            recordQualifiedRecentView(session.recipeId, Date.now(), shouldIncrement);
             applyFilter();
             return true;
         }
@@ -3240,7 +3367,7 @@
         return parsedSteps;
     }
 
-    function parseRecipeMarkdown(mdContent, filePath) {
+    function parseRecipeMarkdown(mdContent, filePath, addedAt = '') {
         const parts = filePath.split('/');
         let folderCategory = '기타';
         if (parts.length >= 3) {
@@ -3287,17 +3414,7 @@
         const time = extractMeta(/(?:조리\s*시간|소요\s*시간)[^*:\n]*[:*]+\s*([^\n*]+)/i, '15분');
         const difficulty = extractMeta(/난이도[^*:\n]*[:*]+\s*([^\n*]+)/i, '쉬움');
         const category = extractMeta(/(?:분류|카테고리)[^*:\n]*[:*]+\s*([^\n*]+)/i, folderCategory);
-
-        const rawStatus = extractMeta(/(?:검증\s*상태|검증|상태)[^*:\n]*[:*]+\s*([^\n*]+)/i, '');
-        let status = 'unverified';
-        let statusText = '미검증';
-        if (/완료|성공|통과|검증됨|pass|verified|ok/i.test(rawStatus)) {
-            status = 'verified';
-            statusText = '검증 완료';
-        } else if (/수정|필요|주의|실패|fail|fix/i.test(rawStatus)) {
-            status = 'needs_fix';
-            statusText = '수정 필요';
-        }
+        const addedAtMs = addedAt ? (Date.parse(addedAt) || 0) : 0;
 
         const commentMatch = mdContent.match(/^[*-]?\s*\*\*?(?:코멘트|메모|피드백|노트|comment)[^*:\n\r]*[:*]+[ \t]*([^\r\n]+)/im);
         let comment = (commentMatch && commentMatch[1]) ? commentMatch[1].replace(/\*\*/g, '').trim() : '';
@@ -3422,8 +3539,8 @@
             modes,
             addons,
             icon,
-            status,
-            statusText,
+            addedAt,
+            addedAtMs,
             comment,
             rawMarkdown: mdContent
         };
@@ -3485,14 +3602,8 @@
     function applyLocalOverrides(recipes) {
         recipes.forEach(recipe => {
             const localData = getLocalRecipeState(recipe.id);
-            if (localData) {
-                if (localData.status) {
-                    recipe.status = localData.status;
-                    recipe.statusText = localData.status === 'verified' ? '검증 완료' : (localData.status === 'needs_fix' ? '수정 필요' : '미검증');
-                }
-                if (typeof localData.comment === 'string') {
-                    recipe.comment = localData.comment;
-                }
+            if (localData && typeof localData.comment === 'string') {
+                recipe.comment = localData.comment;
             }
         });
     }
@@ -3501,8 +3612,17 @@
         const prevOpenMd = activeRecipeId
             ? (allRecipes.find(r => r.id === activeRecipeId) || {}).rawMarkdown
             : null;
+        const bundledMap = new Map(
+            (Array.isArray(window.BUNDLED_RECIPES) ? window.BUNDLED_RECIPES : [])
+                .filter(it => it && it.path)
+                .map(it => [it.path, it.addedAt || ''])
+        );
 
-        const parsed = items.map(item => parseRecipeMarkdown(item.content, item.path));
+        const parsed = items.map(item => parseRecipeMarkdown(
+            item.content,
+            item.path,
+            item.addedAt || bundledMap.get(item.path) || ''
+        ));
         applyLocalOverrides(parsed);
         allRecipes = parsed;
         setupFilterTabs();
@@ -3544,6 +3664,7 @@
         try {
             localStorage.removeItem('cookbook_cached_md_v1');
             localStorage.removeItem('cookbook_cached_md_v2');
+            localStorage.removeItem('cookbook_cached_md_v3');
             const rawCache = localStorage.getItem(CACHED_RECIPES_KEY);
             if (rawCache) {
                 const cacheObj = JSON.parse(rawCache);
@@ -3647,12 +3768,21 @@
         );
         if (recipeFiles.length === 0) throw new Error('No recipe markdown files found');
 
+        const knownAddedAt = new Map(allRecipes.map(r => [r.path, r.addedAt || '']));
+        const commitDate = (commitJson && commitJson.commit && commitJson.commit.author && commitJson.commit.author.date)
+            ? commitJson.commit.author.date
+            : new Date().toISOString();
+
         const fetchedRaw = await Promise.all(recipeFiles.map(async file => {
             const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${refSha}/${file.path}`;
             const res = await fetchWithTimeout(rawUrl, { cache: 'no-store' });
             if (!res.ok) return null;
             const content = (await res.text()).replace(/\r\n/g, '\n');
-            return { path: file.path, content };
+            return {
+                path: file.path,
+                addedAt: knownAddedAt.get(file.path) || commitDate,
+                content
+            };
         }));
 
         const validItems = fetchedRaw.filter(Boolean);
@@ -3820,10 +3950,24 @@
         try { window.scrollTo(0, 0); } catch (_) {}
     }
 
-    function openRecipesMenu({ category = 'all', status = 'all', mealPrepOnly = false } = {}) {
+    function setSortMode(mode) {
+        if (mode !== 'recent_viewed' && mode !== 'newly_added' && mode !== 'most_viewed') return;
+        currentSortMode = mode;
+        try {
+            localStorage.setItem(SORT_MODE_KEY, mode);
+        } catch (_) {}
+        setupFilterTabs();
+        applyFilter();
+        renderHomeDashboard();
+    }
+
+    function openRecipesMenu({ category = 'all', mealPrepOnly = false, sortMode = null } = {}) {
         currentCategory = category;
-        currentStatus = status;
         mealPrepOnlyFilter = !!mealPrepOnly;
+        if (sortMode && (sortMode === 'recent_viewed' || sortMode === 'newly_added' || sortMode === 'most_viewed')) {
+            currentSortMode = sortMode;
+            try { localStorage.setItem(SORT_MODE_KEY, sortMode); } catch (_) {}
+        }
         if (searchInput) searchInput.value = '';
         const titleEl = document.getElementById('recipes-view-title');
         if (titleEl) {
@@ -3831,8 +3975,6 @@
                 titleEl.textContent = '🫙 밀프렙 · 양념 미리 만들기';
             } else if (category !== 'all') {
                 titleEl.textContent = `📖 ${category} 레시피`;
-            } else if (status === 'verified') {
-                titleEl.textContent = '✅ 검증 완료 레시피';
             } else {
                 titleEl.textContent = '📖 전체 레시피';
             }
@@ -3843,52 +3985,88 @@
     function renderHomeDashboard() {
         const totalSub = document.getElementById('home-total-recipes-sub');
         if (totalSub) {
-            const verifiedCnt = allRecipes.filter(r => r.status === 'verified').length;
-            totalSub.textContent = `총 ${allRecipes.length}종 등록 · 검증 완료 ${verifiedCnt}종`;
+            totalSub.textContent = `총 ${allRecipes.length}종 등록 · 원하는 정렬로 둘러보기`;
         }
         updateGochujangPillsUI();
+
+        // Update Home Sort Tabs active state
+        document.querySelectorAll('#home-sort-tabs .home-sort-tab[data-sort]').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-sort') === currentSortMode);
+        });
 
         // Category Quick Chips
         const catGrid = document.getElementById('home-category-grid');
         if (catGrid) {
             const catIcons = { '한식': '🥘', '양식': '🍝', '일식': '🍚', '중식': '🥟', '디저트/베이킹': '🍰', '분식/간식': '🍢' };
             const categories = Array.from(new Set(allRecipes.map(r => r.category))).filter(Boolean);
-            const verifiedCount = allRecipes.filter(r => r.status === 'verified').length;
 
-            let html = categories.map(cat => {
+            const html = categories.map(cat => {
                 const cnt = allRecipes.filter(r => r.category === cat).length;
                 const ic = catIcons[cat] || '🍽️';
                 const safeCat = cat.replace(/'/g, "\\'");
                 return `
-                    <button class="home-cat-chip" onclick="openRecipesMenu({ category: '${safeCat}', status: 'all', mealPrepOnly: false })">
+                    <button class="home-cat-chip" onclick="openRecipesMenu({ category: '${safeCat}', mealPrepOnly: false })">
                         <span>${ic} ${cat}</span>
                         <span class="home-cat-count">${cnt}</span>
                     </button>
                 `;
             }).join('');
-
-            html += `
-                <button class="home-cat-chip" onclick="openRecipesMenu({ category: 'all', status: 'verified', mealPrepOnly: false })">
-                    <span>✅ 검증 완료</span>
-                    <span class="home-cat-count">${verifiedCount}</span>
-                </button>
-            `;
             catGrid.innerHTML = html;
         }
 
-        // Recent (or Featured) Compact List (max 3 items so Home stays clean & airy!)
+        // Home Sorted Showcase List (최근에 본 · 최근 추가된 · 많이 본)
         const recentListEl = document.getElementById('home-recent-list');
         const recentHeading = document.getElementById('home-recent-heading');
+        const hintEl = document.getElementById('home-sort-hint');
         if (recentListEl) {
             const recentMap = getRecentViewsMap();
-            const recentItems = allRecipes
-                .filter(r => !!recentMap[r.id])
-                .sort((a, b) => (recentMap[b.id] || 0) - (recentMap[a.id] || 0))
-                .slice(0, 3);
+            const countsMap = getViewCountsMap();
+            const hasAnyRecent = allRecipes.some(r => !!recentMap[r.id]);
+            const hasAnyCount = allRecipes.some(r => getEffectiveViewCount(r.id, recentMap, countsMap) > 0);
 
-            const displayItems = recentItems.length > 0 ? recentItems : allRecipes.slice(0, 3);
-            if (recentHeading) {
-                recentHeading.textContent = recentItems.length > 0 ? '🕘 최근 30초 이상 살펴본 요리' : '⭐ 바로 시작하기 좋은 대표 요리';
+            let displayItems = [];
+            let hintText = '';
+
+            if (currentSortMode === 'newly_added') {
+                if (recentHeading) recentHeading.textContent = '🆕 최근 추가된 요리';
+                displayItems = sortRecipeList(allRecipes, 'newly_added', recentMap, countsMap).slice(0, 4);
+            } else if (currentSortMode === 'most_viewed') {
+                if (recentHeading) recentHeading.textContent = '🔥 많이 본 요리';
+                if (hasAnyCount) {
+                    displayItems = sortRecipeList(
+                        allRecipes.filter(r => getEffectiveViewCount(r.id, recentMap, countsMap) > 0),
+                        'most_viewed',
+                        recentMap,
+                        countsMap
+                    ).slice(0, 4);
+                } else {
+                    hintText = '💡 아직 30초 이상 살펴본 조회 기록이 없어 최근 추가된 순으로 보여드려요.';
+                    displayItems = sortRecipeList(allRecipes, 'newly_added', recentMap, countsMap).slice(0, 4);
+                }
+            } else {
+                // 'recent_viewed'
+                if (recentHeading) recentHeading.textContent = '🕘 최근에 본 요리';
+                if (hasAnyRecent) {
+                    displayItems = sortRecipeList(
+                        allRecipes.filter(r => !!recentMap[r.id]),
+                        'recent_viewed',
+                        recentMap,
+                        countsMap
+                    ).slice(0, 4);
+                } else {
+                    hintText = '💡 30초 이상 화면을 본 레시피가 이곳에 자동 기록됩니다. 지금은 새로 추가된 요리를 먼저 보여드려요.';
+                    displayItems = sortRecipeList(allRecipes, 'newly_added', recentMap, countsMap).slice(0, 4);
+                }
+            }
+
+            if (hintEl) {
+                if (hintText && allRecipes.length > 0) {
+                    hintEl.textContent = hintText;
+                    hintEl.style.display = 'block';
+                } else {
+                    hintEl.textContent = '';
+                    hintEl.style.display = 'none';
+                }
             }
 
             if (displayItems.length === 0) {
@@ -3898,6 +4076,18 @@
                     const thumbHtml = r.heroImage
                         ? `<img src="${r.heroImage}" alt="${r.title.replace(/"/g, '&quot;')}" loading="lazy" onerror="handleRecipeImgError(this, '${r.icon}')">`
                         : `${r.icon}`;
+
+                    let badgeHtml = '';
+                    const viewCnt = getEffectiveViewCount(r.id, recentMap, countsMap);
+                    if (currentSortMode === 'newly_added' || (!hasAnyRecent && currentSortMode === 'recent_viewed') || (!hasAnyCount && currentSortMode === 'most_viewed')) {
+                        const addLabel = formatAddedDateLabel(r.addedAtMs);
+                        if (addLabel) badgeHtml = `<span class="home-recent-badge badge-new">🆕 ${addLabel}</span>`;
+                    } else if (currentSortMode === 'most_viewed' && viewCnt > 0) {
+                        badgeHtml = `<span class="home-recent-badge badge-hot">🔥 ${viewCnt}회 조회</span>`;
+                    } else if (recentMap[r.id]) {
+                        badgeHtml = `<span class="home-recent-badge badge-recent">🕘 ${formatRelativeTimeLabel(recentMap[r.id])}</span>`;
+                    }
+
                     return `
                         <div class="home-recent-item" onclick="openRecipe('${r.id.replace(/'/g, "\\'")}')">
                             <div class="home-recent-thumb">${thumbHtml}</div>
@@ -3907,6 +4097,7 @@
                                     <span>🍽️ ${r.category}</span>
                                     <span>👥 기본 ${r.baseServings}인분</span>
                                     <span>🕒 ${r.time}</span>
+                                    ${badgeHtml}
                                 </div>
                             </div>
                             <span class="home-recent-arrow">›</span>
@@ -3972,9 +4163,10 @@
 
     function clearRecentViewHistory() {
         localStorage.removeItem(RECENT_VIEWS_KEY);
+        localStorage.removeItem(VIEW_COUNTS_KEY);
         applyFilter();
         renderHomeDashboard();
-        showToast('🕘 최근 조회 정렬 기록이 초기화되었습니다.');
+        showToast('🕘 최근 조회 및 많이 본 기록이 초기화되었습니다.');
     }
 
     function resetAllAppSettings() {
@@ -4086,7 +4278,7 @@
                         🔑 ${getGitHubToken() ? 'GitHub 토큰 연동됨 (변경)' : 'GitHub 원본 저장 토큰 설정'}
                     </button>
                     <button class="settings-action-btn" onclick="clearRecentViewHistory()">
-                        🕘 최근 조회 정렬 초기화
+                        🕘 조회 · 많이 본 기록 초기화
                     </button>
                     <button class="settings-action-btn" onclick="resetAllAppSettings()">
                         ↺ 설정 기본값 복원
@@ -4097,7 +4289,7 @@
             <div class="settings-card">
                 <div class="settings-card-title">👨‍💻 앱 정보 & 업데이트</div>
                 <p class="settings-card-desc">
-                    <strong>개발자의레시피 (&lt;/&gt; Developer's Recipe)</strong> · 버전 <code>v1.4</code><br>
+                    <strong>개발자의레시피 (&lt;/&gt; Developer's Recipe)</strong> · 버전 <code>v1.5</code><br>
                     레시피 내용 및 일러스트 변경은 앱 재설치 없이 자동 동기화되며, 앱 기능 업데이트가 있을 때만 아래 APK를 덮어쓰기 설치하시면 됩니다.
                 </p>
                 <div class="settings-btn-row">
@@ -4122,16 +4314,13 @@
         }
         categoryTabsContainer.innerHTML = catHtml;
 
-        const verifiedCount = allRecipes.filter(r => r.status === 'verified').length;
-        const needsFixCount = allRecipes.filter(r => r.status === 'needs_fix').length;
-        const unverifiedCount = allRecipes.filter(r => r.status === 'unverified').length;
-
-        statusTabsContainer.innerHTML = `
-            <button class="status-tab ${currentStatus === 'all' ? 'active' : ''}" data-status="all" onclick="filterByStatus('all')">전체 상태</button>
-            <button class="status-tab ${currentStatus === 'verified' ? 'active' : ''}" data-status="verified" onclick="filterByStatus('verified')">✅ 검증 완료 (${verifiedCount})</button>
-            <button class="status-tab ${currentStatus === 'needs_fix' ? 'active' : ''}" data-status="needs_fix" onclick="filterByStatus('needs_fix')">⚠️ 수정 필요 (${needsFixCount})</button>
-            <button class="status-tab ${currentStatus === 'unverified' ? 'active' : ''}" data-status="unverified" onclick="filterByStatus('unverified')">⚪ 미검증 (${unverifiedCount})</button>
-        `;
+        if (sortTabsContainer) {
+            sortTabsContainer.innerHTML = `
+                <button class="sort-tab ${currentSortMode === 'recent_viewed' ? 'active' : ''}" data-sort="recent_viewed" onclick="setSortMode('recent_viewed')">🕘 최근에 본 (30초+)</button>
+                <button class="sort-tab ${currentSortMode === 'newly_added' ? 'active' : ''}" data-sort="newly_added" onclick="setSortMode('newly_added')">🆕 최근 추가된</button>
+                <button class="sort-tab ${currentSortMode === 'most_viewed' ? 'active' : ''}" data-sort="most_viewed" onclick="setSortMode('most_viewed')">🔥 많이 본</button>
+            `;
+        }
     }
 
     function toggleMealPrepFilter() {
@@ -4156,43 +4345,30 @@
         applyFilter();
     }
 
-    function filterByStatus(status) {
-        currentStatus = status;
-        setupFilterTabs();
-        applyFilter();
-    }
-
     function applyFilter() {
         const query = searchInput.value.toLowerCase().trim();
         const recentViews = getRecentViewsMap();
+        const viewCounts = getViewCountsMap();
 
         const filtered = allRecipes.filter(r => {
             const matchMealPrep = !mealPrepOnlyFilter || hasMealPrepMode(r);
             const matchCategory = currentCategory === 'all' || r.category === currentCategory;
-            const matchStatus = currentStatus === 'all' || r.status === currentStatus;
             const matchSearch = !query ||
                 r.title.toLowerCase().includes(query) ||
                 r.description.toLowerCase().includes(query) ||
                 (r.comment && r.comment.toLowerCase().includes(query)) ||
                 r.ingredients.some(i => i.name.toLowerCase().includes(query)) ||
                 r.rawMarkdown.toLowerCase().includes(query);
-            return matchMealPrep && matchCategory && matchStatus && matchSearch;
+            return matchMealPrep && matchCategory && matchSearch;
         });
 
-        // Sort recipes viewed for >= 30 seconds to the very top by most recent view timestamp
-        filtered.sort((a, b) => {
-            const ta = recentViews[a.id] || 0;
-            const tb = recentViews[b.id] || 0;
-            if (tb !== ta) return tb - ta;
-            return 0;
-        });
-
-        renderRecipes(filtered, recentViews);
+        const sorted = sortRecipeList(filtered, currentSortMode, recentViews, viewCounts);
+        renderRecipes(sorted, recentViews, viewCounts);
     }
 
     searchInput.addEventListener('input', applyFilter);
 
-    function renderRecipes(items, recentViews = getRecentViewsMap()) {
+    function renderRecipes(items, recentViews = getRecentViewsMap(), viewCounts = getViewCountsMap()) {
         if (items.length === 0) {
             grid.innerHTML = `
                 <div class="status-message" style="grid-column: 1 / -1;">
@@ -4201,26 +4377,32 @@
             return;
         }
 
+        const nowMs = Date.now();
         grid.innerHTML = items.map(recipe => {
-            const statusBadgeHtml = recipe.status === 'verified'
-                ? `<span class="card-status-badge status-verified">✓ 검증 완료</span>`
-                : (recipe.status === 'needs_fix'
-                    ? `<span class="card-status-badge status-needs_fix">! 수정 필요</span>`
-                    : '');
-
             const commentHtml = recipe.comment
                 ? `<div class="card-comment-snippet">💬 ${recipe.comment}</div>`
                 : '';
 
             const variationCount = (recipe.modes ? recipe.modes.length : 0) + (recipe.addons ? recipe.addons.length : 0);
             const isRecent = !!recentViews[recipe.id];
-            const miniPillsHtml = (isRecent || variationCount > 0) ? `
-                <div class="card-meta-pills">
-                    ${isRecent ? `<span class="card-mini-pill pill-recent">🕘 최근 조회</span>` : ''}
-                    ${variationCount > 0 ? `<span class="card-mini-pill pill-variation">🎛️ 베리에이션 ${variationCount}종</span>` : ''}
-                </div>
-            ` : '';
+            const viewCount = getEffectiveViewCount(recipe.id, recentViews, viewCounts);
+            const isRecentlyAdded = recipe.addedAtMs && (nowMs - recipe.addedAtMs) <= 7 * 86400000;
 
+            const pills = [];
+            if (currentSortMode === 'newly_added' || isRecentlyAdded) {
+                const addedLabel = formatAddedDateLabel(recipe.addedAtMs);
+                if (addedLabel) pills.push(`<span class="card-mini-pill pill-new">🆕 ${addedLabel}</span>`);
+            }
+            if (currentSortMode === 'most_viewed' && viewCount > 0) {
+                pills.push(`<span class="card-mini-pill pill-views">🔥 ${viewCount}회 조회</span>`);
+            } else if (isRecent) {
+                pills.push(`<span class="card-mini-pill pill-recent">🕘 ${formatRelativeTimeLabel(recentViews[recipe.id])}${viewCount >= 2 ? ` · ${viewCount}회` : ''}</span>`);
+            }
+            if (variationCount > 0) {
+                pills.push(`<span class="card-mini-pill pill-variation">🎛️ 베리에이션 ${variationCount}종</span>`);
+            }
+
+            const miniPillsHtml = pills.length > 0 ? `<div class="card-meta-pills">${pills.join('')}</div>` : '';
             const totalTimers = recipe.steps.reduce((acc, s) => acc + s.timers.length, 0);
 
             const cardMediaHtml = recipe.heroImage
@@ -4231,7 +4413,6 @@
                 <div class="recipe-card" onclick="openRecipe('${recipe.id.replace(/'/g, "\\'")}')">
                     <div class="card-image">
                         ${cardMediaHtml}
-                        ${statusBadgeHtml}
                         <span class="card-badge">${recipe.category}</span>
                     </div>
                     <div class="card-content">
@@ -4532,6 +4713,7 @@
         }
 
         const cleanedMd = recipe.rawMarkdown
+            .replace(/^\*\s+\*\*검증\s*상태:\*\*[^\r\n]*\r?\n/gm, '')
             .replace(/^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*$/gm, (_, type) => {
                 const labelMap = { NOTE: '📌 참고', TIP: '💡 팁', IMPORTANT: '⭐ 핵심 체크', WARNING: '⚠️ 주의', CAUTION: '🚨 주의' };
                 return `> **${labelMap[type] || type}**`;
@@ -4590,9 +4772,6 @@
             <div class="recipe-header">
                 <h2>${recipe.icon} ${recipe.title}</h2>
                 <p>${recipe.description}</p>
-                <div id="modal-status-badge-container" style="margin-top: 0.7rem;">
-                    ${renderStatusBadgeHtml(recipe.status)}
-                </div>
             </div>
 
             ${heroBannerHtml}
@@ -4682,10 +4861,10 @@
                 </div>` : ''}
             </div>
 
-            <!-- Interactive Status & Comment Panel -->
+            <!-- Personal Cooking Memo Panel -->
             <div class="interactive-status-panel">
                 <h4>
-                    <span>🏷️ 내 검증 상태 & 코멘트 기록</span>
+                    <span>📝 나만의 조리 메모 기록</span>
                     <span style="display:flex; align-items:center; gap:0.45rem;">
                         <span style="font-size:0.76rem; color:var(--text-muted); font-weight:500;">${getGitHubToken() ? '🟢 GitHub + 기기 저장' : '💾 기기 자동 저장'}</span>
                         <button onclick="configureGitHubToken('${escapedId}')" style="background:none; border:1px solid #D1D5DB; border-radius:6px; padding:0.2rem 0.5rem; font-size:0.74rem; cursor:pointer; color:#4B5563;">
@@ -4693,12 +4872,6 @@
                         </button>
                     </span>
                 </h4>
-
-                <div class="status-button-group" id="modal-status-btn-group">
-                    <button class="status-btn ${recipe.status === 'unverified' ? 'selected-unverified' : ''}" onclick="updateRecipeStatus('${escapedId}', 'unverified')">⚪ 미검증</button>
-                    <button class="status-btn ${recipe.status === 'verified' ? 'selected-verified' : ''}" onclick="updateRecipeStatus('${escapedId}', 'verified')">✅ 검증 완료</button>
-                    <button class="status-btn ${recipe.status === 'needs_fix' ? 'selected-needs_fix' : ''}" onclick="updateRecipeStatus('${escapedId}', 'needs_fix')">⚠️ 수정 필요</button>
-                </div>
 
                 <div class="comment-editor-wrapper">
                     <input type="text" id="recipe-comment-input" class="comment-input" placeholder="간 조절이나 다음번 조리 메모를 남겨보세요..." value="${recipe.comment ? recipe.comment.replace(/"/g, '&quot;') : ''}" onkeydown="if(event.key==='Enter') saveRecipeComment('${escapedId}')">
@@ -4752,11 +4925,11 @@
         }
     }
 
-    function saveLocalRecipeState(recipeId, status, comment) {
+    function saveLocalRecipeState(recipeId, comment) {
         try {
             const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
             const map = raw ? JSON.parse(raw) : {};
-            map[recipeId] = { status, comment, updatedAt: new Date().toISOString() };
+            map[recipeId] = { comment, updatedAt: new Date().toISOString() };
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(map));
         } catch (e) {
             console.error('Failed to save to localStorage:', e);
@@ -4770,7 +4943,7 @@
     function configureGitHubToken(currentRecipeId) {
         const current = getGitHubToken();
         const input = prompt(
-            'GitHub Personal Access Token을 입력하면 상태/코멘트 변경 시 GitHub의 마크다운(.md) 원본도 자동 업데이트됩니다.\n(비워두고 확인을 누르면 기기 저장 모드로 전환됩니다.)',
+            'GitHub Personal Access Token을 입력하면 조리 메모 저장 시 GitHub의 마크다운(.md) 원본도 자동 업데이트됩니다.\n(비워두고 확인을 누르면 기기 저장 모드로 전환됩니다.)',
             current
         );
         if (input === null) return;
@@ -4783,15 +4956,6 @@
             showToast('기기 저장 모드로 전환되었습니다.');
         }
         if (currentRecipeId) openRecipe(currentRecipeId, false);
-    }
-
-    function renderStatusBadgeHtml(status) {
-        if (status === 'verified') {
-            return '<span class="card-status-badge status-verified" style="position:static;">✓ 검증 완료</span>';
-        } else if (status === 'needs_fix') {
-            return '<span class="card-status-badge status-needs_fix" style="position:static;">! 수정 필요</span>';
-        }
-        return '<span class="card-status-badge status-unverified" style="position:static;">⚪ 미검증</span>';
     }
 
     let toastTimer = null;
@@ -4807,14 +4971,8 @@
         }, 2600);
     }
 
-    function updateMarkdownStatusAndComment(mdContent, statusText, comment) {
+    function updateMarkdownComment(mdContent, comment) {
         let updated = mdContent;
-        if (/^[*-]?\s*\*\*?(?:검증\s*상태|검증|상태|status)[^*:\n]*[:*]+\s*([^\n\r]*)/im.test(updated)) {
-            updated = updated.replace(
-                /^([*-]?\s*\*\*?(?:검증\s*상태|검증|상태|status)[^*:\n]*[:*]+)[ \t]*([^\n\r]*)/im,
-                `$1 ${statusText}`
-            );
-        }
         if (/^[*-]?\s*\*\*?(?:코멘트|메모|피드백|노트|comment)[^*:\n\r]*[:*]+[ \t]*([^\r\n]*)/im.test(updated)) {
             updated = updated.replace(
                 /^([*-]?\s*\*\*?(?:코멘트|메모|피드백|노트|comment)[^*:\n\r]*[:*]+)[ \t]*([^\r\n]*)/im,
@@ -4838,7 +4996,7 @@
             if (!getRes.ok) throw new Error(`조회 실패 (${getRes.status})`);
             const fileData = await getRes.json();
 
-            const updatedMd = updateMarkdownStatusAndComment(recipe.rawMarkdown, recipe.statusText, recipe.comment);
+            const updatedMd = updateMarkdownComment(recipe.rawMarkdown, recipe.comment);
             recipe.rawMarkdown = updatedMd;
             const base64Content = btoa(unescape(encodeURIComponent(updatedMd)));
 
@@ -4850,7 +5008,7 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    message: `docs(${recipe.title}): 앱/웹에서 상태(${recipe.statusText}) 및 코멘트 업데이트`,
+                    message: `docs(${recipe.title}): 조리 메모 업데이트`,
                     content: base64Content,
                     sha: fileData.sha,
                     branch: GITHUB_BRANCH
@@ -4865,42 +5023,6 @@
         }
     }
 
-    async function updateRecipeStatus(id, newStatus) {
-        const recipe = allRecipes.find(r => r.id === id);
-        if (!recipe) return;
-
-        recipe.status = newStatus;
-        recipe.statusText = newStatus === 'verified' ? '검증 완료' : (newStatus === 'needs_fix' ? '수정 필요' : '미검증');
-
-        const commentInput = document.getElementById('recipe-comment-input');
-        if (commentInput) recipe.comment = commentInput.value.trim();
-
-        saveLocalRecipeState(recipe.id, recipe.status, recipe.comment);
-
-        const badgeContainer = document.getElementById('modal-status-badge-container');
-        if (badgeContainer) badgeContainer.innerHTML = renderStatusBadgeHtml(recipe.status);
-
-        const btnGroup = document.getElementById('modal-status-btn-group');
-        if (btnGroup) {
-            const escapedId = recipe.id.replace(/'/g, "\\'");
-            btnGroup.innerHTML = `
-                <button class="status-btn ${recipe.status === 'unverified' ? 'selected-unverified' : ''}" onclick="updateRecipeStatus('${escapedId}', 'unverified')">⚪ 미검증</button>
-                <button class="status-btn ${recipe.status === 'verified' ? 'selected-verified' : ''}" onclick="updateRecipeStatus('${escapedId}', 'verified')">✅ 검증 완료</button>
-                <button class="status-btn ${recipe.status === 'needs_fix' ? 'selected-needs_fix' : ''}" onclick="updateRecipeStatus('${escapedId}', 'needs_fix')">⚠️ 수정 필요</button>
-            `;
-        }
-
-        setupFilterTabs();
-        applyFilter();
-
-        if (getGitHubToken()) {
-            const ok = await syncRecipeToGitHub(recipe);
-            if (ok) showToast(`✅ '${recipe.statusText}' 상태가 GitHub까지 반영되었습니다!`);
-        } else {
-            showToast(`상태가 '${recipe.statusText}'(으)로 저장되었습니다!`);
-        }
-    }
-
     async function saveRecipeComment(id) {
         const recipe = allRecipes.find(r => r.id === id);
         if (!recipe) return;
@@ -4908,7 +5030,7 @@
         const commentInput = document.getElementById('recipe-comment-input');
         recipe.comment = commentInput ? commentInput.value.trim() : '';
 
-        saveLocalRecipeState(recipe.id, recipe.status, recipe.comment);
+        saveLocalRecipeState(recipe.id, recipe.comment);
 
         const commentBoxContainer = document.getElementById('modal-comment-box-container');
         if (commentBoxContainer) {
@@ -4926,9 +5048,9 @@
 
         if (getGitHubToken()) {
             const ok = await syncRecipeToGitHub(recipe);
-            if (ok) showToast('✅ 코멘트가 GitHub 마크다운까지 저장되었습니다!');
+            if (ok) showToast('✅ 조리 메모가 GitHub 마크다운까지 저장되었습니다!');
         } else {
-            showToast(recipe.comment ? '코멘트가 저장되었습니다!' : '코멘트가 삭제되었습니다.');
+            showToast(recipe.comment ? '조리 메모가 저장되었습니다!' : '조리 메모가 삭제되었습니다.');
         }
     }
 

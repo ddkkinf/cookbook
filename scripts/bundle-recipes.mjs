@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -37,6 +38,25 @@ function computeRecipesHash(items) {
     return `${sorted.length}:${totalLen}:${hex1}${hex2}`;
 }
 
+function getRecipeAddedAt(relPath, fullPath) {
+    try {
+        const out = execFileSync(
+            'git',
+            ['log', '--diff-filter=A', '--follow', '--format=%aI', '--', relPath],
+            { cwd: rootDir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
+        ).trim();
+        if (out) {
+            const lines = out.split(/\r?\n/).filter(Boolean);
+            return lines[lines.length - 1];
+        }
+    } catch (_) {}
+    try {
+        return fs.statSync(fullPath).mtime.toISOString();
+    } catch (_) {
+        return new Date().toISOString();
+    }
+}
+
 function collectMarkdownFiles(dir, baseDir = rootDir) {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     let results = [];
@@ -47,7 +67,8 @@ function collectMarkdownFiles(dir, baseDir = rootDir) {
         } else if (entry.isFile() && entry.name.endsWith('.md')) {
             const relPath = path.relative(baseDir, fullPath).split(path.sep).join('/');
             const content = fs.readFileSync(fullPath, 'utf8').replace(/\r\n/g, '\n');
-            results.push({ path: relPath, content });
+            const addedAt = getRecipeAddedAt(relPath, fullPath);
+            results.push({ path: relPath, addedAt, content });
         }
     }
     return results;
