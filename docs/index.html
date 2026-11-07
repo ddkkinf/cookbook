@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Offline-bundled Marked.js & Bundled Recipes -->
     <script src="./vendor/marked.min.js"></script>
-    <script src="./bundled-recipes.js?v=mw5tp0g6"></script>
+    <script src="./bundled-recipes.js?v=mw5zofjw"></script>
     <style>
         :root {
             --primary: #E63946;
@@ -2655,7 +2655,35 @@
     let activeTimers = []; // { id, label, totalSec, remainingMs, endTime, running, finished }
     let timerTickInterval = null;
     let alarmAudioInterval = null;
+    let nativeAlarmRinging = false;
     let audioCtx = null;
+
+    function getNativeKitchenAlarm() {
+        return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.KitchenAlarm)
+            ? window.Capacitor.Plugins.KitchenAlarm
+            : null;
+    }
+
+    function syncNativeTimerSchedule() {
+        const nativeAlarm = getNativeKitchenAlarm();
+        if (!nativeAlarm) return;
+        const running = activeTimers.filter(t => t.running && !t.finished);
+        let earliest = null;
+        for (const t of running) {
+            if (!earliest || t.endTime < earliest.endTime) {
+                earliest = t;
+            }
+        }
+        try {
+            nativeAlarm.syncSchedule({
+                nextEndTimeMs: earliest ? Math.round(earliest.endTime) : 0,
+                label: earliest ? earliest.label : '',
+                runningCount: running.length,
+                soundEnabled: !!appSettings.timerSoundEnabled,
+                vibrateEnabled: !!appSettings.timerVibrateEnabled
+            });
+        } catch (_) {}
+    }
 
     function extractTimersFromStep(stepTitle, plainText) {
         const timers = [];
@@ -2771,8 +2799,49 @@
         }
     }
 
+    function testKitchenAlarmSound() {
+        const nativeAlarm = getNativeKitchenAlarm();
+        if (nativeAlarm) {
+            try {
+                nativeAlarm.playTestChime({ vibrateEnabled: !!appSettings.timerVibrateEnabled });
+                showToast('🔊 무음·진동 모드와 무관하게 알람 전용 채널로 소리를 재생했습니다!');
+            } catch (_) {}
+            return;
+        }
+        ensureAudioContext();
+        playKitchenBeepPattern();
+        showToast('🔊 브라우저 알람음을 재생했습니다.');
+    }
+
     function syncAlarmLoop() {
-        const anyFinished = activeTimers.some(t => t.finished);
+        const finishedTimers = activeTimers.filter(t => t.finished);
+        const anyFinished = finishedTimers.length > 0;
+        const nativeAlarm = getNativeKitchenAlarm();
+
+        if (nativeAlarm) {
+            if (alarmAudioInterval) {
+                clearInterval(alarmAudioInterval);
+                alarmAudioInterval = null;
+            }
+            if (anyFinished) {
+                const latestLabel = finishedTimers[finishedTimers.length - 1].label || '조리 타이머';
+                nativeAlarmRinging = true;
+                try {
+                    nativeAlarm.startAlarm({
+                        label: latestLabel,
+                        soundEnabled: !!appSettings.timerSoundEnabled,
+                        vibrateEnabled: !!appSettings.timerVibrateEnabled
+                    });
+                } catch (_) {}
+            } else if (nativeAlarmRinging) {
+                nativeAlarmRinging = false;
+                try {
+                    nativeAlarm.stopAlarm();
+                } catch (_) {}
+            }
+            return;
+        }
+
         if (anyFinished && !alarmAudioInterval) {
             playKitchenBeepPattern();
             let count = 0;
@@ -2793,7 +2862,9 @@
 
     function startCookingTimer(seconds, label, event) {
         if (event) event.stopPropagation();
-        ensureAudioContext();
+        if (!getNativeKitchenAlarm()) {
+            ensureAudioContext();
+        }
         requestWakeLockAutomatically();
 
         const id = 't_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
@@ -2808,6 +2879,7 @@
             finished: false
         });
 
+        syncNativeTimerSchedule();
         ensureTimerLoop();
         renderTimerDock();
         showToast(`⏱️ '${label}' 타이머가 시작되었습니다!`);
@@ -2840,8 +2912,11 @@
         } else {
             t.endTime = Date.now() + t.remainingMs;
             t.running = true;
-            ensureAudioContext();
+            if (!getNativeKitchenAlarm()) {
+                ensureAudioContext();
+            }
         }
+        syncNativeTimerSchedule();
         renderTimerDock();
     }
 
@@ -2864,12 +2939,14 @@
             t.remainingMs += addMs;
             t.totalMs = Math.max(t.totalMs, t.remainingMs);
         }
+        syncNativeTimerSchedule();
         ensureTimerLoop();
         renderTimerDock();
     }
 
     function dismissTimer(id) {
         activeTimers = activeTimers.filter(x => x.id !== id);
+        syncNativeTimerSchedule();
         syncAlarmLoop();
         renderTimerDock();
     }
@@ -2881,6 +2958,31 @@
         return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
+    function evaluateTimersNow(fromNativeFire = false) {
+        if (activeTimers.length === 0) return;
+        const now = Date.now();
+        const graceMs = fromNativeFire ? 450 : 0;
+        let stateChanged = false;
+
+        activeTimers.forEach(t => {
+            if (t.running && !t.finished) {
+                t.remainingMs = Math.max(0, t.endTime - now);
+                if (t.remainingMs <= graceMs) {
+                    t.remainingMs = 0;
+                    t.running = false;
+                    t.finished = true;
+                    stateChanged = true;
+                }
+            }
+        });
+
+        if (stateChanged) {
+            syncNativeTimerSchedule();
+            syncAlarmLoop();
+        }
+        renderTimerDock();
+    }
+
     function ensureTimerLoop() {
         if (timerTickInterval) return;
         timerTickInterval = setInterval(() => {
@@ -2889,24 +2991,7 @@
                 timerTickInterval = null;
                 return;
             }
-            const now = Date.now();
-            let stateChanged = false;
-
-            activeTimers.forEach(t => {
-                if (t.running && !t.finished) {
-                    t.remainingMs = Math.max(0, t.endTime - now);
-                    if (t.remainingMs <= 0) {
-                        t.running = false;
-                        t.finished = true;
-                        stateChanged = true;
-                    }
-                }
-            });
-
-            if (stateChanged) {
-                syncAlarmLoop();
-            }
-            renderTimerDock();
+            evaluateTimersNow(false);
         }, 250);
     }
 
@@ -4158,6 +4243,9 @@
             smartScaleEnabled = !!checked;
         }
         saveAppSettings();
+        if (key === 'timerSoundEnabled' || key === 'timerVibrateEnabled') {
+            syncNativeTimerSchedule();
+        }
         showToast('⚙️ 설정이 저장되었습니다.');
     }
 
@@ -4243,8 +4331,8 @@
 
                 <div class="settings-row">
                     <div class="settings-row-info">
-                        <h4>🔔 타이머 완료 알람음</h4>
-                        <p>조리 타이머가 끝났을 때 주방 알림 벨소리를 울립니다.</p>
+                        <h4>🔔 타이머 완료 알람음 (무음·진동 무관)</h4>
+                        <p>휴대폰이 무음·진동·미디어 음소거 모드여도 안드로이드 알람 전용 채널(STREAM_ALARM)로 소리가 울립니다.</p>
                     </div>
                     <label class="toggle-switch">
                         <input type="checkbox" ${appSettings.timerSoundEnabled ? 'checked' : ''} onchange="toggleAppSetting('timerSoundEnabled', this.checked)">
@@ -4261,6 +4349,12 @@
                         <input type="checkbox" ${appSettings.timerVibrateEnabled ? 'checked' : ''} onchange="toggleAppSetting('timerVibrateEnabled', this.checked)">
                         <span class="toggle-slider"></span>
                     </label>
+                </div>
+
+                <div class="settings-btn-row" style="margin-top: 0.75rem;">
+                    <button class="settings-action-btn" onclick="testKitchenAlarmSound()">
+                        🔊 지금 알람 소리 테스트
+                    </button>
                 </div>
             </div>
 
@@ -5112,17 +5206,32 @@
             }
         });
 
-        // 앱을 백그라운드에서 다시 켤 때(기동/전환 시) 웹 변경사항 즉시 체크
+        // 앱을 백그라운드에서 다시 켤 때(기동/전환 시) 타이머 상태 갱신 및 웹 변경사항 즉시 체크
         window.Capacitor.Plugins.App.addListener('appStateChange', ({ isActive }) => {
             if (isActive) {
+                evaluateTimersNow(false);
                 syncRecipesFromGitHub(false, 'app_resume');
             }
+        });
+    }
+
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.KitchenAlarm) {
+        window.Capacitor.Plugins.KitchenAlarm.addListener('alarmFired', () => {
+            nativeAlarmRinging = true;
+            evaluateTimersNow(true);
+        });
+        window.Capacitor.Plugins.KitchenAlarm.addListener('alarmDismissedExternally', () => {
+            nativeAlarmRinging = false;
+            activeTimers = activeTimers.filter(t => !t.finished);
+            syncNativeTimerSchedule();
+            renderTimerDock();
         });
     }
 
     // 브라우저 탭 복귀 및 네트워크 재연결 시에도 자동 동기화
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
+            evaluateTimersNow(false);
             syncRecipesFromGitHub(false, 'visibility');
         }
     });
