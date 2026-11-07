@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Offline-bundled Marked.js & Bundled Recipes -->
     <script src="./vendor/marked.min.js"></script>
-    <script src="./bundled-recipes.js?v=mw66fb3b"></script>
+    <script src="./bundled-recipes.js?v=mw66zogq"></script>
     <style>
         :root {
             --primary: #E63946;
@@ -1295,6 +1295,39 @@
             color: #0369A1;
             background: #E0F2FE;
             border: 1px solid #BAE6FD;
+        }
+
+        .step-addon-injections {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+            margin-top: 0.65rem;
+        }
+
+        .step-addon-injection-box {
+            background: #F5F3FF;
+            border: 1px solid #DDD6FE;
+            border-left: 3.5px solid #7C3AED;
+            border-radius: 10px;
+            padding: 0.58rem 0.78rem;
+            font-size: 0.88rem;
+            line-height: 1.52;
+            color: #334155;
+        }
+
+        .step-addon-injection-title {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.28rem;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #5B21B6;
+            margin-bottom: 0.22rem;
+        }
+
+        .step-addon-injection-body {
+            color: #334155;
         }
 
         .step-checkbox {
@@ -3737,19 +3770,43 @@
     function parseStepBlocks(scopeText, hashes = '###', timerPrefix = 'Step') {
         const parsedSteps = [];
         if (!scopeText || !scopeText.trim()) return parsedSteps;
-        const splitRegex = new RegExp(`(?=^${hashes}\\s+Step\\s*\\d+)`, 'mi');
+        const splitRegex = new RegExp(`(?=^${hashes}\\s+(?:Step\\s*\\d+|\\[\\s*Step\\s*\\d+))`, 'mi');
+        const directiveHeaderRegex = new RegExp(`^${hashes}\\s+\\[\\s*Step\\s*(\\d+)\\s*(에\\s*추가|다음)\\s*\\]\\s*([^\\n]+)\\n?([\\s\\S]*)$`, 'i');
         const headerRegex = new RegExp(`^${hashes}\\s+(Step\\s*\\d+[^.\\n]*\\.?\\s*[^\\n]+)\\n?([\\s\\S]*)$`, 'i');
         const prepTagRegex = /^\[(?:재료\s*손질|사전\s*손질|밑준비)\]\s*/;
         let counter = 0;
 
         for (const chunk of scopeText.split(splitRegex)) {
-            const match = chunk.trim().match(headerRegex);
-            if (!match) continue;
+            const trimmedChunk = chunk.trim();
+            if (!trimmedChunk) continue;
+
+            let attachToStep = 0;
+            let insertAfterStep = 0;
+            let rawStepHeader = '';
+            let rawBodyPart = '';
+
+            const dirMatch = trimmedChunk.match(directiveHeaderRegex);
+            if (dirMatch) {
+                const targetNum = parseInt(dirMatch[1], 10) || 0;
+                const dirKind = dirMatch[2].replace(/\s+/g, '');
+                if (dirKind.includes('추가')) {
+                    attachToStep = targetNum;
+                } else {
+                    insertAfterStep = targetNum;
+                }
+                rawStepHeader = dirMatch[3].trim();
+                rawBodyPart = dirMatch[4] || '';
+            } else {
+                const match = trimmedChunk.match(headerRegex);
+                if (!match) continue;
+                rawStepHeader = match[1].replace(/^Step\s*\d+\s*\.?\s*/i, '').trim();
+                rawBodyPart = match[2] || '';
+            }
+
             counter++;
-            const rawStepHeader = match[1].replace(/^Step\s*\d+\s*\.?\s*/i, '').trim();
             const isPrepStep = prepTagRegex.test(rawStepHeader);
             const cleanStepHeader = rawStepHeader.replace(prepTagRegex, '').trim();
-            const rawBody = match[2].split(/\n---|\n##\s/)[0].trim();
+            const rawBody = rawBodyPart.split(/\n---|\n##\s/)[0].trim();
 
             const stepImages = [];
             const textOnlyLines = [];
@@ -3771,10 +3828,15 @@
                 .join('\n')
                 .replace(/`?\{\{[^}]+\}\}`?/g, '')
                 .replace(/[*_`>#]/g, '');
-            const timers = extractTimersFromStep(`${timerPrefix} ${counter}`, plainForTimer);
+            const timerLabelPrefix = attachToStep > 0
+                ? `${timerPrefix} · Step ${attachToStep}`
+                : `${timerPrefix} ${counter}`;
+            const timers = extractTimersFromStep(timerLabelPrefix, plainForTimer);
 
             parsedSteps.push({
                 index: counter,
+                attachToStep,
+                insertAfterStep,
                 isPrepStep,
                 rawTitle: cleanStepHeader,
                 rawLines: textOnlyLines,
@@ -3949,7 +4011,7 @@
                         varAuxVariables.push(...parseAuxVariableRows(sp));
                     } else if (/미리\s*준비할\s*용기|준비할\s*용기/.test(h4Title)) {
                         varContainers.push(...parseContainerRows(sp));
-                    } else if (/^Step\s*\d+/i.test(h4Title)) {
+                    } else if (/^(?:Step\s*\d+|\[\s*Step\s*\d+)/i.test(h4Title)) {
                         stepChunks.push(sp);
                     } else {
                         varIngredients.push(...parseTableRowsIntoIngredients(sp, varTitle));
@@ -5029,7 +5091,14 @@
 
         const mergedIngredients = [...recipe.ingredients];
         const mergedContainers = [...(recipe.containers || [])];
-        const mergedSteps = recipe.steps.map(s => ({ ...s }));
+        const baseClones = recipe.steps.map(s => ({
+            ...s,
+            baseIndex: s.index,
+            timers: [...(s.timers || [])],
+            addonAdditions: []
+        }));
+        const afterStepMap = new Map();
+        const endAddonSteps = [];
         const selectedNotes = [];
 
         for (const addon of (recipe.addons || [])) {
@@ -5056,16 +5125,62 @@
                     addonTitle: addon.title
                 });
             }
-            for (const st of addon.steps) {
-                mergedSteps.push({
-                    ...st,
-                    index: mergedSteps.length + 1,
-                    isAddon: true,
-                    addonId: addon.id,
-                    addonTitle: addon.title
-                });
+            (addon.steps || []).forEach((st, stIdx) => {
+                if (st.attachToStep > 0 && baseClones.length > 0) {
+                    const targetStep = baseClones.find(b => b.baseIndex === st.attachToStep) || baseClones[baseClones.length - 1];
+                    targetStep.addonAdditions.push({
+                        addonId: addon.id,
+                        addonTitle: addon.title,
+                        rawTitle: st.rawTitle,
+                        rawLines: st.rawLines,
+                        titleHtml: st.titleHtml,
+                        bodyHtml: st.bodyHtml
+                    });
+                    for (const tm of (st.timers || [])) {
+                        if (!targetStep.timers.some(existing => existing.seconds === tm.seconds)) {
+                            targetStep.timers.push({ ...tm });
+                        }
+                    }
+                } else if (st.insertAfterStep > 0) {
+                    if (!afterStepMap.has(st.insertAfterStep)) {
+                        afterStepMap.set(st.insertAfterStep, []);
+                    }
+                    afterStepMap.get(st.insertAfterStep).push({
+                        ...st,
+                        isAddon: true,
+                        addonId: addon.id,
+                        addonTitle: addon.title,
+                        addonStepIdx: stIdx,
+                        addonAdditions: []
+                    });
+                } else {
+                    endAddonSteps.push({
+                        ...st,
+                        isAddon: true,
+                        addonId: addon.id,
+                        addonTitle: addon.title,
+                        addonStepIdx: stIdx,
+                        addonAdditions: []
+                    });
+                }
+            });
+        }
+
+        const mergedSteps = [];
+        for (const b of baseClones) {
+            mergedSteps.push(b);
+            if (afterStepMap.has(b.baseIndex)) {
+                mergedSteps.push(...afterStepMap.get(b.baseIndex));
+                afterStepMap.delete(b.baseIndex);
             }
         }
+        for (const leftoverList of afterStepMap.values()) {
+            mergedSteps.push(...leftoverList);
+        }
+        mergedSteps.push(...endAddonSteps);
+        mergedSteps.forEach((st, idx) => {
+            st.index = idx + 1;
+        });
 
         return {
             ingredients: mergedIngredients,
@@ -5254,7 +5369,9 @@
         const gochujangIng = effectiveIngredients.find(i => isGochujangIngredient(i.name));
 
         return effectiveSteps.map(step => {
-            const stepKey = `${activeVariationMode}_${step.isAddon ? ('addon_' + (step.addonId || '') + '_') : ''}${step.index}`;
+            const stepKey = step.isAddon
+                ? `${activeVariationMode}_addon_${step.addonId || ''}_${step.addonStepIdx ?? step.index}`
+                : `${activeVariationMode}_base_${step.baseIndex ?? step.index}`;
             const addonPrefix = step.isAddon
                 ? `<span class="addon-ing-badge" style="margin-right:0.35rem; vertical-align:middle;">➕ ${step.addonTitle}</span>`
                 : '';
@@ -5275,7 +5392,30 @@
                 }).join('<br>')
                 : step.bodyHtml;
 
-            const stepMentionsGochujang = isGochujangCustom && /고추장/.test(stepBodyHtml || '');
+            const addonAdditions = Array.isArray(step.addonAdditions) ? step.addonAdditions : [];
+            const addonAdditionsHtml = addonAdditions.length > 0
+                ? `<div class="step-addon-injections">${addonAdditions.map(inj => {
+                    const injTitleHtml = inj.rawTitle
+                        ? formatInlineMdWithVars(inj.rawTitle, ctxMap)
+                        : (inj.titleHtml || '');
+                    const injBodyHtml = Array.isArray(inj.rawLines)
+                        ? inj.rawLines.map(l => {
+                            if (/^[*-]\s+/.test(l)) {
+                                return '&nbsp;&nbsp;• ' + formatInlineMdWithVars(l.replace(/^[*-]\s+/, ''), ctxMap);
+                            }
+                            return formatInlineMdWithVars(l, ctxMap);
+                        }).join('<br>')
+                        : (inj.bodyHtml || '');
+                    return `
+                        <div class="step-addon-injection-box">
+                            <div class="step-addon-injection-title">➕ ${inj.addonTitle}${injTitleHtml ? ` · ${injTitleHtml}` : ''}</div>
+                            <div class="step-addon-injection-body">${injBodyHtml}</div>
+                        </div>
+                    `;
+                }).join('')}</div>`
+                : '';
+
+            const stepMentionsGochujang = isGochujangCustom && /고추장/.test((stepBodyHtml || '') + ' ' + addonAdditionsHtml);
             let gochujangStepNoteHtml = '';
             if (stepMentionsGochujang && gochujangIng) {
                 const gComp = (gochujangIng.varKey && ctxMap.has(gochujangIng.varKey))
@@ -5317,6 +5457,7 @@
                         <div class="step-text">
                             ${addonPrefix}${prepBadgeHtml}<strong>Step ${step.index}. ${stepTitleHtml}</strong><br>
                             ${stepBodyHtml}
+                            ${addonAdditionsHtml}
                         </div>
                         ${gochujangStepNoteHtml}
                         ${stepImagesHtml}
@@ -5363,6 +5504,8 @@
         md = md.replace(/^([*-]\s+\*\*(?:조리\s*분량|분량):\*\*)\s*[^\r\n]+/m, `$1 ${servNote}`);
         md = md.replace(/^(##\s*🛒?\s*재료)[^\r\n]*/m, `$1 (${targetServings}인분 기준)`);
         md = md.replace(/^(###+\s+Step\s*\d+\.\s*)\[(?:재료\s*손질|사전\s*손질|밑준비)\]\s*/gim, '$1🔪 [사전 재료 손질] ');
+        md = md.replace(/^(####\s+)\[\s*Step\s*(\d+)\s*에\s*추가\s*\]\s*/gim, '$1➕ [Step $2 단계에 함께 진행] ');
+        md = md.replace(/^(####\s+)\[\s*Step\s*(\d+)\s*다음\s*\]\s*/gim, '$1➕ [Step $2 직후 진행] ');
 
         // Strip internal '변수' column from 4-column ingredient tables and inject scaled quantities
         let inVarTable = false;
