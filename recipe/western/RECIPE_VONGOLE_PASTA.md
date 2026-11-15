@@ -51,7 +51,7 @@
 | `pasta_water_keep` | 따로 덜어둘 면수 | 1컵 (약 150ml) | liquid |
 | `pasta_water_steam` | 조개 스팀용 면수 | 3큰술 (약 45ml) | liquid |
 | `pasta_water_emulsify` | 면 유화용 면수 | 4~5큰술 (약 60~70ml) | liquid |
-| `pasta_water_add` | 농도 보충용 면수 | 2큰술 | liquid |
+| `pasta_water_add` | 농도 보충용 면수 | 2큰술 (약 30ml) | liquid |
 
 ### 🥣 미리 준비할 용기
 | 용기 | 용도 및 준비 포인트 |

@@ -49,7 +49,7 @@
 | 변수 | 항목 | 기준 분량 | 역할 |
 | :--- | :--- | :--- | :--- |
 | `pasta_water_keep` | 덜어둘 면수 | 반 컵 (약 80ml) | liquid |
-| `pasta_water_adjust` | 농도 조절용 면수 추가량 | 2~3큰술 | liquid |
+| `pasta_water_adjust` | 농도 조절용 면수 추가량 | 2~3큰술 (약 30~45ml) | liquid |
 | `alt_cheese` | 생크림 대체 치즈 | 1장 | main |
 | `alt_butter` | 생크림 대체 추가 버터 | 0.5큰술 (약 5g) | mild_seasoning |
 

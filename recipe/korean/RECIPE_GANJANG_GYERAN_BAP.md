@@ -40,7 +40,7 @@
 | `two_egg` | 달걀 넉넉 기준 | 2개 | main |
 | `two_egg_soy` | 달걀 넉넉 시 진간장 | 1.5큰술 (약 22g) | strong_seasoning |
 | `butter_sesame_oil` | 버터 추가 시 참기름 권장량 | 0.5큰술 (약 5g) | oil |
-| `tip_chili_oil` | 매콤 팁 고추기름 | 0.5큰술 | oil |
+| `tip_chili_oil` | 매콤 팁 고추기름 | 0.5큰술 (약 7ml) | oil |
 | `tip_chili` | 매콤 팁 청양고추 | 1/2개 | main |
 
 ### 🥣 미리 준비할 용기
