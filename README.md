@@ -4,7 +4,7 @@ GitHub Markdown 기반의 **스마트 레시피 웹 & 안드로이드 하이브�
 `/recipe` 폴더 하위에 마크다운(`.md`) 파일로 새 레시피를 추가하면 **웹페이지**와 **안드로이드 앱** 모두에 실시간으로 자동 반영됩니다!
 
 * 🌐 **웹사이트:** [https://ddkkinf.github.io/cookbook/](https://ddkkinf.github.io/cookbook/)
-* 📲 **안드로이드 앱(APK) 최신 다운로드:** [kim-cookbook.apk 바로 받기](https://github.com/ddkkinf/cookbook/releases/latest/download/kim-cookbook.apk)
+* 📲 **안드로이드 앱(APK) 최신 다운로드:** [dev-cook.apk 바로 받기](https://github.com/ddkkinf/cookbook/releases/latest/download/dev-cook.apk)
 
 ---
 

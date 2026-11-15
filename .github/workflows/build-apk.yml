@@ -58,15 +58,15 @@ jobs:
 
       - name: Prepare & verify signed APK file
         run: |
-          cp android/app/build/outputs/apk/release/app-release.apk kim-cookbook.apk
-          ls -lh kim-cookbook.apk
-          keytool -printcert -jarfile kim-cookbook.apk | head -n 12
+          cp android/app/build/outputs/apk/release/app-release.apk dev-cook.apk
+          ls -lh dev-cook.apk
+          keytool -printcert -jarfile dev-cook.apk | head -n 12
 
       - name: Upload APK to GitHub Actions Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: kim-cookbook-apk
-          path: kim-cookbook.apk
+          name: dev-cook-apk
+          path: dev-cook.apk
           if-no-files-found: error
 
       - name: Publish latest APK to GitHub Releases
@@ -75,14 +75,14 @@ jobs:
           tag_name: latest
           name: "개발자의레시피 · Developer's Recipe Android App (최신 빌드 v1.5.${{ github.run_number }})"
           body: |
-            📱 **개발자의레시피 (`Developer's Recipe`) 안드로이드 정식 서명 설치 파일 (`kim-cookbook.apk`)**
+            📱 **개발자의레시피 (`Developer's Recipe`) 안드로이드 정식 서명 설치 파일 (`dev-cook.apk`)**
             - 버전: `v1.5.${{ github.run_number }}`
             - 커밋: `${{ github.sha }}`
             - **무음·진동·미디어 음소거 무관 알람(`USAGE_ALARM` / `STREAM_ALARM`) + 화면 꺼짐·백그라운드 조리 타이머** 지원
             - **3종 스마트 정렬 (`최근에 본(30초+)` · `최근 추가된` · `많이 본`)** 홈 & 레시피 목록 탑재 + 검증/미검증 배지 제거로 깔끔한 UI 구성
             - **홈 메뉴 대시보드 + 하단 탭 네비게이션(홈 · 레시피 · 설정) + 고추장 비율 일괄 조절 옵션** 지원
             - 앱 기동/복귀 시 웹 레시피 자동 감지·반영 + 오프라인 로컬 폴백 지원
-          files: kim-cookbook.apk
+          files: dev-cook.apk
           overwrite_files: true
           prerelease: false
           make_latest: true
