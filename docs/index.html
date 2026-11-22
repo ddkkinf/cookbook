@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Offline-bundled Marked.js & Bundled Recipes -->
     <script src="./vendor/marked.min.js"></script>
-    <script src="./bundled-recipes.js?v=mwrgn4h3"></script>
+    <script src="./bundled-recipes.js?v=mwrh5jhw"></script>
     <style>
         :root {
             --primary: #E63946;
@@ -2759,12 +2759,13 @@
 
     // Extensible global app settings schema (추후 새로운 설정 항목도 여기에 추가하면 자동 연동)
     const DEFAULT_APP_SETTINGS = {
-        unitPreference: 'spoon',    // 계량 단위 표시 선호 ('spoon': 큰술·작은술 우선 | 'metric': g·ml 우선)
-        gochujangRatio: 1.0,        // 고추장 전체 투입 비율 (0.3 ~ 1.3, 예: 0.7 = 70%)
-        defaultSmartScale: true,    // 다인분 변경 시 스마트 양념 보정 기본 켜기
-        autoWakeLockOnCook: false,  // 레시피 진입 시 조리 화면 자동 켜짐 유지
-        timerSoundEnabled: true,    // 타이머 완료 알람음 사용
-        timerVibrateEnabled: true   // 타이머 완료 진동 알림 사용
+        unitPreference: 'spoon',        // 양념·액체 계량 단위 ('spoon': 큰술·작은술 우선 | 'metric': g·ml 우선)
+        countUnitPreference: 'count',   // 채소·원물(양파·대파 등) 단위 ('count': 개·대·마리 우선 | 'metric': g 무게 우선)
+        gochujangRatio: 1.0,            // 고추장 전체 투입 비율 (0.3 ~ 1.3, 예: 0.7 = 70%)
+        defaultSmartScale: true,        // 다인분 변경 시 스마트 양념 보정 기본 켜기
+        autoWakeLockOnCook: false,      // 레시피 진입 시 조리 화면 자동 켜짐 유지
+        timerSoundEnabled: true,        // 타이머 완료 알람음 사용
+        timerVibrateEnabled: true       // 타이머 완료 진동 알림 사용
     };
 
     function loadAppSettings() {
@@ -2778,10 +2779,14 @@
             const unitPreference = (parsed.unitPreference === 'metric' || parsed.unitPreference === 'spoon')
                 ? parsed.unitPreference
                 : DEFAULT_APP_SETTINGS.unitPreference;
+            const countUnitPreference = (parsed.countUnitPreference === 'metric' || parsed.countUnitPreference === 'count')
+                ? parsed.countUnitPreference
+                : DEFAULT_APP_SETTINGS.countUnitPreference;
             return {
                 ...DEFAULT_APP_SETTINGS,
                 ...parsed,
                 unitPreference,
+                countUnitPreference,
                 gochujangRatio: ratio
             };
         } catch (_) {
@@ -2837,10 +2842,12 @@
     function updateGochujangPillsUI() {
         const pct = Math.round(appSettings.gochujangRatio * 100);
         const isMetric = appSettings.unitPreference === 'metric';
-        const unitLabelShort = isMetric ? '⚖️ g·ml 우선' : '🥄 큰술·작은술 우선';
+        const isCountMetric = appSettings.countUnitPreference === 'metric';
+        const spoonShort = isMetric ? '양념 ⚖️g·ml' : '양념 🥄큰술';
+        const countShort = isCountMetric ? '채소 ⚖️g' : '채소 🧅개·대';
         const homeUnitPill = document.getElementById('home-unit-pill');
         if (homeUnitPill) {
-            homeUnitPill.textContent = unitLabelShort;
+            homeUnitPill.textContent = `${spoonShort} · ${countShort}`;
         }
         const homePill = document.getElementById('home-gochujang-pill');
         if (homePill) {
@@ -2848,11 +2855,11 @@
         }
         const recPill = document.getElementById('recipes-gochujang-pill');
         if (recPill) {
-            recPill.textContent = `${isMetric ? '⚖️ g·ml' : '🥄 큰술'} · 🌶️ ${pct}%`;
+            recPill.textContent = `${spoonShort} · ${countShort} · 🌶️ ${pct}%`;
         }
         const setSub = document.getElementById('home-settings-sub');
         if (setSub) {
-            setSub.textContent = `${isMetric ? 'g·ml 우선' : '큰술·작은술 우선'} · 고추장 ${pct}%`;
+            setSub.textContent = `${spoonShort} · ${countShort} · 고추장 ${pct}%`;
         }
     }
 
@@ -4777,11 +4784,14 @@
         return `📌 <strong>적용 예시 (${pct}%):</strong> 떡볶이(2인분) 고추장 → <strong>${exTteok}</strong> · 제육볶음(2인분) → <strong>${exJeyuk}</strong>`;
     }
 
-    function buildUnitPreferencePreviewText(pref = appSettings.unitPreference) {
-        if (pref === 'metric') {
-            return `📌 <strong>현재 표시 방식 (⚖️ g / ml 우선):</strong> 재료 카드에 <strong>30ml</strong> · <strong>15g</strong>이 먼저 표시되고, 조리 순서에서도 <strong>30ml (2큰술)</strong> 순서로 안내됩니다.`;
-        }
-        return `📌 <strong>현재 표시 방식 (🥄 큰술 · 작은술 우선):</strong> 재료 카드에 <strong>2큰술</strong> · <strong>0.5작은술</strong>이 먼저 표시되고, 조리 순서에서도 <strong>2큰술 (약 30ml)</strong> 순서로 안내됩니다.`;
+    function buildUnitPreferencePreviewText(
+        spoonPref = appSettings.unitPreference,
+        countPref = appSettings.countUnitPreference
+    ) {
+        const exSoy = formatAmountByUnitPreference('1.5큰술 (약 22ml)', spoonPref, countPref).fullAmt;
+        const exOnion = formatAmountByUnitPreference('1/2개 (약 100g)', spoonPref, countPref).fullAmt;
+        const exScallion = formatAmountByUnitPreference('1대 (약 45g)', spoonPref, countPref).fullAmt;
+        return `📌 <strong>현재 표시 예시:</strong> 진간장 → <strong>${exSoy}</strong> · 양파 → <strong>${exOnion}</strong> · 대파 → <strong>${exScallion}</strong>`;
     }
 
     function setUnitPreference(pref, silent = false) {
@@ -4795,7 +4805,7 @@
         });
         const unitPreview = document.getElementById('settings-unit-preview');
         if (unitPreview) {
-            unitPreview.innerHTML = buildUnitPreferencePreviewText(nextPref);
+            unitPreview.innerHTML = buildUnitPreferencePreviewText(nextPref, appSettings.countUnitPreference);
         }
         const gochujangPreview = document.getElementById('settings-gochujang-preview');
         if (gochujangPreview) {
@@ -4809,8 +4819,32 @@
 
         if (!silent) {
             showToast(nextPref === 'metric'
-                ? '⚖️ 계량 단위가 [g / ml 우선]으로 전환되었습니다!'
-                : '🥄 계량 단위가 [큰술 · 작은술 우선]으로 전환되었습니다!');
+                ? '⚖️ 양념·액체 단위가 [g / ml 우선]으로 전환되었습니다!'
+                : '🥄 양념·액체 단위가 [큰술 · 작은술 우선]으로 전환되었습니다!');
+        }
+    }
+
+    function setCountUnitPreference(pref, silent = false) {
+        const nextPref = pref === 'metric' ? 'metric' : 'count';
+        appSettings.countUnitPreference = nextPref;
+        saveAppSettings();
+
+        document.querySelectorAll('[data-count-unit-pref]').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-count-unit-pref') === nextPref);
+        });
+        const unitPreview = document.getElementById('settings-unit-preview');
+        if (unitPreview) {
+            unitPreview.innerHTML = buildUnitPreferencePreviewText(appSettings.unitPreference, nextPref);
+        }
+
+        if (activeRecipeId && modal.classList.contains('active')) {
+            updateServingPortion(currentServings);
+        }
+
+        if (!silent) {
+            showToast(nextPref === 'metric'
+                ? '⚖️ 채소·원물(양파·대파 등) 단위가 [g 무게 우선]으로 전환되었습니다!'
+                : '🧅 채소·원물(양파·대파 등) 단위가 [개 · 대 · 마리 우선]으로 전환되었습니다!');
         }
     }
 
@@ -4868,10 +4902,10 @@
                 </p>
 
                 <div class="unit-settings-box">
-                    <div style="font-size:0.86rem; font-weight:800; color:#1E3A8A; margin-bottom:0.55rem;">
-                        📏 계량 단위 표시 우선순위 선택
+                    <div style="font-size:0.86rem; font-weight:800; color:#1E3A8A; margin-bottom:0.45rem;">
+                        ① 양념 · 액체류 단위 (간장·설탕·고춧가루·물 등)
                     </div>
-                    <div class="unit-preset-grid">
+                    <div class="unit-preset-grid" style="margin-bottom:0.75rem;">
                         <button class="unit-preset-btn ${appSettings.unitPreference !== 'metric' ? 'active' : ''}" data-unit-pref="spoon" onclick="setUnitPreference('spoon')">
                             🥄 큰술 · 작은술 우선
                         </button>
@@ -4879,8 +4913,19 @@
                             ⚖️ g / ml 정밀 계량 우선
                         </button>
                     </div>
+                    <div style="font-size:0.86rem; font-weight:800; color:#1E3A8A; margin-bottom:0.45rem;">
+                        ② 채소 · 원물류 단위 (양파·대파·마늘·오징어·달걀 등)
+                    </div>
+                    <div class="unit-preset-grid">
+                        <button class="unit-preset-btn ${appSettings.countUnitPreference !== 'metric' ? 'active' : ''}" data-count-unit-pref="count" onclick="setCountUnitPreference('count')">
+                            🧅 개 · 대 · 마리(원물) 우선
+                        </button>
+                        <button class="unit-preset-btn ${appSettings.countUnitPreference === 'metric' ? 'active' : ''}" data-count-unit-pref="metric" onclick="setCountUnitPreference('metric')">
+                            ⚖️ g(무게) 정밀 계량 우선
+                        </button>
+                    </div>
                     <div id="settings-unit-preview" class="unit-preview-note">
-                        ${buildUnitPreferencePreviewText(appSettings.unitPreference)}
+                        ${buildUnitPreferencePreviewText(appSettings.unitPreference, appSettings.countUnitPreference)}
                     </div>
                 </div>
 
@@ -5144,7 +5189,15 @@
         return stripped.length === 0;
     }
 
-    function formatAmountByUnitPreference(rawScaledStr, unitPref = appSettings.unitPreference) {
+    function isSpoonOrCupQuantity(txt) {
+        return /큰술|작은술|스푼|컵|꼬집|tbsp|tsp/i.test(txt || '');
+    }
+
+    function formatAmountByUnitPreference(
+        rawScaledStr,
+        spoonPref = appSettings.unitPreference,
+        countPref = appSettings.countUnitPreference
+    ) {
         const s = (rawScaledStr || '').trim();
         if (!s) {
             return { fullAmt: '', primaryAmt: '', secondaryAmt: '', drawerIcon: '⚖️', drawerLabel: '정밀 계량' };
@@ -5157,13 +5210,13 @@
         const outer = m[1].trim();
         const inner = m[2].trim();
 
-        // Special case: comma-separated metric + spoon inside parentheses, e.g. "1조각 (약 10g, 0.7큰술)"
-        if (/^(?:약\s*)?\d+(?:\.\d+)?\s*(?:g|ml)\s*,\s*[\d.]+\s*(?:큰술|작은술)/i.test(inner)) {
+        // Special case: comma-separated metric + spoon inside parentheses, e.g. "1조각 (약 10g, 0.7큰술)" or "1/2컵 (약 50g, 5큰술)"
+        if (/^(?:약\s*)?\d+(?:\.\d+)?(?:\s*[~-]\s*\d+(?:\.\d+)?)?\s*(?:g|ml)\s*,\s*[\d.]+\s*(?:큰술|작은술)/i.test(inner)) {
             const parts = inner.split(',').map(x => x.trim());
             const metricRaw = parts[0];
             const cleanMetric = metricRaw.replace(/^약\s*/, '').trim();
             const spoonPart = parts.slice(1).join(', ');
-            if (unitPref === 'metric') {
+            if (spoonPref === 'metric') {
                 return {
                     fullAmt: `${cleanMetric} (${outer} · ${spoonPart})`,
                     primaryAmt: cleanMetric,
@@ -5184,16 +5237,18 @@
         const outerIsMetric = isPureMetricQuantity(outer);
         const innerIsMetric = isPureMetricQuantity(inner);
 
-        // Case 1: Outer is spoon/cup/count ("2큰술", "1/2개") and inner is g/ml ("약 30ml", "약 100g")
+        // Case 1: Outer is spoon/cup ("2큰술") OR count/piece ("1/2개", "1대") and inner is g/ml ("약 30ml", "약 100g")
         if (!outerIsMetric && innerIsMetric) {
+            const isSpoonCup = isSpoonOrCupQuantity(outer);
+            const activePref = isSpoonCup ? spoonPref : countPref;
             const cleanMetric = inner.replace(/^약\s*/, '').trim();
-            if (unitPref === 'metric') {
+            if (activePref === 'metric') {
                 return {
                     fullAmt: `${cleanMetric} (${outer})`,
                     primaryAmt: cleanMetric,
                     secondaryAmt: outer,
-                    drawerIcon: '🥄',
-                    drawerLabel: '스푼·개수 환산'
+                    drawerIcon: isSpoonCup ? '🥄' : '🧅',
+                    drawerLabel: isSpoonCup ? '스푼·컵 환산' : '원물 개수 환산'
                 };
             }
             return {
@@ -5205,10 +5260,10 @@
             };
         }
 
-        // Case 2: Outer is g/ml ("400ml", "180ml", "300g") and inner is cup/spoon/handful ("약 2컵 반", "약 1컵", "약 2줌")
-        if (outerIsMetric && !innerIsMetric && /큰술|작은술|스푼|컵|공기|줌/.test(inner)) {
+        // Case 2: Outer is g/ml ("400ml", "180ml") and inner is cup/spoon ("약 2컵 반", "약 1컵")
+        if (outerIsMetric && !innerIsMetric && /큰술|작은술|스푼|컵/.test(inner)) {
             const cleanSpoon = inner.replace(/^약\s*/, '').trim();
-            if (unitPref === 'spoon') {
+            if (spoonPref === 'spoon') {
                 return {
                     fullAmt: `${cleanSpoon} (${outer})`,
                     primaryAmt: cleanSpoon,
@@ -5226,7 +5281,7 @@
             };
         }
 
-        // Case 3: Both are metric ("100ml (약 100g)") or inner is descriptive count ("200~250g (바지락 15~20알...)")
+        // Case 3: Both are metric ("100ml (약 100g)") or inner is descriptive count ("200-250g (바지락 15-20알...)")
         return {
             fullAmt: s,
             primaryAmt: outer,
@@ -5241,7 +5296,11 @@
         const isGochujang = isGochujangIngredient(entry.name || '');
         const finalFactor = isGochujang ? (factor * gRatio) : factor;
         const rawScaledAmt = scaleAmountText(entry.amount || '', finalFactor);
-        const unitFormatted = formatAmountByUnitPreference(rawScaledAmt, appSettings.unitPreference);
+        const unitFormatted = formatAmountByUnitPreference(
+            rawScaledAmt,
+            appSettings.unitPreference,
+            appSettings.countUnitPreference
+        );
         const scaledAmt = unitFormatted.fullAmt;
         const mainAmt = unitFormatted.primaryAmt || scaledAmt;
         const subAmt = unitFormatted.secondaryAmt || '';
@@ -6090,13 +6149,24 @@
                     </label>
                 </div>
                 <div class="unit-pref-inline-bar">
-                    <span class="unit-pref-inline-label">📏 계량 단위 표시:</span>
+                    <span class="unit-pref-inline-label">📏 양념·액체 단위:</span>
                     <div class="unit-pref-chip-group">
                         <button class="unit-pref-chip ${appSettings.unitPreference !== 'metric' ? 'active' : ''}" data-unit-pref="spoon" onclick="setUnitPreference('spoon')">
                             🥄 큰술·작은술 우선
                         </button>
                         <button class="unit-pref-chip ${appSettings.unitPreference === 'metric' ? 'active' : ''}" data-unit-pref="metric" onclick="setUnitPreference('metric')">
                             ⚖️ g / ml 우선
+                        </button>
+                    </div>
+                </div>
+                <div class="unit-pref-inline-bar" style="margin-top:0.45rem; padding-top:0.5rem;">
+                    <span class="unit-pref-inline-label">🧅 채소·원물 단위:</span>
+                    <div class="unit-pref-chip-group">
+                        <button class="unit-pref-chip ${appSettings.countUnitPreference !== 'metric' ? 'active' : ''}" data-count-unit-pref="count" onclick="setCountUnitPreference('count')">
+                            🧅 개·대·마리 우선
+                        </button>
+                        <button class="unit-pref-chip ${appSettings.countUnitPreference === 'metric' ? 'active' : ''}" data-count-unit-pref="metric" onclick="setCountUnitPreference('metric')">
+                            ⚖️ g(무게) 우선
                         </button>
                     </div>
                 </div>
